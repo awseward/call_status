@@ -11,4 +11,5 @@ bin           = @["whos_on_a_call"]
 
 # Dependencies
 
-requires "nim >= 1.2.0", "jester >= 0.4.3"
+requires "jester >= 0.4.3"
+requires "nim >= 1.2.0"

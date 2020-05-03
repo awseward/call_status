@@ -6,5 +6,4 @@ nimcache/
 
 # End of https://www.gitignore.io/api/nim
 
-dist/
-.test/main.js
+.envrc
