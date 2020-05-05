@@ -5,11 +5,11 @@ author        = "Andrew Seward"
 description   = "An app to indicate who's on a call"
 license       = "MIT"
 srcDir        = "src"
-bin           = @["whos_on_a_call"]
-
+bin           = @["backend", "cli"]
 
 
 # Dependencies
 
 requires "jester >= 0.4.3"
 requires "nim >= 1.2.0"
+requires "argparse >= 0.10.1"

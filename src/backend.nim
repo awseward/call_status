@@ -1,7 +1,11 @@
-import jester
-import asyncdispatch, os, sequtils, strutils
+import asyncdispatch
 import db_postgres as pg
 import htmlgen as h
+import jester
+import json
+import os
+import sequtils
+import strutils
 
 var settings = newSettings()
 
@@ -77,6 +81,22 @@ routes:
       forms[0],
       forms[1]
     )
+
+
+  post "/api/status":
+    let jsonNode = parseJson request.body
+    let user     = jsonNode["user"].getStr()
+    let isOnCall = jsonNode["is_on_call"].getBool()
+    let db       = openDb()
+    db.exec sql(
+      """
+        UPDATE people
+        SET is_on_call = $1
+        WHERE name = '$2';
+      """ % [ ($ isOnCall), user ]
+    )
+    db.close
+    resp Http204
 
   post "/set_status/@name":
     let isOnCall = request.params["is_on_call"]
