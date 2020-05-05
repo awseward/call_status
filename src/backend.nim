@@ -85,6 +85,7 @@ routes:
 
   post "/api/status":
     let jsonNode = parseJson request.body
+    echo jsonNode
     let user     = jsonNode["user"].getStr()
     let isOnCall = jsonNode["is_on_call"].getBool()
     let db       = openDb()
