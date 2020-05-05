@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>PATH</key>
+      <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:</string>
+
+      <key>CALL_STATUS_USER</key>
+      <string>__CALL_STATUS_USER__</string>
+    </dict>
+
+    <key>Label</key>
+    <string>com.startup</string>
+
+    <key>Program</key>
+    <string>/usr/local/bin/call_status_watch_zoom.sh</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>LaunchOnlyOnce</key>
+    <true/>
+
+    <key>UserName</key>
+    <string>__LAUNCHCTL_USER_NAME__</string>
+
+    <key>WorkingDirectory</key>
+    <string>/usr/local/bin</string>
+
+    <key>StandardOutPath</key>
+    <string>/var/log/com.call_status.plist/stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/var/log/com.call_status.plist/stderr.log</string>
+  </dict>
+</plist>
