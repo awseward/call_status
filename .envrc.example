@@ -1,0 +1,2 @@
+export HEROKU_APPNAME=__fixme__
+export DATABASE_URL=postgres://localhost:5432/call_status_development
