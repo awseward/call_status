@@ -20,8 +20,8 @@ routes:
     proc renderUser(name: string, isOn: string): string =
       let isOnACall = (isOn == "t")
       let submitText =
-        if isOnACall: "Set status: Not On a Call"
-                else: "Set status: On a Call"
+        if isOnACall: "Set status to \"Not On a Call\""
+                else: "Set status to \"On a Call\""
       let statusClass =  if isOnACall: "is-on-call"
                                  else: ""
 
@@ -82,8 +82,8 @@ routes:
           }
 
           .half:not(.is-on-call) {
-            background-color: #7FDBFF;
-            border-radius: 5px;
+            background-color: #01FF70;
+            opacity: 0.4;
           }
 
           button {
