@@ -22,20 +22,23 @@ routes:
       let submitText =
         if isOnACall: "Set status: Not On a Call"
                 else: "Set status: On a Call"
-      let formClass =  if isOnACall: "is-on-call"
-                               else: ""
+      let statusClass =  if isOnACall: "is-on-call"
+                                 else: ""
 
-      return h.form(
-        action   = "set_status/" & name,
-        `method` = "POST",
-        class    = formClass,
-        h.input(
-          `type` = "hidden",
-          name="is_on_call",
-          value=($ not isOnACall)[0]
-        ),
-        h.h1(name),
-        h.button(type = "submit", submitText),
+      return h.div(
+        class = statusClass & " half",
+        h.form(
+          action   = "set_status/" & name,
+          `method` = "POST",
+          class    = statusClass,
+          h.input(
+            `type` = "hidden",
+            name="is_on_call",
+            value=($ not isOnACall)[0]
+          ),
+          h.h1(name),
+          h.button(type = "submit", submitText),
+        )
       )
 
     let db   = openDb()
@@ -52,29 +55,46 @@ routes:
     # Ew..
     let forms = rows.map(proc (r: Row): string = renderUser(r[0], r[1]))
     resp h.div(
-      class = "form-wrapper",
+      class = "main-wrapper",
       style(
         """
           body {
             font-family: monospace;
           }
 
-          .form-wrapper form {
+          form {
             padding: 20px;
+            text-align: center;
+            margin-top: 25vh;
           }
 
-          .form-wrapper form.is-on-call {
+          .main-wrapper {
+            display: flex;
+          }
+
+          .half {
+            flex: 0 0 50%;
+            height: 100vh;
+          }
+
+          .half.is-on-call {
             background-color: #FF4136;
           }
 
-          .form-wrapper button {
-            padding: 15px;
+          .half:not(.is-on-call) {
+            background-color: #7FDBFF;
+            border-radius: 5px;
           }
 
-          .form-wrapper h1 {
+          button {
+            padding: 100px;
+          }
+
+          h1 {
             display: inline-block;
             margin: 15px;
             width: 80%;
+            font-size: 60pt;
           }
         """
       ),
