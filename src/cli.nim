@@ -1,6 +1,7 @@
 import argparse
 import json
 import httpClient
+import os
 
 proc postStatus(apiBaseUrl: string, user: string, isOnCall: bool) =
   let client = newHttpClient()
@@ -19,7 +20,7 @@ let p = newParser("call-status"):
 
   flag("-n", "--dryrun")
 
-  option("-u", "--user",   choices = @["D", "N"])
+  option("-u", "--user",   choices = @["D", "N"], env = "CALL_STATUS_USER")
   option("-s", "--status", choices = @["on", "off"])
 
   option("--api-base-url",
