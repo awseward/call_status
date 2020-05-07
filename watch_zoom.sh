@@ -4,25 +4,29 @@ set -euo pipefail
 
 is_on_call=0
 
-zoom_pids() {
+_zoom_pids() {
   # shellcheck disable=SC2009
   echo -n "$(( $(ps aux | grep -c --regexp='zoom.*[C]ptHost') ))"
 }
+_date() { date -u +'%Y-%m-%dT%H:%M:%SZ' ; }
+_info() { echo "[$(_date)] ${1}" ; }
 
-echo "Watching zoom..."
+_set_status() {
+  local status="${1}"
+  _info "Setting status to: ${status}"
+  xargs -t call-status -s <<< "${status}"
+}
+
+_info "Zoom process watcher starting..."
 
 while true; do
   if [ $is_on_call = 0 ]; then
-    if [ "$(zoom_pids)" -gt 0 ]; then
-      echo "setting on..."
-      is_on_call=1
-      call-status -s on
+    if [ "$(_zoom_pids)" -gt 0 ]; then
+      _set_status 'on' && is_on_call=1
     fi
   else
-    if [ "$(zoom_pids)" = 0 ]; then
-      echo "setting off..."
-      is_on_call=0
-      call-status -s off
+    if [ "$(_zoom_pids)" = 0 ]; then
+      _set_status 'off' && is_on_call=0
     fi
   fi
   sleep 10
