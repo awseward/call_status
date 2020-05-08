@@ -6,8 +6,16 @@ nimcache/
 
 # End of https://www.gitignore.io/api/nim
 
+# SQLite
+*.db
+
+# Mac Finder junk
 .DS_STORE
+
+# direnv
 .envrc
+
+# nimble binaries
 backend
+check_zoom
 cli
-dist/
