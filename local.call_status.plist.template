@@ -12,7 +12,7 @@
     </dict>
 
     <key>Label</key>
-    <string>com.startup</string>
+    <string>local.call_status</string>
 
     <key>Program</key>
     <string>/usr/local/bin/call_status_watch_zoom.sh</string>
@@ -21,21 +21,12 @@
     <true/>
 
     <key>KeepAlive</key>
-    <true/>
-
-    <key>LaunchOnlyOnce</key>
-    <true/>
-
-    <key>UserName</key>
-    <string>__LAUNCHCTL_USER_NAME__</string>
-
-    <key>WorkingDirectory</key>
-    <string>/usr/local/bin</string>
+    <false/>
 
     <key>StandardOutPath</key>
-    <string>/var/log/com.call_status.plist/stdout.log</string>
+    <string>/tmp/log/local.call_status/watch.log</string>
 
     <key>StandardErrorPath</key>
-    <string>/var/log/com.call_status.plist/stderr.log</string>
+    <string>/tmp/log/local.call_status/watch.log</string>
   </dict>
 </plist>
