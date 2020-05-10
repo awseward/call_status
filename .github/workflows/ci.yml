@@ -14,13 +14,11 @@ jobs:
 
     - name: Setup Nim environment
       uses: jiro4989/setup-nim-action@v1.0.2
-    - run: nimble install nimassets
 
     - name: Check assets file
       run: |
         nimble install -y nimassets
         nimassets --dir=public --output=src/views/assetsFile.nim
         git diff --exit-code
-
 
     - run: nimble build -Y
