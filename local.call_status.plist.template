@@ -9,19 +9,25 @@
 
       <key>CALL_STATUS_USER</key>
       <string>__CALL_STATUS_USER__</string>
+
+      <key>DB_FILEPATH</key>
+      <string>__DB_FILEPATH__</string>
     </dict>
 
     <key>Label</key>
     <string>local.call_status</string>
 
     <key>Program</key>
-    <string>/usr/local/bin/call_status_watch_zoom.sh</string>
+    <string>/usr/local/bin/call_status_check_zoom</string>
 
     <key>RunAtLoad</key>
     <true/>
 
     <key>KeepAlive</key>
     <false/>
+
+    <key>StartInterval</key>
+    <integer>10</integer>
 
     <key>StandardOutPath</key>
     <string>/tmp/log/local.call_status/watch.log</string>

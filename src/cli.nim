@@ -1,19 +1,12 @@
 import argparse
-import json
 import httpClient
 import os
+import ./api_client
 
-proc postStatus(apiBaseUrl: string, user: string, isOnCall: bool) =
-  let client = newHttpClient()
-  client.headers = newHttpHeaders({ "Content-Type": "application/json" })
-  let response = client.post(
-    apiBaseUrl & "/api/status",
-    body = ($ %*{ "user": user, "is_on_call": isOnCall })
-  )
+proc setStatus(apiBaseUrl: string, user: string, isOnCall: bool) =
+  let response = api_client.postStatus(apiBaseUrl, user, isOnCall)
   echo response.status
   echo response.body
-
-  discard
 
 let p = newParser("call-status"):
   help("A CLI client for managing call status")
@@ -37,6 +30,6 @@ let p = newParser("call-status"):
     if opts.dryrun:
       echo "Would set ", opts.user, "\'s status to ", opts.status, "."
     else:
-      postStatus(opts.apiBaseUrl, opts.user, opts.status == "on")
+      setStatus(opts.apiBaseUrl, opts.user, opts.status == "on")
 
 p.run()
