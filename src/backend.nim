@@ -7,7 +7,7 @@ import os
 import sequtils
 import strutils
 
-import ./views/index
+include "./views/index.html.nimf"
 
 var settings = newSettings()
 
