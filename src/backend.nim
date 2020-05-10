@@ -9,8 +9,7 @@ import strutils
 
 include "./views/index.html.nimf"
 
-var settings = newSettings()
-
+let settings = newSettings()
 if existsEnv("PORT"):
   settings.port = Port(parseInt(getEnv("PORT")))
 
