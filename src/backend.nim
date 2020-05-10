@@ -7,6 +7,8 @@ import os
 import sequtils
 import strutils
 
+import ./views/index
+
 var settings = newSettings()
 
 if existsEnv("PORT"):
@@ -75,66 +77,7 @@ routes:
       let name = r[0]
       let isOn = r[1] == "t"
       return renderUser(name, isOn)
-    resp h.div(
-      class = "main-wrapper",
-      style(
-        """
-          body {
-            font-family: monospace;
-          }
-
-          form {
-            padding: 20px;
-            text-align: center;
-            margin-top: 25vh;
-          }
-
-          .main-wrapper {
-            display: flex;
-          }
-
-          .half {
-            flex: 0 0 50%;
-            height: 100vh;
-          }
-
-          .half.is-on-call {
-            background-color: #FF4136;
-          }
-
-          .half:not(.is-on-call) {
-            background-color: #01FF70;
-            opacity: 0.4;
-          }
-
-          details {
-            margin-top: 100px;
-          }
-
-          summary {
-            font-size: 20pt;
-            color: #222;
-          }
-
-          button {
-            margin-top: 20px;
-            font-size: 14pt;
-            padding: 30px 100px;
-          }
-
-          h1 {
-            display: inline-block;
-            margin: 15px;
-            width: 80%;
-            font-size: 100pt;
-            font-weight: 200;
-          }
-        """
-      ),
-      # Ew...
-      forms[0],
-      forms[1]
-    )
+    resp renderIndex(forms[0], forms[1])
 
   proc setStatus(name: string, isOnCall: bool) =
     db_command proc(conn: DbConn) =
