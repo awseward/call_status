@@ -9,9 +9,10 @@ FILE_PLIST="${HOME}/Library/LaunchAgents/local.call_status.plist"
 _write_plist() { tee "${FILE_PLIST}" > /dev/null ; }
 
 _up() {
-  nimble -d:ssl -d:release build check_zoom
+  nimble -d:ssl -d:release build check_zoom cli
 
-  cp "./check_zoom"   /usr/local/bin/call_status_check_zoom
+  cp "cli"        /usr/local/bin/call-status
+  cp "check_zoom" /usr/local/bin/call_status_check_zoom
 
   echo -n 'Are you D or N? ' && read -r call_status_user
 
