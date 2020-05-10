@@ -18,7 +18,7 @@ jobs:
 
     - name: Check assets file
       run: |
-        nimble install nimassets
+        nimble install -y nimassets
         nimassets --dir=public --output=src/views/assetsFile.nim
         git diff --exit-code
 
