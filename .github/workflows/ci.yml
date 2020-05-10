@@ -7,18 +7,20 @@ on:
     branches: [ master ]
 
 jobs:
+  check_assets:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: jiro4989/setup-nim-action@v1.0.2
+
+    - run: nimble install -y nimassets
+    - run: nimassets --dir=public --output=src/views/assetsFile.nim
+    - run: git diff --exit-code
+
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - uses: jiro4989/setup-nim-action@v1.0.2
 
-    - name: Setup Nim environment
-      uses: jiro4989/setup-nim-action@v1.0.2
-
-    - name: Check assets file
-      run: |
-        nimble install -y nimassets
-        nimassets --dir=public --output=src/views/assetsFile.nim
-        git diff --exit-code
-
-    - run: nimble build -Y
+    - run: nimble build -y
