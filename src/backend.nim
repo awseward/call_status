@@ -17,11 +17,13 @@ proc openDb(): DbConn =
 
 routes:
   get "/":
-    proc renderUser(name: string, isOn: string): string =
-      let isOnACall = (isOn == "t")
+    proc renderUser(name: string, isOnACall: bool): string =
+      let descText  =
+        if isOnACall: "is on a call"
+                else: "is not on a call"
       let submitText =
-        if isOnACall: "Set status to \"Not On a Call\""
-                else: "Set status to \"On a Call\""
+        if isOnACall: "Set status to \"not on a call\""
+                else: "Set status to \"on a call\""
       let statusClass =  if isOnACall: "is-on-call"
                                  else: ""
 
@@ -34,10 +36,14 @@ routes:
           h.input(
             `type` = "hidden",
             name="is_on_call",
-            value=($ not isOnACall)[0]
+            value=($ not isOnACall)
           ),
           h.h1(name),
-          h.button(type = "submit", submitText),
+          h.h2(descText),
+          h.details(
+            h.summary("Status not accurate?"),
+            h.button(type = "submit", submitText),
+          )
         )
       )
 
@@ -53,7 +59,11 @@ routes:
     db.close
 
     # Ew..
-    let forms = rows.map(proc (r: Row): string = renderUser(r[0], r[1]))
+    let forms = rows.map(proc (r: Row): string =
+      let name = r[0]
+      let isOn = r[1] == "t"
+      return renderUser(name, isOn)
+    )
     resp h.div(
       class = "main-wrapper",
       style(
@@ -86,15 +96,27 @@ routes:
             opacity: 0.4;
           }
 
+          details {
+            margin-top: 100px;
+          }
+
+          summary {
+            font-size: 20pt;
+            color: #222;
+          }
+
           button {
-            padding: 100px;
+            margin-top: 20px;
+            font-size: 14pt;
+            padding: 30px 100px;
           }
 
           h1 {
             display: inline-block;
             margin: 15px;
             width: 80%;
-            font-size: 60pt;
+            font-size: 100pt;
+            font-weight: 200;
           }
         """
       ),
@@ -125,7 +147,7 @@ routes:
     let command  = sql(
       """
         UPDATE people
-        SET is_on_call = '$1'
+        SET is_on_call = $1
         WHERE name = '$2';
       """ % [isOnCall, @"name"]
     )
