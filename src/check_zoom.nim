@@ -36,9 +36,10 @@ let lastKnown = db_open().use do (conn: DbConn) -> Option[bool]:
 let current = isZoomCallActive()
 
 if lastKnown.isSome and lastKnown.get() == current:
-  info "Status unchanged: doing nothing."
+  info "Status unchanged. Doing nothing."
   quit 0
 else:
+  info "New status. updating."
   let apiBaseUrl = "https://call-status.herokuapp.com"
   let user       = getEnv "CALL_STATUS_USER"
 
