@@ -1,16 +1,17 @@
 import os
-import db_postgres as pg
-import db_sqlite as sqlite
+import db_postgres
+import db_sqlite
 
-type Db = pg.DbConn | sqlite.DbConn
+type Closeable = concept x
+  close x
 
-proc use*[TDb: Db](conn: TDb, fn: proc (conn: TDb)) =
+proc use*[TDb: Closeable](conn: TDb, fn: proc (conn: TDb)) =
   try:
     fn conn
   finally:
     close conn
 
-proc use*[TDb: Db, TResult](conn: TDb, fn: proc(conn: TDb): TResult): TResult =
+proc use*[TDb: Closeable, TResult](conn: TDb, fn: proc(conn: TDb): TResult): TResult =
   try:
     return fn(conn)
   finally:
@@ -18,8 +19,8 @@ proc use*[TDb: Db, TResult](conn: TDb, fn: proc(conn: TDb): TResult): TResult =
 
 # ---
 
-proc open_pg*(): pg.DbConn =
-  pg.open("", "", "", getEnv("DATABASE_URL"))
+proc open_pg*(): db_postgres.DbConn =
+  db_postgres.open("", "", "", getEnv("DATABASE_URL"))
 
-proc open_sqlite*(): sqlite.DbConn =
-  sqlite.open(getEnv("DB_FILEPATH"), "", "", "")
+proc open_sqlite*(): db_sqlite.DbConn =
+  db_sqlite.open(getEnv("DB_FILEPATH"), "", "", "")
