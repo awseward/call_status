@@ -1,8 +1,8 @@
 #? stdtmpl(subsChar = '$', metaChar = '#')
 #
-#import assetsFile
+#import assets_file
 #
-#let css = assetsFile.getAsset("public/style.css")
+#let css = assets_file.getAsset("public/style.css")
 #
 #proc renderIndex*(left: string, right: string): string =
 ##  result = ""

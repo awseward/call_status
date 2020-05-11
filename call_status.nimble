@@ -13,3 +13,12 @@ bin           = @["backend", "check_zoom", "cli"]
 requires "jester >= 0.4.3"
 requires "nim >= 1.2.0"
 requires "argparse >= 0.10.1"
+requires "nimassets >= 0.1.0"
+
+# Tasks
+
+task assets, "Generate packaged assets":
+  exec "nimassets --dir=public --output=src/views/assets_file.nim"
+
+task db_setup, "Set up the DB":
+  exec "./misc/db_setup.sh"
