@@ -7,28 +7,14 @@ import os
 import sequtils
 import strutils
 
+import ./db
+let db_open = open_pg
+
 include "./views/index.html.nimf"
 
 let settings = newSettings()
 if existsEnv("PORT"):
   settings.port = Port(parseInt(getEnv("PORT")))
-
-proc db_open(): DbConn =
-  db_postgres.open("", "", "", getEnv("DATABASE_URL"))
-
-proc db_command(fn: proc(conn: DbConn)) =
-  var conn: DbConn
-  try:
-    fn db_open()
-  finally:
-    conn.close()
-
-proc db_query[T](fn: proc(conn: DbConn): T) : T =
-  var conn: DbConn
-  try:
-    return fn db_open()
-  finally:
-    conn.close()
 
 routes:
   get "/":
@@ -62,7 +48,7 @@ routes:
         )
       )
 
-    let rows = db_query proc(conn: DbConn) : seq[Row] =
+    let rows = db_open().use do (conn: DbConn) -> seq[Row]:
       conn.getAllRows sql"""
         SELECT
             name
@@ -79,7 +65,7 @@ routes:
     resp renderIndex(forms[0], forms[1])
 
   proc setStatus(name: string, isOnCall: bool) =
-    db_command proc(conn: DbConn) =
+    db_open().use do (conn: DbConn):
       conn.exec sql(
         """
           UPDATE people
