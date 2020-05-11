@@ -48,7 +48,7 @@ routes:
         )
       )
 
-    let rows = db_open().use_query do (conn: DbConn) -> seq[Row]:
+    let rows = db_open().use do (conn: DbConn) -> seq[Row]:
       conn.getAllRows sql"""
         SELECT
             name
@@ -65,7 +65,7 @@ routes:
     resp renderIndex(forms[0], forms[1])
 
   proc setStatus(name: string, isOnCall: bool) =
-    db_open().use_command do (conn: DbConn):
+    db_open().use do (conn: DbConn):
       conn.exec sql(
         """
           UPDATE people

@@ -4,13 +4,13 @@ import db_sqlite as sqlite
 
 type Db = pg.DbConn | sqlite.DbConn
 
-proc use_command*[TDb: Db](conn: TDb, fn: proc (conn: TDb)) =
+proc use*[TDb: Db](conn: TDb, fn: proc (conn: TDb)) =
   try:
     fn conn
   finally:
     close conn
 
-proc use_query*[TDb: Db, TResult](conn: TDb, fn: proc(conn: TDb): TResult): TResult =
+proc use*[TDb: Db, TResult](conn: TDb, fn: proc(conn: TDb): TResult): TResult =
   try:
     return fn(conn)
   finally:
