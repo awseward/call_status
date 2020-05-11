@@ -13,7 +13,7 @@ proc use*[TDb: Closeable](conn: TDb, fn: proc (conn: TDb)) =
 
 proc use*[TDb: Closeable, TResult](conn: TDb, fn: proc(conn: TDb): TResult): TResult =
   try:
-    return fn(conn)
+    return fn conn
   finally:
     close conn
 
