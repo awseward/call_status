@@ -5,7 +5,7 @@ author        = "Andrew Seward"
 description   = "An app to indicate who's on a call"
 license       = "MIT"
 srcDir        = "src"
-bin           = @["backend", "cli", "check_zoom"]
+bin           = @["backend", "check_zoom", "cli"]
 
 
 # Dependencies
