@@ -27,36 +27,40 @@ proc setStatus(person: Person) =
       """ % [$isOnCall, person.name]
     )
 
-routes:
-  get "/":
-    let rows = db_open().use do (conn: DbConn) -> seq[Row]:
-      conn.getAllRows sql"""
-        SELECT
-            name
-          , is_on_call
-        FROM people
-        WHERE name IN ('D', 'N')
-        ORDER BY name
-        ;
-      """
-    let forms = rows.map(fromPgRow).map(renderPerson)
+proc getPeople(): seq[Person] =
+  let rows = db_open().use do (conn: DbConn) -> seq[Row]:
+    conn.getAllRows sql"""
+      SELECT
+          name
+        , is_on_call
+      FROM people
+      WHERE name IN ('D', 'N')
+      ORDER BY name
+      ;
+    """
+  return rows.map(fromPgRow)
 
-    resp renderIndex(forms[0], forms[1])
-
-  post "/api/status":
+router api:
+  post "/status":
     let jsonNode = parseJson request.body
     # Maybe use logger?
     echo jsonNode
     setStatus person.fromJson(jsonNode)
     resp Http204
 
+router web:
+  get "/":
+    let forms = getPeople().map(renderPerson)
+    resp renderIndex(forms[0], forms[1])
+
   post "/set_status/@name":
     let status = fromIsOnCall parseBool(request.params["is_on_call"])
-    let person = Person(
-      name:   @"name",
-      status: status,
-    )
+    let person = Person(name: @"name", status: status)
     setStatus person
     redirect "/"
+
+routes:
+  extend web, ""
+  extend api, "/api"
 
 runForever()

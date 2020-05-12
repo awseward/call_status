@@ -22,3 +22,7 @@ task assets, "Generate packaged assets":
 
 task db_setup, "Set up the DB":
   exec "./misc/db_setup.sh"
+
+task watch_zoom, "Simulate a zoom watching daemon (launchd LaunchAgent on MacOS)":
+  while true:
+    exec "nimble -d:ssl run check_zoom; sleep 10"
