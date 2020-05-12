@@ -17,7 +17,7 @@ if existsEnv("PORT"):
   settings.port = Port(parseInt(getEnv("PORT")))
 
 proc setStatus(person: Person) =
-  let isOnCall = isOnCall person.status
+  let isOnCall = person.isOnCall()
   db_open().use do (conn: DbConn):
     conn.exec sql(
       """
@@ -54,7 +54,7 @@ router web:
     resp renderIndex(forms[0], forms[1])
 
   post "/set_status/@name":
-    let status = fromIsOnCall parseBool(request.params["is_on_call"])
+    let status = status.fromIsOnCall parseBool(request.params["is_on_call"])
     let person = Person(name: @"name", status: status)
     setStatus person
     redirect "/"
