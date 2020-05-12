@@ -4,16 +4,30 @@ import ../models/status
 
 include "./index.html.nimf"
 
+type Presenter = object
+  description:  string
+  callToAction: string
+  statusClass:  string
+
+proc presenterFor(person: Person): Presenter =
+  return case person.status
+    of OnCall:
+      Presenter(
+        description:  "is on a call",
+        callToAction: "Set status to \"not on a call\"",
+        statusClass:  "is-on-call",
+      )
+    of NotOnCall:
+      Presenter(
+        description:  "is not on a call",
+        callToAction: "Set status to \"on a call\"",
+        statusClass:  "",
+      )
+
 proc renderPerson*(person: Person): string =
-  let isOnACall = isOnCall person.status
-  let descText  =
-    if isOnACall: "is on a call"
-            else: "is not on a call"
-  let submitText =
-    if isOnACall: "Set status to \"not on a call\""
-            else: "Set status to \"on a call\""
-  let statusClass =  if isOnACall: "is-on-call"
-                             else: ""
+  let presenter   = presenterFor person
+  let statusClass = presenter.statusClass
+
   return h.div(
     class = statusClass & " half",
     h.form(
@@ -23,13 +37,13 @@ proc renderPerson*(person: Person): string =
       h.input(
         `type` = "hidden",
         name="is_on_call",
-        value=($ not isOnACall)
+        value=($ not person.isOnCall())
       ),
       h.h1(person.name),
-      h.h2(descText),
+      h.h2(presenter.description),
       h.details(
         h.summary("Status not accurate?"),
-        h.button(type = "submit", submitText),
+        h.button(type = "submit", presenter.callToAction),
       )
     )
   )

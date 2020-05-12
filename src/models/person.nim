@@ -22,3 +22,6 @@ proc fromJson*(jsonNode: JsonNode): Person =
     name:   jsonNode["user"].getStr(),
     status: status,
   )
+
+proc isOnCall*(person: Person): bool =
+  status.isOnCall person.status

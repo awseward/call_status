@@ -16,6 +16,6 @@ nimcache/
 .envrc
 
 # nimble binaries
-backend
 check_zoom
 cli
+web
