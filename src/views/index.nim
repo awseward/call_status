@@ -1,10 +1,11 @@
 import htmlgen as h
 import ../models/person
+import ../models/status
 
 include "./index.html.nimf"
 
 proc renderPerson*(person: Person): string =
-  let isOnACall = person.is_on_call
+  let isOnACall = isOnCall person.status
   let descText  =
     if isOnACall: "is on a call"
             else: "is not on a call"

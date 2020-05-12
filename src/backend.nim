@@ -9,6 +9,7 @@ import strutils
 import ./db
 let db_open = open_pg
 import ./models/person
+import ./models/status
 import ./views/index
 
 let settings = newSettings()
@@ -16,13 +17,14 @@ if existsEnv("PORT"):
   settings.port = Port(parseInt(getEnv("PORT")))
 
 proc setStatus(person: Person) =
+  let isOnCall = isOnCall person.status
   db_open().use do (conn: DbConn):
     conn.exec sql(
       """
         UPDATE people
         SET is_on_call = $1
         WHERE name = '$2';
-      """ % [$person.is_on_call, person.name]
+      """ % [$isOnCall, person.name]
     )
 
 routes:
@@ -49,9 +51,10 @@ routes:
     resp Http204
 
   post "/set_status/@name":
+    let status = fromIsOnCall parseBool(request.params["is_on_call"])
     let person = Person(
-      name:       @"name",
-      is_on_call: parseBool request.params["is_on_call"],
+      name:   @"name",
+      status: status,
     )
     setStatus person
     redirect "/"
