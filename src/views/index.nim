@@ -10,25 +10,25 @@ type Presenter = object
   statusClass:  string
 
 proc presenterFor(person: Person): Presenter =
-  return case person.status
-    of OnCall:
-      Presenter(
-        description:  "is on a call",
-        callToAction: "Set status to \"not on a call\"",
-        statusClass:  "is-on-call",
-      )
-    of NotOnCall:
-      Presenter(
-        description:  "is not on a call",
-        callToAction: "Set status to \"on a call\"",
-        statusClass:  "",
-      )
+  case person.status
+  of OnCall:
+    Presenter(
+      description:  "is on a call",
+      callToAction: "Set status to \"not on a call\"",
+      statusClass:  "is-on-call",
+    )
+  of NotOnCall:
+    Presenter(
+      description:  "is not on a call",
+      callToAction: "Set status to \"on a call\"",
+      statusClass:  "",
+    )
 
 proc renderPerson*(person: Person): string =
   let presenter   = presenterFor person
   let statusClass = presenter.statusClass
 
-  return h.div(
+  h.div(
     class = statusClass & " half",
     h.form(
       action   = "set_status/" & person.name,

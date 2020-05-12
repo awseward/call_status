@@ -38,7 +38,7 @@ proc getPeople(): seq[Person] =
       ORDER BY name
       ;
     """
-  return rows.map(fromPgRow)
+  rows.map(fromPgRow)
 
 router api:
   post "/status":

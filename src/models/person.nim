@@ -10,7 +10,7 @@ type Person* = object
   status*: Status
 
 proc fromPgRow*(row: Row): Person =
-  return Person(
+  Person(
     name:   row[0],
     status: fromIsOnCall(row[1] == "t"),
   )
@@ -18,7 +18,7 @@ proc fromPgRow*(row: Row): Person =
 proc fromJson*(jsonNode: JsonNode): Person =
   let status = status.fromIsOnCall(jsonNode["is_on_call"].getBool())
 
-  return Person(
+  Person(
     name:   jsonNode["user"].getStr(),
     status: status,
   )

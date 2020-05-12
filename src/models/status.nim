@@ -3,11 +3,10 @@ type Status* = enum
   NotOnCall
 
 proc isOnCall*(s: Status): bool =
-  return case s
+  case s
     of OnCall:    true
     of NotOnCall: false
 
 proc fromIsOnCall*(isOnCall: bool): Status =
-  return
-    if isOnCall: OnCall
-    else:        NotOnCall
+  if isOnCall: OnCall
+  else:        NotOnCall

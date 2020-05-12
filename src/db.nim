@@ -6,16 +6,10 @@ type Closeable = concept x
   close x
 
 proc use*[TDb: Closeable](conn: TDb, fn: proc (conn: TDb)) =
-  try:
-    fn conn
-  finally:
-    close conn
+  try: fn conn finally: close conn
 
 proc use*[TDb: Closeable, TResult](conn: TDb, fn: proc(conn: TDb): TResult): TResult =
-  try:
-    return fn conn
-  finally:
-    close conn
+  try: fn conn finally: close conn
 
 # ---
 
