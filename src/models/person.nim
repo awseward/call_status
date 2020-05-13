@@ -25,3 +25,9 @@ proc fromJson*(jsonNode: JsonNode): Person =
 
 proc isOnCall*(person: Person): bool =
   status.isOnCall person.status
+
+proc `%`*(person: Person): JsonNode =
+  %[
+    ("name",       %person.name),
+    ("is_on_call", %person.isOnCall()),
+  ]

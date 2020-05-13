@@ -41,6 +41,12 @@ proc getPeople(): seq[Person] =
   rows.map(fromPgRow)
 
 router api:
+  get "/status":
+    let jArr = newJArray()
+    for person in getPeople().map(`%`):
+      jArr.add person
+    resp jArr
+
   post "/status":
     let jsonNode = parseJson request.body
     # Maybe use logger?
