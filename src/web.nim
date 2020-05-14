@@ -21,13 +21,13 @@ if existsEnv("PORT"):
 logging.addHandler newConsoleLogger(fmtStr = "[$levelname] ")
 logging.setLogFilter when defined(release): lvlInfo else: lvlDebug
 
-proc setStatus(person: Person) =
+proc updateStatus(person: Person) =
   db_open().use do (conn: DbConn):
     let query = sql dedent """
       UPDATE people
       SET is_on_call = $1
       WHERE name = $2;"""
-    let prepared = conn.prepare("set_person_status", query, 2)
+    let prepared = conn.prepare("update_status", query, 2)
 
     conn.exec prepared, $person.isOnCall(), person.name
 
@@ -48,15 +48,12 @@ proc getPeople(): seq[Person] =
 
 router api:
   get "/status":
-    let jArr = newJArray()
-    for person in getPeople().map(`%`):
-      jArr.add person
-    resp jArr
+    resp %*getPeople()
 
   post "/status":
     let jsonNode = parseJson request.body
     debug jsonNode
-    setStatus person.fromJson(jsonNode)
+    updateStatus person.fromJson(jsonNode)
     resp Http204
 
 router web:
@@ -67,7 +64,7 @@ router web:
   post "/set_status/@name":
     let status = status.fromIsOnCall parseBool(request.params["is_on_call"])
     let person = Person(name: @"name", status: status)
-    setStatus person
+    updateStatus person
     redirect "/"
 
 routes:
