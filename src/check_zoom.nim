@@ -10,10 +10,10 @@ import ./db
 import ./detect_zoom
 let db_open = open_sqlite
 
-let logger = newConsoleLogger(fmtStr="[$datetime] - $levelname: ")
+let logger = newConsoleLogger(fmtStr = "[$datetime] - $levelname: ")
 addHandler logger
 
-let user       = getEnv "CALL_STATUS_USER"
+let user = getEnv "CALL_STATUS_USER"
 
 db_open().use do (conn: DbConn):
   let query = sql unindent """
@@ -43,7 +43,7 @@ if lastKnown.isSome and lastKnown.get() == current:
 else:
   info "New status. updating."
   let apiBaseUrl = "https://call-status.herokuapp.com"
-  let user       = getEnv "CALL_STATUS_USER"
+  let user = getEnv "CALL_STATUS_USER"
 
   discard postStatus(apiBaseUrl, user, current)
 

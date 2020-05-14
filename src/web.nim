@@ -17,7 +17,7 @@ let settings = newSettings()
 if existsEnv("PORT"):
   settings.port = Port(parseInt(getEnv("PORT")))
 
-logging.addHandler newConsoleLogger(fmtStr="[$levelid] ")
+logging.addHandler newConsoleLogger(fmtStr = "[$levelid] ")
 logging.setLogFilter when defined(release): lvlInfo else: lvlDebug
 
 proc setStatus(person: Person) =

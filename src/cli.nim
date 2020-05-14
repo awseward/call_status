@@ -13,7 +13,7 @@ let p = newParser("call-status"):
 
   flag("-n", "--dryrun")
 
-  option("-u", "--user",   choices = @["D", "N"], env = "CALL_STATUS_USER")
+  option("-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER")
   option("-s", "--status", choices = @["on", "off"])
 
   option("--api-base-url",
