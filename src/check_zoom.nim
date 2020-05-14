@@ -27,17 +27,34 @@ proc dbSetup() =
     debug query.string
     conn.exec query
 
+proc tryParseBool(str: string): Option[bool] =
+  if str == "":
+    none bool
+  else:
+    try: some parseBool(str) except ValueError: none bool
+
+proc getLastKnownLocalStatus(conn: DbConn, user: string): Option[bool] =
+  let query = sql dedent """
+    SELECT is_on_call
+    FROM statuses
+    WHERE name = ?"""
+  debug query.string
+  tryParseBool conn.getValue(query, user)
+
+proc updateLocalStatus(conn: DbConn, user: string, isOnCall: bool) =
+  let query = sql dedent """
+    INSERT INTO statuses (name, is_on_call, last_checked) VALUES
+      (?, ?, current_timestamp)
+      ON CONFLICT(name) DO UPDATE SET
+        is_on_call = ?,
+        last_checked = current_timestamp"""
+  debug query.string
+  conn.exec query, user, isOnCall, isOnCall
+
 proc main(user: string, apiBaseUrl: string, dryRun: bool) =
   dbsetup()
   let lastKnown = db_open().use do (conn: DbConn) -> Option[bool]:
-    let query = sql dedent """
-      SELECT is_on_call
-      FROM statuses
-      WHERE name = ?"""
-    debug query.string
-    let textValue = conn.getValue(query, user)
-    return if textValue == "": none bool
-           else: some parseBool(textValue)
+    getLastKnownLocalStatus(conn, user)
   let current = isZoomCallActive()
 
   if lastKnown.isSome and lastKnown.get() == current:
@@ -52,18 +69,7 @@ proc main(user: string, apiBaseUrl: string, dryRun: bool) =
 
     discard postStatus(apiBaseUrl, user, current)
 
-    db_open().use do (conn: DbConn):
-      conn.exec(
-        sql"""
-          INSERT INTO statuses (name, is_on_call, last_checked) VALUES
-            (?, ?, current_timestamp)
-            ON CONFLICT(name) DO UPDATE SET
-              is_on_call = ?,
-              last_checked = current_timestamp""",
-        user,
-        current,
-        current
-      )
+    db_open().use do (conn: DbConn): updateLocalStatus conn, user, current
 
 let p = newParser("check-zoom"):
   help "Check Zoom call status and update Call Status API accordingly"
