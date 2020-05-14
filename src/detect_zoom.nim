@@ -25,4 +25,4 @@ proc isZoomCallActive*(): bool =
       """
       result = false
   else:
-    raise newException(UnsupportedError, "Unsupported host OS: " & system.hostOS)
+    raise UnsupportedError.newException "Unsupported host OS: " & system.hostOS

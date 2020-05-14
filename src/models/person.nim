@@ -6,12 +6,12 @@ import ./status
 type Row = seq[string]
 
 type Person* = object
-  name*:   string
+  name*: string
   status*: Status
 
 proc fromPgRow*(row: Row): Person =
   Person(
-    name:   row[0],
+    name: row[0],
     status: fromIsOnCall(row[1] == "t"),
   )
 
@@ -19,7 +19,7 @@ proc fromJson*(jsonNode: JsonNode): Person =
   let status = status.fromIsOnCall(jsonNode["is_on_call"].getBool())
 
   Person(
-    name:   jsonNode["user"].getStr(),
+    name: jsonNode["user"].getStr(),
     status: status,
   )
 
@@ -28,6 +28,6 @@ proc isOnCall*(person: Person): bool =
 
 proc `%`*(person: Person): JsonNode =
   %[
-    ("name",       %person.name),
+    ("name", %person.name),
     ("is_on_call", %person.isOnCall()),
   ]
