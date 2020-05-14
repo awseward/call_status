@@ -4,16 +4,17 @@ import logging
 import os
 import ./api_client
 
-logging.addHandler newConsoleLogger(fmtStr = "[$levelname] ")
-logging.setLogFilter when defined(release): lvlInfo else: lvlDebug
+block logging:
+  addHandler newConsoleLogger(fmtStr = "[$levelname] ")
+  setLogFilter when defined(release): lvlInfo else: lvlDebug
 
 proc setStatus(apiBaseUrl: string, user: string, isOnCall: bool) =
   discard api_client.postStatus(apiBaseUrl, user, isOnCall)
 
 let p = newParser("call-status"):
-  help("A CLI client for managing call status")
+  help("Manage call status via the CLI")
 
-  flag("-n", "--dryrun")
+  flag("-n", "--dry-run")
 
   option("-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER")
   option("-s", "--status", choices = @["on", "off"])
@@ -29,9 +30,9 @@ let p = newParser("call-status"):
       echo p.help
       quit 1
 
-    if opts.dryrun:
+    if opts.dryRun:
       echo "Would set ", opts.user, "\'s status to ", opts.status, "."
     else:
-      discard postStatus(opts.apiBaseUrl, opts.user, opts.status == "on")
+      discard postStatus(opts.apiBaseUrl, opts.user, parseBool opts.status)
 
 p.run()
