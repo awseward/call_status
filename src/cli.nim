@@ -8,9 +8,6 @@ block logging:
   addHandler newConsoleLogger(fmtStr = "[$levelname] ")
   setLogFilter when defined(release): lvlInfo else: lvlDebug
 
-proc setStatus(apiBaseUrl: string, user: string, isOnCall: bool) =
-  discard api_client.postStatus(apiBaseUrl, user, isOnCall)
-
 let p = newParser("call-status"):
   help("Manage call status via the CLI")
 

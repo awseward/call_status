@@ -1,5 +1,4 @@
 import osproc
-import parseutils
 import strutils
 import system
 

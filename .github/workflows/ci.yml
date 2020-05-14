@@ -1,13 +1,11 @@
 name: CI
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
   pull_request:
     branches: [ master ]
 
 jobs:
-  check_assets:
+  assets:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -24,3 +22,11 @@ jobs:
     - uses: jiro4989/setup-nim-action@v1.0.2
 
     - run: nimble build -y
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: jiro4989/setup-nim-action@v1.0.2
+
+    - run: nimble docs

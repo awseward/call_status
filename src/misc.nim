@@ -6,20 +6,34 @@ proc discoverIndent(s: string): int =
     if s[i] != ' ': break
     inc result
 
-assert discoverIndent("  a") == 2
-
-# Very slightly smarter version of strutils' unindent
 proc dedent*(s: string): string =
+  ## Similar to strutils' unindent, but this proc only unindents as far as the
+  ## first line is indented.
   unindent(s, discoverIndent s)
 
-block:
-  let input = """
-    a
-      b
-      c
-    d"""
-  assert input.dedent() == """
-a
-  b
-  c
-d"""
+runnableExamples:
+  import strutils
+
+  let query = dedent """
+
+    CREATE TABLE things (
+      id        SERIAL PRIMARY KEY,
+      name      TEXT NOT NULL,
+      is_active BOOLEAN NOT NULL
+    );
+  """
+  doAssert query == """
+CREATE TABLE things (
+  id        SERIAL PRIMARY KEY,
+  name      TEXT NOT NULL,
+  is_active BOOLEAN NOT NULL
+);
+"""
+
+# TESTME
+when isMainModule:
+  doAssert discoverIndent("  a") == 2
+  doAssert discoverIndent("a") == 0
+
+  doAssert dedent("    a") == "a"
+  doAssert dedent("a") == "a"
