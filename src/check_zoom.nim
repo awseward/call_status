@@ -16,20 +16,22 @@ addHandler logger
 let user       = getEnv "CALL_STATUS_USER"
 
 db_open().use do (conn: DbConn):
-  conn.exec sql"""
+  let query = sql unindent """
     CREATE TABLE IF NOT EXISTS statuses (
       name         TEXT UNIQUE NOT NULL,
       is_on_call   BOOLEAN NOT NULL,
       last_checked DATETIME NOT NULL
     )"""
+  debug query.string
+  conn.exec query
 
 let lastKnown = db_open().use do (conn: DbConn) -> Option[bool]:
-  let textValue = conn.getValue(sql"""
+  let query = sql unindent """
     SELECT is_on_call
     FROM statuses
-    WHERE name = ?""",
-    user
-  )
+    WHERE name = ?"""
+  debug query.string
+  let textValue = conn.getValue(query, user)
   return if textValue == "": none bool
                        else: some parseBool(textValue)
 
