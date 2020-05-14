@@ -30,20 +30,22 @@ proc renderPerson*(person: Person): string =
 
   h.div(
     class = statusClass & " half",
-    h.form(
-      action   = "set_status/" & person.name,
-      `method` = "POST",
-      class    = statusClass,
-      h.input(
-        `type` = "hidden",
-        name="is_on_call",
-        value=($ not person.isOnCall())
-      ),
+    h.div(
+      class = "half-inner",
       h.h1(person.name),
       h.h2(presenter.description),
-      h.details(
-        h.summary("Status not accurate?"),
-        h.button(type = "submit", presenter.callToAction),
+      h.form(
+        action   = "set_status/" & person.name,
+        `method` = "POST",
+        h.input(
+          `type` = "hidden",
+          name="is_on_call",
+          value=($ not person.isOnCall())
+        ),
+        h.details(
+          h.summary("Status not accurate?"),
+          h.button(type = "submit", presenter.callToAction),
+        )
       )
     )
   )
