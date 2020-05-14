@@ -23,6 +23,12 @@ task assets, "Generate packaged assets":
 task db_setup, "Set up the DB":
   exec "./misc/db_setup.sh"
 
+task docs, "Generate documentation":
+  exec "nim doc --project src/check_zoom.nim"
+  exec "nim doc --project src/cli.nim"
+  # Web currently errors here, will have to figure out why
+  # exec "nim doc --project src/web.nim"
+
 task pretty, "Run nimpretty on all .nim files in the repo":
   exec "find . -type f -not -name 'assets_file.nim' -name '*.nim' | xargs -n1 nimpretty --indent:2 --maxLineLen:120"
 
