@@ -1,12 +1,14 @@
 import argparse
 import httpClient
+import logging
 import os
 import ./api_client
 
+logging.addHandler newConsoleLogger(fmtStr = "[$levelname] ")
+logging.setLogFilter when defined(release): lvlInfo else: lvlDebug
+
 proc setStatus(apiBaseUrl: string, user: string, isOnCall: bool) =
-  let response = api_client.postStatus(apiBaseUrl, user, isOnCall)
-  echo response.status
-  echo response.body
+  discard api_client.postStatus(apiBaseUrl, user, isOnCall)
 
 let p = newParser("call-status"):
   help("A CLI client for managing call status")
@@ -30,6 +32,6 @@ let p = newParser("call-status"):
     if opts.dryrun:
       echo "Would set ", opts.user, "\'s status to ", opts.status, "."
     else:
-      setStatus(opts.apiBaseUrl, opts.user, opts.status == "on")
+      discard postStatus(opts.apiBaseUrl, opts.user, opts.status == "on")
 
 p.run()

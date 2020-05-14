@@ -9,14 +9,15 @@ import ./api_client
 import ./db
 import ./detect_zoom
 let db_open = open_sqlite
+import ./misc
 
-let logger = newConsoleLogger(fmtStr = "[$datetime] - $levelname: ")
+let logger = newConsoleLogger(fmtStr = "[$datetime][$levelname] ")
 addHandler logger
 
 let user = getEnv "CALL_STATUS_USER"
 
 db_open().use do (conn: DbConn):
-  let query = sql unindent """
+  let query = sql dedent """
     CREATE TABLE IF NOT EXISTS statuses (
       name         TEXT UNIQUE NOT NULL,
       is_on_call   BOOLEAN NOT NULL,
@@ -26,7 +27,7 @@ db_open().use do (conn: DbConn):
   conn.exec query
 
 let lastKnown = db_open().use do (conn: DbConn) -> Option[bool]:
-  let query = sql unindent """
+  let query = sql dedent """
     SELECT is_on_call
     FROM statuses
     WHERE name = ?"""

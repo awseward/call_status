@@ -9,6 +9,7 @@ import strutils
 
 import ./db
 let db_open = open_pg
+import ./misc
 import ./models/person
 import ./models/status
 import ./views/index
@@ -17,12 +18,12 @@ let settings = newSettings()
 if existsEnv("PORT"):
   settings.port = Port(parseInt(getEnv("PORT")))
 
-logging.addHandler newConsoleLogger(fmtStr = "[$levelid] ")
+logging.addHandler newConsoleLogger(fmtStr = "[$levelname] ")
 logging.setLogFilter when defined(release): lvlInfo else: lvlDebug
 
 proc setStatus(person: Person) =
   db_open().use do (conn: DbConn):
-    let query = sql unindent """
+    let query = sql dedent """
       UPDATE people
       SET is_on_call = $1
       WHERE name = $2;"""
@@ -32,7 +33,7 @@ proc setStatus(person: Person) =
 
 proc getPeople(): seq[Person] =
   let rows = db_open().use do (conn: DbConn) -> seq[Row]:
-    let query = sql unindent """
+    let query = sql dedent """
       SELECT
         name
       , is_on_call
@@ -54,8 +55,7 @@ router api:
 
   post "/status":
     let jsonNode = parseJson request.body
-    # Maybe use logger?
-    echo jsonNode
+    debug jsonNode
     setStatus person.fromJson(jsonNode)
     resp Http204
 
