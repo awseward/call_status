@@ -1,18 +1,4 @@
-import parsecfg
-import streams
 import strutils
-
-const pkgVersion*: string = static:
-  const filepath: string = staticExec("ls ../*.nimble").splitLines()[0]
-  var stream: StringStream
-  try:
-    stream = newStringStream slurp(filePath)
-    let cfg = loadConfig stream
-    cfg.getSectionValue("", "version")
-  finally:
-    close stream
-
-const pkgRevision*: string = staticExec "git rev-parse HEAD"
 
 proc discoverIndent(s: string): int =
   result = 0

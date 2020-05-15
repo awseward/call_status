@@ -4,7 +4,6 @@ import httpClient
 import options
 import os
 import strutils
-import uri
 
 import ./api_client
 import ./db
