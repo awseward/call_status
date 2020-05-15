@@ -28,15 +28,16 @@ proc sendJson(api: ApiClient, httpMethod: HttpMethod, relativeUrl: string, bodyJ
     httpMethod = httpMethod,
     body = body
   )
-  if is5xx result.code: raise newException(HttpRequestError, $result.status)
+  if is4xx(result.code) or is5xx(result.code):
+    raise newException(HttpRequestError, $result.status)
   debug result.status
   if result.body != "": debug result.body
 
 
 proc getPeople*(api: ApiClient): seq[Person] =
   # The relative path is a little weird, but it's fine for now
-  let response = api.sendJson(HttpGet, "/api/status")
+  let response = api.sendJson(HttpGet, "/api/people")
   person.fromJsonMany parseJson(response.body)
 
 proc updatePerson*(api: ApiClient, person: Person) =
-  discard api.sendJson(HttpPost, "/api/status", %*person)
+  discard api.sendJson(HttpPut, "/api/person/" & person.name, %*person)
