@@ -15,7 +15,7 @@ sql_content() {
 CREATE TABLE people (
   id         SERIAL PRIMARY KEY,
   name       TEXT NOT NULL,
-  is_on_call BOOLEAN
+  is_on_call BOOLEAN NOT NULL
 );
 
 -- Populate table
