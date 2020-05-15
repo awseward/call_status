@@ -4,6 +4,7 @@ import os
 
 import ./api_client
 import ./logs
+from ./misc import pkgVersion, pkgRevision
 import ./models/person
 import ./models/status
 
@@ -13,6 +14,10 @@ let p = newParser("call-status"):
   help("Manage call status via the CLI")
 
   flag("-n", "--dry-run")
+  flag "-f", "--force"
+
+  flag("--version")
+  flag("--revision")
 
   option("-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER")
   option("-s", "--status", choices = @["on", "off"])
@@ -23,6 +28,14 @@ let p = newParser("call-status"):
   )
 
   run:
+    if (opts.version):
+      echo pkgVersion
+      quit 0
+
+    if (opts.revision):
+      echo pkgRevision
+      quit 0
+
     if (opts.user == "" or opts.status == ""):
       echo "ERROR: Both user and status are required.", "\n"
       echo p.help

@@ -86,8 +86,10 @@ let p = newParser("check-zoom"):
   help "Check Zoom call status and update Call Status API accordingly"
 
   flag "-n", "--dry-run"
-
   flag "-f", "--force"
+
+  flag("--version")
+  flag("--revision")
 
   option "-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER"
 
@@ -96,6 +98,14 @@ let p = newParser("check-zoom"):
     env = "CALL_STATUS_API_BASE_URL"
 
   run:
+    if (opts.version):
+      echo pkgVersion
+      quit 0
+
+    if (opts.revision):
+      echo pkgRevision
+      quit 0
+
     if opts.user == "":
       echo "ERROR: Call Status user is required"
       echo p.help
