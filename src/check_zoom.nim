@@ -63,13 +63,13 @@ proc main(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
   let current = isZoomCallActive()
 
   if (not force) and lastKnown.isSome and lastKnown.get() == current:
-    info "Status unchanged. Doing nothing."
+    info "Status unchanged; doing nothing."
     quit 0
   else:
     if dryRun:
-      info "New status, but dry run. Doing nothing."
+      info "New status (or just forced update), but dry run; doing nothing."
       return
-    info "Updating."
+    info "New status (or just forced update); updating."
     let person = Person(
       name: name,
       status: status.fromIsOnCall current
