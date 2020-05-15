@@ -17,6 +17,7 @@ requires "nimassets >= 0.1.0"
 
 # Tasks
 
+# See: https://web.archive.org/web/20200515050555/https://www.rockyourcode.com/how-to-serve-static-files-with-nim-and-jester-on-heroku/
 task assets, "Generate packaged assets":
   exec "nimassets --dir=public --output=src/views/assets_file.nim"
 
