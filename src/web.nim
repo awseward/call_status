@@ -8,18 +8,21 @@ import sequtils
 import strutils
 
 import ./db
-let db_open = open_pg
+import ./deprecations
 import ./misc
 import ./models/person
 import ./models/status
 import ./views/index
 
+let db_open = open_pg
+
 let settings = newSettings()
 if existsEnv("PORT"):
   settings.port = Port(parseInt(getEnv("PORT")))
 
-logging.addHandler newConsoleLogger(fmtStr = "[$levelname] ")
-logging.setLogFilter when defined(release): lvlInfo else: lvlDebug
+block logging:
+  addHandler newConsoleLogger(fmtStr = "[$levelname] ")
+  setLogFilter when defined(release): lvlInfo else: lvlDebug
 
 proc updateStatus(person: Person) =
   db_open().use do (conn: DbConn):
@@ -27,9 +30,23 @@ proc updateStatus(person: Person) =
       UPDATE people
       SET is_on_call = $1
       WHERE name = $2;"""
+    debug query.string
     let prepared = conn.prepare("update_status", query, 2)
 
     conn.exec prepared, $person.isOnCall(), person.name
+
+proc nameExists(name: string): bool =
+  db_open().use do (conn: DbConn) -> bool:
+    let query = sql dedent """
+      SELECT name
+      FROM people
+      WHERE name = $1
+      LIMIT 1;
+    """
+    debug query.string
+    let prepared = conn.prepare("check_name", query, 1)
+
+    conn.getValue(prepared, name) == name
 
 proc getPeople(): seq[Person] =
   let rows = db_open().use do (conn: DbConn) -> seq[Row]:
@@ -40,6 +57,7 @@ proc getPeople(): seq[Person] =
       FROM people
       WHERE name IN ($1, $2)
       ORDER BY name;"""
+    debug query.string
     let prepared = conn.prepare("get_people", query, 2)
 
     conn.getAllrows prepared, "D", "N"
@@ -47,13 +65,34 @@ proc getPeople(): seq[Person] =
   rows.map(fromPgRow)
 
 router api:
+  # DEPRECATED
   get "/status":
-    resp %*getPeople()
+    if not deprecations.apiStatusEndpoints: halt Http404
 
+    redirect "/api/people"
+
+  get "/people": resp %*getPeople()
+
+  # DEPRECATED
   post "/status":
+    if not deprecations.apiStatusEndpoints: halt Http404
+
     let jsonNode = parseJson request.body
     debug jsonNode
     updateStatus person.fromJson(jsonNode)
+    resp Http204
+
+  put "/person/@name":
+    let rawName: TaintedString = @"name"
+    if not nameExists(rawName.string): halt Http404
+
+    let jsonNode = parseJson request.body
+    debug jsonNode
+
+    let person = person.fromJson jsonNode
+    if not(person.name == rawName.string): halt Http422
+
+    updateStatus person
     resp Http204
 
 router web:
@@ -61,7 +100,8 @@ router web:
     let forms = getPeople().map(renderPerson)
     resp renderIndex(forms[0], forms[1])
 
-  post "/set_status/@name":
+  # I'd like for this to be PUT, but browser forms are GET and POST only
+  post "/person/@name":
     let status = status.fromIsOnCall parseBool(request.params["is_on_call"])
     let person = Person(name: @"name", status: status)
     updateStatus person

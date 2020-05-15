@@ -29,7 +29,7 @@ proc renderPerson*(person: Person): string =
   let statusClass = presenter.statusClass
 
   let form = h.form(
-    action = "set_status/" & person.name,
+    action = "/person/" & person.name,
     `method` = "POST",
     h.input(
       `type` = "hidden",

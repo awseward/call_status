@@ -5,16 +5,20 @@ import logging
 import options
 import os
 import strutils
+import uri
 
 import ./api_client
 import ./db
 import ./detect_zoom
-let db_open = open_sqlite
 import ./misc
+import ./models/person
+import ./models/status
 
 block logging:
   let logger = newConsoleLogger(fmtStr = "[$datetime][$levelname] ")
   addHandler logger
+
+let db_open = open_sqlite
 
 proc dbSetup() =
   db_open().use do (conn: DbConn):
@@ -33,15 +37,15 @@ proc tryParseBool(str: string): Option[bool] =
   else:
     try: some parseBool(str) except ValueError: none bool
 
-proc getLastKnownLocalStatus(conn: DbConn, user: string): Option[bool] =
+proc getLastKnownLocalStatus(conn: DbConn, name: string): Option[bool] =
   let query = sql dedent """
     SELECT is_on_call
     FROM statuses
     WHERE name = ?"""
   debug query.string
-  tryParseBool conn.getValue(query, user)
+  tryParseBool conn.getValue(query, name)
 
-proc updateLocalStatus(conn: DbConn, user: string, isOnCall: bool) =
+proc updatePerson(conn: DbConn, person: Person) =
   let query = sql dedent """
     INSERT INTO statuses (name, is_on_call, last_checked) VALUES
       (?, ?, current_timestamp)
@@ -49,32 +53,36 @@ proc updateLocalStatus(conn: DbConn, user: string, isOnCall: bool) =
         is_on_call = ?,
         last_checked = current_timestamp"""
   debug query.string
-  conn.exec query, user, isOnCall, isOnCall
+  let isOnCall = person.isOnCall()
+  conn.exec query, person.name, isOnCall, isOnCall
 
-proc main(user: string, apiBaseUrl: string, dryRun: bool) =
+proc main(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
   dbsetup()
   let lastKnown = db_open().use do (conn: DbConn) -> Option[bool]:
-    getLastKnownLocalStatus(conn, user)
+    getLastKnownLocalStatus(conn, name)
   let current = isZoomCallActive()
 
-  if lastKnown.isSome and lastKnown.get() == current:
-    info "Status unchanged. Doing nothing."
+  if (not force) and lastKnown.isSome and lastKnown.get() == current:
+    info "Status unchanged; doing nothing."
     quit 0
   else:
     if dryRun:
-      info "New Status, but dry run. Doing nothing."
+      info "New status (or just forced update), but dry run; doing nothing."
       return
-
-    info "New status. Updating."
-
-    discard postStatus(apiBaseUrl, user, current)
-
-    db_open().use do (conn: DbConn): updateLocalStatus conn, user, current
+    info "New status (or just forced update); updating."
+    let person = Person(
+      name: name,
+      status: status.fromIsOnCall current
+    )
+    newApiClient(apiBaseUrl).updatePerson person
+    db_open().use do (conn: DbConn): conn.updatePerson person
 
 let p = newParser("check-zoom"):
   help "Check Zoom call status and update Call Status API accordingly"
 
   flag "-n", "--dry-run"
+
+  flag "-f", "--force"
 
   option "-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER"
 
@@ -88,6 +96,6 @@ let p = newParser("check-zoom"):
       echo p.help
       quit 1
 
-    main opts.user, opts.apiBaseUrl, opts.dryRun
+    main opts.user, opts.apiBaseUrl, opts.dryRun, opts.force
 
 p.run()

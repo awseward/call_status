@@ -2,7 +2,10 @@ import argparse
 import httpClient
 import logging
 import os
+
 import ./api_client
+import ./models/person
+import ./models/status
 
 block logging:
   addHandler newConsoleLogger(fmtStr = "[$levelname] ")
@@ -30,6 +33,10 @@ let p = newParser("call-status"):
     if opts.dryRun:
       echo "Would set ", opts.user, "\'s status to ", opts.status, "."
     else:
-      discard postStatus(opts.apiBaseUrl, opts.user, parseBool opts.status)
+      let person = Person(
+        name: opts.user,
+        status: status.fromIsOnCall parseBool(opts.status)
+      )
+      newApiClient(opts.apiBaseUrl).updatePerson person
 
 p.run()
