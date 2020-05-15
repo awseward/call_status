@@ -1,4 +1,4 @@
-import logging
+import logs
 import os
 import strUtils
 

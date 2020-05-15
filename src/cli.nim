@@ -1,15 +1,13 @@
 import argparse
 import httpClient
-import logging
 import os
 
 import ./api_client
+import ./logs
 import ./models/person
 import ./models/status
 
-block logging:
-  addHandler newConsoleLogger(fmtStr = "[$levelname] ")
-  setLogFilter when defined(release): lvlInfo else: lvlDebug
+logs.setupCli()
 
 let p = newParser("call-status"):
   help("Manage call status via the CLI")

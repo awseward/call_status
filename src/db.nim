@@ -1,8 +1,9 @@
 import os
 import db_postgres
 import db_sqlite
-import logging
 import typetraits
+
+import ./logs
 
 type Closeable* = concept x
   ## Intended to facilitate generalizing DbConn types from the db_postgres and

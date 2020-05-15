@@ -2,13 +2,13 @@ import asyncdispatch
 import db_postgres
 import jester
 import json
-import logging
 import os
 import sequtils
 import strutils
 
 import ./db
 import ./deprecations
+import ./logs
 import ./misc
 import ./models/person
 import ./models/status
@@ -20,9 +20,7 @@ let settings = newSettings()
 if existsEnv("PORT"):
   settings.port = Port(parseInt(getEnv("PORT")))
 
-block logging:
-  addHandler newConsoleLogger(fmtStr = "[$levelname] ")
-  setLogFilter when defined(release): lvlInfo else: lvlDebug
+logs.setupWeb()
 
 proc updateStatus(person: Person) =
   let query = sql dedent """
