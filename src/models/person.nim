@@ -1,4 +1,5 @@
 import json
+import seqUtils
 import ./status
 
 # This is a duplicate of db_*'s `Row`.
@@ -19,9 +20,12 @@ proc fromJson*(jsonNode: JsonNode): Person =
   let status = status.fromIsOnCall(jsonNode["is_on_call"].getBool())
 
   Person(
-    name: jsonNode["user"].getStr(),
+    name: jsonNode["name"].getStr(),
     status: status,
   )
+
+proc fromJsonMany*(jsonNode: JsonNode): seq[Person] =
+  jsonNode.getElems().map fromJson
 
 proc isOnCall*(person: Person): bool =
   status.isOnCall person.status

@@ -24,8 +24,8 @@ task db_setup, "Set up the DB":
   exec "./misc/db_setup.sh"
 
 task docs, "Generate documentation":
-  exec "nim doc --project src/check_zoom.nim"
-  exec "nim doc --project src/cli.nim"
+  exec "nimble doc --project src/check_zoom.nim"
+  exec "nimble doc --project src/cli.nim"
   # Web currently errors here, will have to figure out why
   # exec "nim doc --project src/web.nim"
 

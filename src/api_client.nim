@@ -1,20 +1,42 @@
 import httpClient
+import httpCore
 import json
 import logging
+import uri
 
-proc postStatus*(apiBaseUrl: string, user: string, isOnCall: bool): Response =
-  let url = apiBaseUrl & "/api/status"
-  let body = $ %*{"user": user, "is_on_call": isOnCall}
-  let client = block:
+import ./models/person
+
+type ApiClient* = object
+  baseUri: Uri
+
+proc newApiClient*(baseUrl: string): ApiClient =
+  ApiClient(baseUri: parseUri baseUrl)
+
+proc sendJson(api: ApiClient, httpMethod: HttpMethod, relativeUrl: string, bodyJson: JsonNode = nil): Response =
+  let uri = api.baseUri / relativeUrl
+  let body = $bodyJson
+  let http = block:
     let c = newHttpClient()
-    c.headers = newHttpHeaders {"Content-Type": "application/json"}
+    c.headers = newHttpHeaders {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    }
     c
-  debug "POST " & url & " " & body
-  let response = client.post(url, body = $ %*{
-    "user": user,
-    "is_on_call": isOnCall,
-  })
-  debug response.status
-  if response.body != "": debug response.body
+  debug httpMethod, " ", uri, " ", body
+  result = http.request(
+    url = $uri,
+    httpMethod = httpMethod,
+    body = body
+  )
+  if is5xx result.code: raise newException(HttpRequestError, $result.status)
+  debug result.status
+  if result.body != "": debug result.body
 
-  response
+
+proc getPeople*(api: ApiClient): seq[Person] =
+  # The relative path is a little weird, but it's fine for now
+  let response = api.sendJson(HttpGet, "/api/status")
+  person.fromJsonMany parseJson(response.body)
+
+proc updatePerson*(api: ApiClient, person: Person) =
+  discard api.sendJson(HttpPost, "/api/status", %*person)
