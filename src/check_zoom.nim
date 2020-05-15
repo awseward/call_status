@@ -56,20 +56,20 @@ proc updatePerson(conn: DbConn, person: Person) =
   let isOnCall = person.isOnCall()
   conn.exec query, person.name, isOnCall, isOnCall
 
-proc main(name: string, apiBaseUrl: string, dryRun: bool) =
+proc main(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
   dbsetup()
   let lastKnown = db_open().use do (conn: DbConn) -> Option[bool]:
     getLastKnownLocalStatus(conn, name)
   let current = isZoomCallActive()
 
-  if lastKnown.isSome and lastKnown.get() == current:
+  if (not force) and lastKnown.isSome and lastKnown.get() == current:
     info "Status unchanged. Doing nothing."
     quit 0
   else:
     if dryRun:
-      info "New Status, but dry run. Doing nothing."
+      info "New status, but dry run. Doing nothing."
       return
-    info "New status. Updating."
+    info "Updating."
     let person = Person(
       name: name,
       status: status.fromIsOnCall current
@@ -81,6 +81,8 @@ let p = newParser("check-zoom"):
   help "Check Zoom call status and update Call Status API accordingly"
 
   flag "-n", "--dry-run"
+
+  flag "-f", "--force"
 
   option "-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER"
 
@@ -94,6 +96,6 @@ let p = newParser("check-zoom"):
       echo p.help
       quit 1
 
-    main opts.user, opts.apiBaseUrl, opts.dryRun
+    main opts.user, opts.apiBaseUrl, opts.dryRun, opts.force
 
 p.run()

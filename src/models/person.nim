@@ -1,5 +1,7 @@
 import json
 import seqUtils
+
+import ../deprecations
 import ./status
 
 # This is a duplicate of db_*'s `Row`.
@@ -18,11 +20,17 @@ proc fromPgRow*(row: Row): Person =
 
 proc fromJson*(jsonNode: JsonNode): Person =
   let status = status.fromIsOnCall(jsonNode["is_on_call"].getBool())
-
-  Person(
-    name: jsonNode["name"].getStr(),
-    status: status,
+  let name = getStr(
+    if deprecations.userKeySupported:
+      try:
+        jsonNode["name"]
+      except KeyError:
+        jsonNode["user"]
+    else:
+      jsonNode["name"]
   )
+
+  Person(name: name, status: status)
 
 proc fromJsonMany*(jsonNode: JsonNode): seq[Person] =
   jsonNode.getElems().map fromJson
@@ -32,6 +40,6 @@ proc isOnCall*(person: Person): bool =
 
 proc `%`*(person: Person): JsonNode =
   %[
-    ("name", %person.name),
+    ("user", %person.name),
     ("is_on_call", %person.isOnCall()),
   ]
