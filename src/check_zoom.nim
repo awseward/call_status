@@ -12,6 +12,7 @@ import ./logs
 import ./misc
 import ./models/person
 import ./models/status
+import ./statics
 
 logs.setupCheckZoom()
 

@@ -13,6 +13,7 @@ import ./misc
 import ./models/person
 import ./models/status
 import ./views/index
+import ./statics
 
 let db_open = open_pg
 

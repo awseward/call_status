@@ -4,9 +4,9 @@ import os
 
 import ./api_client
 import ./logs
-from ./misc import pkgVersion, pkgRevision
 import ./models/person
 import ./models/status
+import ./statics
 
 logs.setupCli()
 
