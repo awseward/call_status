@@ -21,14 +21,15 @@ block logging:
 let db_open = open_sqlite
 
 proc dbSetup() =
-  db_open().use do (conn: DbConn):
-    let query = sql dedent """
-      CREATE TABLE IF NOT EXISTS statuses (
-        name         TEXT UNIQUE NOT NULL,
-        is_on_call   BOOLEAN NOT NULL,
-        last_checked DATETIME NOT NULL
-      )"""
-    debug query.string
+  let query = sql dedent """
+    CREATE TABLE IF NOT EXISTS statuses (
+      name         TEXT UNIQUE NOT NULL,
+      is_on_call   BOOLEAN NOT NULL,
+      last_checked DATETIME NOT NULL
+    )"""
+  debug query.string
+
+  db_open.use conn:
     conn.exec query
 
 proc tryParseBool(str: string): Option[bool] =
@@ -37,15 +38,16 @@ proc tryParseBool(str: string): Option[bool] =
   else:
     try: some parseBool(str) except ValueError: none bool
 
-proc getLastKnownLocalStatus(conn: DbConn, name: string): Option[bool] =
+proc getLastKnownLocalStatus(name: string): Option[bool] =
   let query = sql dedent """
     SELECT is_on_call
     FROM statuses
     WHERE name = ?"""
   debug query.string
-  tryParseBool conn.getValue(query, name)
+  db_open.use conn:
+    tryParseBool conn.getValue(query, name)
 
-proc updatePerson(conn: DbConn, person: Person) =
+proc updatePerson(person: Person) =
   let query = sql dedent """
     INSERT INTO statuses (name, is_on_call, last_checked) VALUES
       (?, ?, current_timestamp)
@@ -54,12 +56,11 @@ proc updatePerson(conn: DbConn, person: Person) =
         last_checked = current_timestamp"""
   debug query.string
   let isOnCall = person.isOnCall()
-  conn.exec query, person.name, isOnCall, isOnCall
+  db_open.use conn: conn.exec query, person.name, isOnCall, isOnCall
 
 proc main(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
   dbsetup()
-  let lastKnown = db_open().use do (conn: DbConn) -> Option[bool]:
-    getLastKnownLocalStatus(conn, name)
+  let lastKnown = getLastKnownLocalStatus(name)
   let current = isZoomCallActive()
 
   if (not force) and lastKnown.isSome and lastKnown.get() == current:
@@ -75,7 +76,7 @@ proc main(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
       status: status.fromIsOnCall current
     )
     newApiClient(apiBaseUrl).updatePerson person
-    db_open().use do (conn: DbConn): conn.updatePerson person
+    updatePerson person
 
 let p = newParser("check-zoom"):
   help "Check Zoom call status and update Call Status API accordingly"
