@@ -1,7 +1,6 @@
 import argparse
 import db_sqlite
 import httpClient
-import logging
 import options
 import os
 import strutils
@@ -10,12 +9,12 @@ import uri
 import ./api_client
 import ./db
 import ./detect_zoom
+import ./logs
 import ./misc
 import ./models/person
 import ./models/status
 
-block logging:
-  addHandler newConsoleLogger(fmtStr = "[$datetime][$levelname] ")
+logs.setupCheckZoom()
 
 block tempBackwardsCompat:
   # Would like to use DATABASE_FILEPATH, but will have to migrate existing

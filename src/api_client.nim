@@ -1,10 +1,10 @@
 import httpClient
 import httpCore
 import json
-import logging
 import uri
 
 import ./models/person
+import ./logs
 
 type ApiClient* = object
   baseUri: Uri

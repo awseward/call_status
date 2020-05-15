@@ -21,7 +21,7 @@ proc fromPgRow*(row: Row): Person =
 proc fromJson*(jsonNode: JsonNode): Person =
   let status = status.fromIsOnCall(jsonNode["is_on_call"].getBool())
   let name = getStr(
-    if deprecations.userKeySupported:
+    if isSupported USER_KEY:
       try:
         jsonNode["name"]
       except KeyError:
