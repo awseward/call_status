@@ -15,8 +15,13 @@ import ./models/person
 import ./models/status
 
 block logging:
-  let logger = newConsoleLogger(fmtStr = "[$datetime][$levelname] ")
-  addHandler logger
+  addHandler newConsoleLogger(fmtStr = "[$datetime][$levelname] ")
+
+block tempBackwardsCompat:
+  # Would like to use DATABASE_FILEPATH, but will have to migrate existing
+  # installs to be safe. In the meantime, this should do it.
+  if not(existsEnv "DATABASE_FILEPATH") and existsEnv "DB_FILEPATH":
+    putEnv("DATABASE_FILEPATH", getEnv("DB_FILEPATH"))
 
 let db_open = open_sqlite
 
