@@ -10,8 +10,14 @@
       <key>CALL_STATUS_USER</key>
       <string>__CALL_STATUS_USER__</string>
 
-      <key>DB_FILEPATH</key>
-      <string>__DB_FILEPATH__</string>
+      <key>DATABASE_FILEPATH</key>
+      <string>__DATABASE_FILEPATH__</string>
+
+<!--
+      <key>LOG_LEVEL</key>
+      <string>DEBUG</string>
+-->
+
     </dict>
 
     <key>Label</key>
