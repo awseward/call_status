@@ -65,7 +65,7 @@ proc updatePerson(person: Person) =
   db_open.use conn: conn.exec query, person.name, isOnCall, isOnCall
 
 proc check(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
-  dbsetup()
+  dbSetup()
   let lastKnown = getLastKnownLocalStatus(name)
   let current = isZoomCallActive()
 
@@ -134,8 +134,6 @@ let p = newParser("check-zoom"):
         echo "ERROR: User is required, but was not provided"
         echo p.help
         quit 1
-
-      dbSetup()
 
       check user, opts.apiBaseUrl, opts.dryRun, opts.force
 
