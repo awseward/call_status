@@ -135,6 +135,8 @@ let p = newParser("check-zoom"):
         echo p.help
         quit 1
 
+      dbSetup()
+
       check user, opts.apiBaseUrl, opts.dryRun, opts.force
 
   run:
