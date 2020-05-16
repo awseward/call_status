@@ -20,7 +20,7 @@ _up() {
   echo -n 'Are you D or N? ' && read -r call_status_user
 
   ( sed -e "s/__CALL_STATUS_USER__/${call_status_user}/g" \
-  | sed -e "s%__DB_FILEPATH__%${DIR_APP_SUPPORT}/call_status.db%g" \
+  | sed -e "s%__DATABASE_FILEPATH__%${DIR_APP_SUPPORT}/call_status.db%g" \
   | _write_plist
   ) < './install/macos/local.call_status.plist.template'
 
