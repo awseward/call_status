@@ -5,7 +5,7 @@ author        = "Andrew Seward"
 description   = "An app to indicate who's on a call"
 license       = "MIT"
 srcDir        = "src"
-bin           = @["check_zoom", "cli", "web"]
+bin           = @["call_status_checker", "call_status_cli", "web"]
 
 
 # Dependencies
@@ -25,8 +25,8 @@ task db_setup, "Set up the DB":
   exec "./misc/db_setup.sh"
 
 task docs, "Generate documentation":
-  exec "nimble doc --project src/check_zoom.nim"
-  exec "nimble doc --project src/cli.nim"
+  exec "nimble doc --project src/call_status_checker.nim"
+  exec "nimble doc --project src/call_status_cli.nim"
   # Web currently errors here, will have to figure out why
   # exec "nim doc --project src/web.nim"
 
@@ -38,5 +38,5 @@ task watch_web, "Watch for changes and reload web accordingly":
 
 task watch_zoom, "Simulate a zoom watching daemon (launchd LaunchAgent on MacOS)":
   while true:
-    exec "nimble -d:ssl run check_zoom; sleep 10"
+    exec "nimble -d:ssl run call_status_checker; sleep 10"
 

@@ -4,8 +4,10 @@ import httpClient
 import options
 import os
 import strutils
+import sugar
 
 import ./api_client
+import ./checker_config
 import ./db
 import ./detect_zoom
 import ./logs
@@ -14,7 +16,7 @@ import ./models/person
 import ./models/status
 import ./statics
 
-logs.setupCheckZoom()
+logs.setupChecker()
 
 block tempBackwardsCompat:
   # Would like to use DATABASE_FILEPATH, but will have to migrate existing
@@ -62,7 +64,7 @@ proc updatePerson(person: Person) =
   let isOnCall = person.isOnCall()
   db_open.use conn: conn.exec query, person.name, isOnCall, isOnCall
 
-proc main(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
+proc check(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
   dbsetup()
   let lastKnown = getLastKnownLocalStatus(name)
   let current = isZoomCallActive()
@@ -82,35 +84,65 @@ proc main(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
     newApiClient(apiBaseUrl).updatePerson person
     updatePerson person
 
+proc config(name: string) =
+  let filepath = block:
+    let val = getEnv "CONFIG_FILEPATH"
+    if val == "":
+      logs.error "Invalid config filepath (uses env var CONFIG_FILEPATH)"
+      quit 1
+    else:
+      val.string
+
+  CheckerConfig(userName: name).writeConfigFile filepath
+
 let p = newParser("check-zoom"):
-  help "Check Zoom call status and update Call Status API accordingly"
+  help "Check call status and update Call Status API accordingly"
+  flag "--version"
+  flag "--revision"
 
-  flag "-n", "--dry-run"
-  flag "-f", "--force"
+  command "config":
+    option "-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER"
+    run:
+      let user = opts.user
+      if user == "":
+        echo "ERROR: User is required, but was not provided"
+        echo p.help
+        quit 1
 
-  flag("--version")
-  flag("--revision")
+      config user
 
-  option "-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER"
+  command "check":
+    option "-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER"
 
-  option "--api-base-url",
-    default = "https://call-status.herokuapp.com",
-    env = "CALL_STATUS_API_BASE_URL"
+    flag "-n", "--dry-run"
+    flag "-f", "--force"
+
+    option "--api-base-url",
+      default = "https://call-status.herokuapp.com",
+      env = "CALL_STATUS_API_BASE_URL"
+
+    run:
+      let user = block:
+        if opts.user != "":
+          opts.user
+        else:
+          tryReadConfigFile(getEnv "CONFIG_FILEPATH")
+            .map(conf => conf.userName)
+            .get ""
+
+      if user == "":
+        echo "ERROR: User is required, but was not provided"
+        echo p.help
+        quit 1
+
+      check user, opts.apiBaseUrl, opts.dryRun, opts.force
 
   run:
     if (opts.version):
       echo pkgVersion
       quit 0
-
     if (opts.revision):
       echo pkgRevision
       quit 0
-
-    if opts.user == "":
-      echo "ERROR: Call Status user is required"
-      echo p.help
-      quit 1
-
-    main opts.user, opts.apiBaseUrl, opts.dryRun, opts.force
 
 p.run()
