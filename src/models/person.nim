@@ -22,10 +22,7 @@ proc fromJson*(jsonNode: JsonNode): Person =
   let status = status.fromIsOnCall(jsonNode["is_on_call"].getBool())
   let name = getStr(
     if isSupported USER_KEY:
-      try:
-        jsonNode["name"]
-      except KeyError:
-        jsonNode["user"]
+      try: jsonNode["name"] except KeyError: jsonNode["user"]
     else:
       jsonNode["name"]
   )
@@ -40,6 +37,6 @@ proc isOnCall*(person: Person): bool =
 
 proc `%`*(person: Person): JsonNode =
   %[
-    ("user", %person.name),
+    ("name", %person.name),
     ("is_on_call", %person.isOnCall()),
   ]
