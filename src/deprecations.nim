@@ -6,9 +6,16 @@ type Deprecation = distinct string
 
 proc log(deprecation: Deprecation, supported: bool) =
   if supported:
-    warn "Deprecated (but supported) functionality triggered: ", deprecation.string
+    discard
+    # warn "Deprecated (but supported) functionality triggered: ", deprecation.string
   else:
     error "Deprecated (and no longer supported) functionality triggered: ", deprecation.string
+
+template checkSupport*(deprecation, supported, message, actions: untyped): untyped =
+  let key = "DEPRECATION_SUPPORT_" & deprecation.string
+  let supported = parseBool getEnv(key, default = "true")
+  let message = "FIXME"
+  actions
 
 proc isSupported*(deprecation: Deprecation, default: bool = true): bool =
   let key = "DEPRECATION_SUPPORT_" & deprecation.string

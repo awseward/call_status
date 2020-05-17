@@ -20,14 +20,20 @@ proc fromPgRow*(row: Row): Person =
 
 proc fromJson*(jsonNode: JsonNode): Person =
   let status = status.fromIsOnCall(jsonNode["is_on_call"].getBool())
-  let name = getStr(
-    if isSupported USER_KEY:
-      try: jsonNode["name"] except KeyError: jsonNode["user"]
-    else:
-      jsonNode["name"]
-  )
 
-  Person(name: name, status: status)
+  USER_KEY.checkSupport(supported, message):
+    let name = getStr(
+      if supported:
+        try:
+          jsonNode["name"]
+        except KeyError:
+          echo message
+          jsonNode["user"]
+      else:
+        jsonNode["name"]
+    )
+
+    Person(name: name, status: status)
 
 proc fromJsonMany*(jsonNode: JsonNode): seq[Person] =
   jsonNode.getElems().map fromJson
