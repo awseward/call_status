@@ -42,7 +42,7 @@ jobs:
     - uses: jiro4989/setup-nim-action@v1.0.2
 
     - run: nimble install -y
-    - run: nimble build dump
+    - run: nimble build dump --verbose
 
   docs:
     runs-on: ubuntu-latest
