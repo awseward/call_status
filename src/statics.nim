@@ -1,6 +1,7 @@
 import parsecfg
 import streams
 import strutils
+import os
 
 proc getPkgVersion(): string {.compileTime.} =
   const filepath = staticExec("ls ../*.nimble").splitLines()[0]
@@ -13,7 +14,10 @@ proc getPkgVersion(): string {.compileTime.} =
     close stream
 
 proc getPkgRevision(): string {.compileTime.} =
-  staticExec "git rev-parse HEAD"
+  let fromEnv = getEnv "SOURCE_VERSION"
+  if fromEnv != "": fromEnv
+  else:
+    staticExec "git rev-parse HEAD"
 
 const pkgVersion* = getPkgVersion()
 

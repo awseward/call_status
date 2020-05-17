@@ -23,8 +23,8 @@ if existsEnv("PORT"):
 
 logs.setupWeb()
 
-debug "version:  ", pkgVersion
-debug "revision: ", pkgRevision
+info "version:  ", pkgVersion
+info "revision: ", pkgRevision
 
 proc updateStatus(person: Person) =
   let query = sql dedent """
