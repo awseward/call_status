@@ -62,7 +62,7 @@ jobs:
         draft: false
         prerelease: false
 
-    - id: upload_release_asset
+    - id: upload_tarball
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -72,4 +72,11 @@ jobs:
         asset_name: ${{ steps.plan.outputs.tarball_filename }}
         asset_content_type: application/gzip
 
-    # TODO: open awseward/homebrew-tap pull request
+    - uses: mislav/bump-homebrew-formula-action@v1
+      with:
+        formula-name: call_status_checker
+        homebrew-tap: awseward/homebrew-tap
+        base-branch: master
+        download-url: ${{ steps.upload_tarball.outputs.browser_download_url }}
+      env:
+        COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
