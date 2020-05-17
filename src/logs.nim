@@ -28,6 +28,6 @@ proc setupCli*() =
   addHandler newConsoleLogger(fmtStr = "[$levelname] ")
   setLogFilter chooseLevel()
 
-proc setupCheckZoom*() =
+proc setupChecker*() =
   addHandler newConsoleLogger(fmtStr = "[$datetime][$levelname] ")
   setLogFilter chooseLevel()

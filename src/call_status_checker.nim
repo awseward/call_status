@@ -4,8 +4,10 @@ import httpClient
 import options
 import os
 import strutils
+import sugar
 
 import ./api_client
+import ./checker_config
 import ./db
 import ./detect_zoom
 import ./logs
@@ -14,7 +16,7 @@ import ./models/person
 import ./models/status
 import ./statics
 
-logs.setupCheckZoom()
+logs.setupChecker()
 
 block tempBackwardsCompat:
   # Would like to use DATABASE_FILEPATH, but will have to migrate existing
@@ -62,8 +64,8 @@ proc updatePerson(person: Person) =
   let isOnCall = person.isOnCall()
   db_open.use conn: conn.exec query, person.name, isOnCall, isOnCall
 
-proc main(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
-  dbsetup()
+proc runCheck(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
+  dbSetup()
   let lastKnown = getLastKnownLocalStatus(name)
   let current = isZoomCallActive()
 
@@ -82,35 +84,59 @@ proc main(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
     newApiClient(apiBaseUrl).updatePerson person
     updatePerson person
 
-let p = newParser("check-zoom"):
-  help "Check Zoom call status and update Call Status API accordingly"
+proc runConfig(name: string) =
+  CheckerConfig(userName: name).writeConfigFile getEnv("CONFIG_FILEPATH")
 
-  flag "-n", "--dry-run"
-  flag "-f", "--force"
+const APP_NAME = "call_status_checker"
 
-  flag("--version")
-  flag("--revision")
+let p = newParser(APP_NAME):
+  help "Check call status and update Call Status API accordingly"
+  flag("--version",  help = "Print the version of " & APP_NAME)
+  flag("--revision", help = "Print the Git SHA of " & APP_NAME)
 
-  option "-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER"
+  command "config":
+    option "-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER"
+    run:
+      let user = opts.user
+      if user == "":
+        echo "ERROR: User is required, but was not provided"
+        echo p.help
+        quit 1
 
-  option "--api-base-url",
-    default = "https://call-status.herokuapp.com",
-    env = "CALL_STATUS_API_BASE_URL"
+      runConfig user
+
+  command "check":
+    option "-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER"
+
+    flag "-n", "--dry-run"
+    flag "-f", "--force"
+
+    option "--api-base-url",
+      default = "https://call-status.herokuapp.com",
+      env = "CALL_STATUS_API_BASE_URL"
+
+    run:
+      let user = block:
+        if opts.user != "":
+          opts.user
+        else:
+          tryReadConfigFile(getEnv "CONFIG_FILEPATH")
+            .map(conf => conf.userName)
+            .get ""
+
+      if user == "":
+        echo "ERROR: User is required, but was not provided"
+        echo p.help
+        quit 1
+
+      runCheck user, opts.apiBaseUrl, opts.dryRun, opts.force
 
   run:
     if (opts.version):
       echo pkgVersion
       quit 0
-
     if (opts.revision):
       echo pkgRevision
       quit 0
-
-    if opts.user == "":
-      echo "ERROR: Call Status user is required"
-      echo p.help
-      quit 1
-
-    main opts.user, opts.apiBaseUrl, opts.dryRun, opts.force
 
 p.run()

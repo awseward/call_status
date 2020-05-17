@@ -2,13 +2,12 @@ import osproc
 import strutils
 import system
 
+import ./misc
+
 const MACOS_COMMAND = "ps aux | grep -c --regexp='zoom.*[C]ptHost'"
 
-type
-  UnsupportedError* = object of Exception
-
 proc isZoomCallActive*(): bool =
-  when system.hostOS == "macosx":
+  when hostOS == "macosx":
     let (output, errorCode) = execCmdEx MACOS_COMMAND
     let exitZero = (errorCode == 0)
     let parsedOutput = parseint(output.strip())
@@ -18,10 +17,11 @@ proc isZoomCallActive*(): bool =
     elif (not exitZero) and parsedOutput == 0:
       result = false
     else:
-      stderr.writeLine """
-        ERROR: Nonzero exit code
-        Message: $1
-      """
+      stderr.writeLine dedent("""
+          ERROR: Nonzero exit code
+          Message: $1
+        """ % [ output ]
+      )
       result = false
   else:
-    raise UnsupportedError.newException "Unsupported host OS: " & system.hostOS
+    raise Exception.newException "Unsupported host OS: " & hostOS
