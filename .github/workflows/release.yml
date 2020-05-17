@@ -1,18 +1,75 @@
-name: release
+name: Release
 
 on:
   push:
     tags:
     - '*'
 jobs:
-  foo:
-    runs-on: ubuntu-latest
+  release-call_status_checker:
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
 
-    - run: 'echo TODO: make a release job'
-    - run: 'echo build'
-    - run: 'echo tarball'
-    - run: 'echo create release'
-    - run: 'echo upload tarball to release'
-    - run: 'echo open awseward/homebrew-tap pull request'
+    - id: plan
+      run: |
+        export GIT_TAG="${GITHUB_REF/refs\/tags\//}"
+        export BINARY_FILENAME="call_status_checker"
+        export TARBALL_FILENAME="${BINARY_FILENAME}-${GIT_TAG}.tar.gz"
+        export TARBALL_FILEPATH="./${TARBALL_FILENAME}"
+
+        echo "::set-env name=GIT_TAG::${GIT_TAG}"
+        echo "::set-env name=BINARY_FILENAME::${BINARY_FILENAME}"
+        echo "::set-env name=TARBALL_FILENAME::${TARBALL_FILENAME}"
+        echo "::set-env name=TARBALL_FILEPATH::${TARBALL_FILEPATH}"
+
+        echo "::set-output name=git_tag::${GIT_TAG}"
+        echo "::set-output name=binary_filename::${BINARY_FILENAME}"
+        echo "::set-output name=tarball_filename::${TARBALL_FILENAME}"
+        echo "::set-output name=tarball_filepath::${TARBALL_FILEPATH}"
+
+    - name: Cache choosenim
+      id: cache-choosenim
+      uses: actions/cache@v1
+      with:
+        path: ~/.choosenim
+        key: ${{ runner.os }}-choosenim-stable
+    - name: Cache nimble
+      id: cache-nimble
+      uses: actions/cache@v1
+      with:
+        path: ~/.nimble
+        key: ${{ runner.os }}-nimble-stable
+    - uses: jiro4989/setup-nim-action@v1.0.2
+
+    - run: nimble -d:ssl -d:release build -y
+
+    - run: tar -czf "${TARBALL_FILENAME}" "${BINARY_FILENAME}"
+
+    - id: checksum
+      run: |
+        export TARBALL_CHECKSUM="$(shasum -a 256 "${TARBALL_FILENAME}" | cut -d ' ' -f1)"
+        echo "::set-env name=TARBALL_CHECKSUM::${TARBALL_CHECKSUM}"
+        echo "::set-output name=tarball_checksum::${TARBALL_CHECKSUM}"
+
+    - id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.plan.outputs.git_tag }}
+        release_name: ${{ steps.plan.outputs.git_tag }}
+        body: "Checksum: `${{ steps.checksum.outputs.tarball_checksum }}`"
+        draft: false
+        prerelease: false
+
+    - id: upload_release_asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ steps.plan.outputs.tarball_filepath }}
+        asset_name: ${{ steps.plan.outputs.tarball_filename }}
+        asset_content_type: application/gzip
+
+    # TODO: open awseward/homebrew-tap pull request
