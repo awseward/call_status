@@ -1,0 +1,18 @@
+name: release
+
+on:
+  push:
+    tags:
+    - '*'
+jobs:
+  foo:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: 'echo TODO: make a release job'
+    - run: 'echo build'
+    - run: 'echo tarball'
+    - run: 'echo create release'
+    - run: 'echo upload tarball to release'
+    - run: 'echo open awseward/homebrew-tap pull request'
