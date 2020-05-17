@@ -16,6 +16,6 @@ nimcache/
 .envrc
 
 # nimble binaries
-check_zoom
-cli
+call_status_checker
+call_status_cli
 web
