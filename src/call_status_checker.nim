@@ -87,7 +87,7 @@ proc check(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
 proc config(name: string) =
   CheckerConfig(userName: name).writeConfigFile getEnv("CONFIG_FILEPATH")
 
-let p = newParser("check-zoom"):
+let p = newParser("call_status_checker"):
   help "Check call status and update Call Status API accordingly"
   flag "--version"
   flag "--revision"
