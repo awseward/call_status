@@ -33,7 +33,8 @@ jobs:
         key: ${{ runner.os }}-nimble-stable
     - uses: jiro4989/setup-nim-action@v1.0.2
 
-    - run: nimble build dump
+    - run: nimble build -y # call_status_checker # (for some reason even w/ a valid binary)
+
 
   build-web:
     runs-on: ubuntu-latest
@@ -41,8 +42,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: jiro4989/setup-nim-action@v1.0.2
 
-    - run: nimble install -y
-    - run: nimble build dump --verbose
+    - run: nimble build -y # web # (for some reason even w/ a valid binary)
 
   docs:
     runs-on: ubuntu-latest
