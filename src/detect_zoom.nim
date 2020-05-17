@@ -4,11 +4,8 @@ import system
 
 const MACOS_COMMAND = "ps aux | grep -c --regexp='zoom.*[C]ptHost'"
 
-type
-  UnsupportedError* = object of Exception
-
 proc isZoomCallActive*(): bool =
-  when system.hostOS == "macosx":
+  when hostOS == "macosx":
     let (output, errorCode) = execCmdEx MACOS_COMMAND
     let exitZero = (errorCode == 0)
     let parsedOutput = parseint(output.strip())
@@ -24,4 +21,4 @@ proc isZoomCallActive*(): bool =
       """
       result = false
   else:
-    raise UnsupportedError.newException "Unsupported host OS: " & system.hostOS
+    raise Exception.newException "Unsupported host OS: " & hostOS

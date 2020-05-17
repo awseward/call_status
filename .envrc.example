@@ -1,5 +1,6 @@
 export CALL_STATUS_API_BASE_URL=http://localhost:5000
 export CALL_STATUS_USER=__fixme__
-export HEROKU_APPNAME=__fixme__
+export CONFIG_FILEPATH=config.json
 export DATABASE_URL=postgres://localhost:5432/call_status_development
 export DB_FILEPATH=check_zoom.db
+export HEROKU_APPNAME=__fixme__

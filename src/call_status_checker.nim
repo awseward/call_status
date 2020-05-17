@@ -85,15 +85,7 @@ proc check(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
     updatePerson person
 
 proc config(name: string) =
-  let filepath = block:
-    let val = getEnv "CONFIG_FILEPATH"
-    if val == "":
-      logs.error "Invalid config filepath (uses env var CONFIG_FILEPATH)"
-      quit 1
-    else:
-      val.string
-
-  CheckerConfig(userName: name).writeConfigFile filepath
+  CheckerConfig(userName: name).writeConfigFile getEnv("CONFIG_FILEPATH")
 
 let p = newParser("check-zoom"):
   help "Check call status and update Call Status API accordingly"
