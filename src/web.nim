@@ -65,7 +65,9 @@ proc getPeople(): seq[Person] =
 router api:
   # DEPRECATED
   get "/status":
-    if not isSupported API_STATUS_ENDPOINTS: halt Http404
+    deprecations.API_STATUS_ENDPOINTS.check(supported, logProc):
+      logProc()
+      if not supported: halt Http404
 
     redirect "/api/people"
 
@@ -73,7 +75,9 @@ router api:
 
   # DEPRECATED
   post "/status":
-    if not isSupported API_STATUS_ENDPOINTS: halt Http404
+    deprecations.API_STATUS_ENDPOINTS.check(supported, logProc):
+      logProc()
+      if not supported: halt Http404
 
     let jsonNode = parseJson request.body
     debug jsonNode
