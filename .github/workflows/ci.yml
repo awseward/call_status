@@ -16,6 +16,8 @@ jobs:
     - run: git diff --exit-code
 
   build-call_status_checker:
+    # FIXME: Solve the flaky cache issue and then turn this job back on
+    if: false
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
