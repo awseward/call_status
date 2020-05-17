@@ -87,10 +87,12 @@ proc check(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
 proc config(name: string) =
   CheckerConfig(userName: name).writeConfigFile getEnv("CONFIG_FILEPATH")
 
-let p = newParser("call_status_checker"):
+const APP_NAME = "call_status_checker"
+
+let p = newParser(APP_NAME):
   help "Check call status and update Call Status API accordingly"
-  flag "--version"
-  flag "--revision"
+  flag("--version",  help = "Print the version of " & APP_NAME)
+  flag("--revision", help = "Print the Git SHA of " & APP_NAME)
 
   command "config":
     option "-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER"
