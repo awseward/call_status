@@ -134,9 +134,9 @@ let p = newParser(APP_NAME):
   run:
     if (opts.version):
       echo pkgVersion
-      quit 0
-    if (opts.revision):
+    elif (opts.revision):
       echo pkgRevision
-      quit 0
+    elif commandLineParams().len == 0:
+      echo p.help
 
 p.run()
