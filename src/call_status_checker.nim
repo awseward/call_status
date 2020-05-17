@@ -64,7 +64,7 @@ proc updatePerson(person: Person) =
   let isOnCall = person.isOnCall()
   db_open.use conn: conn.exec query, person.name, isOnCall, isOnCall
 
-proc check(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
+proc runCheck(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
   dbSetup()
   let lastKnown = getLastKnownLocalStatus(name)
   let current = isZoomCallActive()
@@ -84,7 +84,7 @@ proc check(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
     newApiClient(apiBaseUrl).updatePerson person
     updatePerson person
 
-proc config(name: string) =
+proc runConfig(name: string) =
   CheckerConfig(userName: name).writeConfigFile getEnv("CONFIG_FILEPATH")
 
 const APP_NAME = "call_status_checker"
@@ -103,7 +103,7 @@ let p = newParser(APP_NAME):
         echo p.help
         quit 1
 
-      config user
+      runConfig user
 
   command "check":
     option "-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER"
@@ -129,7 +129,7 @@ let p = newParser(APP_NAME):
         echo p.help
         quit 1
 
-      check user, opts.apiBaseUrl, opts.dryRun, opts.force
+      runCheck user, opts.apiBaseUrl, opts.dryRun, opts.force
 
   run:
     if (opts.version):
