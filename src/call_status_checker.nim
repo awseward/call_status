@@ -92,9 +92,9 @@ const APP_NAME = "call_status_checker"
 let p = newParser(APP_NAME):
   help "Check call status and update Call Status API accordingly"
 
-  flag("--version",  help = "Print the version of " & APP_NAME)
+  flag("--version", help = "Print the version of " & APP_NAME)
   flag("--revision", help = "Print the Git SHA of " & APP_NAME)
-  flag("--info",     help = "Print version and revision")
+  flag("--info", help = "Print version and revision")
 
   command "config":
     option "-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER"

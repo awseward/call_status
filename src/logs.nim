@@ -7,12 +7,12 @@ template flush(actions: untyped): untyped =
   flushFile stdout
 
 type Args = varargs[string, `$`]
-template debug*(args: Args)  = flush: debug  args
-template info*(args: Args)   = flush: info   args
+template debug*(args: Args) = flush: debug args
+template info*(args: Args) = flush: info args
 template notice*(args: Args) = flush: notice args
-template warn*(args: Args)   = flush: warn   args
-template error*(args: Args)  = flush: error  args
-template fatal*(args: Args)  = flush: fatal  args
+template warn*(args: Args) = flush: warn args
+template error*(args: Args) = flush: error args
+template fatal*(args: Args) = flush: fatal args
 
 proc chooseLevel(): Level =
   result = parseEnum[Level](

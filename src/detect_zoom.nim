@@ -20,7 +20,7 @@ proc isZoomCallActive*(): bool =
       stderr.writeLine dedent("""
           ERROR: Nonzero exit code
           Message: $1
-        """ % [ output ]
+        """ % [output]
       )
       result = false
   else:

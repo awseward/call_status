@@ -10,7 +10,7 @@ type Closeable* = concept x
   ## db_sqlite stdlib modules without having to duplicate much.
   close x
 
-proc logClose[T:Closeable](cls: T) =
+proc logClose[T: Closeable](cls: T) =
   debug "Closing ", cls.type.name, "..."
   close cls
 
