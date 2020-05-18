@@ -2,11 +2,11 @@ import json
 import options
 import logs
 
-const USER_NAME = "user_name"
+const UserName = "user_name"
 
 type ConfigFilepath = distinct string
 
-const DEFAULT_CONFIG_FILEPATH =
+const DefaultConfigFilepath =
   when hostOS == "macosx":
     # Basis of this filepath is homebrew installation directory choices.
     #
@@ -31,7 +31,7 @@ const DEFAULT_CONFIG_FILEPATH =
 
 proc fromString(str: string): ConfigFilepath =
   if str == "":
-    DEFAULT_CONFIG_FILEPATH
+    DefaultConfigFilepath
   else:
     ConfigFilepath str
 
@@ -42,11 +42,11 @@ type CheckerConfig* = object
 
 proc fromJson(jsonStr: string): CheckerConfig =
   let json = parseJson jsonStr
-  CheckerConfig(userName: json[USER_NAME].getStr())
+  CheckerConfig(userName: json[UserName].getStr())
 
 proc `%`(config: CheckerConfig): JsonNode =
   %*{
-    USER_NAME: %config.user_name
+    UserName: %config.user_name
   }
 
 proc tryRead(filepath: ConfigFilepath): Option[CheckerConfig] =

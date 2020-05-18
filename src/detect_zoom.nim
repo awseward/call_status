@@ -4,11 +4,11 @@ import system
 
 import ./misc
 
-const MACOS_COMMAND = "ps aux | grep -c --regexp='zoom.*[C]ptHost'"
+const MacosCommand = "ps aux | grep -c --regexp='zoom.*[C]ptHost'"
 
 proc isZoomCallActive*(): bool =
   when hostOS == "macosx":
-    let (output, errorCode) = execCmdEx MACOS_COMMAND
+    let (output, errorCode) = execCmdEx MacosCommand
     let exitZero = (errorCode == 0)
     let parsedOutput = parseint(output.strip())
 
