@@ -24,7 +24,7 @@ proc fromJson*(jsonNode: JsonNode): Person =
   let name = getStr(
     try: jsonNode["name"]
     except KeyError:
-      deprecations.USER_KEY.check supported, logProc:
+      deprecations.UserKey.check supported, logProc:
         logProc()
         if not supported: raise
         else:

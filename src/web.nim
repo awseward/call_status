@@ -65,7 +65,7 @@ proc getPeople(): seq[Person] =
 router api:
   # DEPRECATED
   get "/status":
-    deprecations.API_STATUS_ENDPOINTS.check(supported, logProc):
+    deprecations.ApiStatusEndpoints.check(supported, logProc):
       logProc()
       if not supported: halt Http404
 
@@ -75,7 +75,7 @@ router api:
 
   # DEPRECATED
   post "/status":
-    deprecations.API_STATUS_ENDPOINTS.check(supported, logProc):
+    deprecations.ApiStatusEndpoints.check(supported, logProc):
       logProc()
       if not supported: halt Http404
 

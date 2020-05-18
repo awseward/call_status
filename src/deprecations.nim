@@ -22,5 +22,5 @@ template check*(deprecation, supported, logProc, actions: untyped): untyped =
 
 # ---
 
-const USER_KEY* = Deprecation "USER_KEY"
-const API_STATUS_ENDPOINTS* = Deprecation "API_STATUS_ENDPOINTS"
+const UserKey* = Deprecation "USER_KEY"
+const ApiStatusEndpoints* = Deprecation "API_STATUS_ENDPOINTS"
