@@ -78,5 +78,9 @@ jobs:
         homebrew-tap: awseward/homebrew-tap
         base-branch: master
         download-url: ${{ steps.upload_tarball.outputs.browser_download_url }}
+        commit-message: |
+          {{formulaName}} {{version}}
+
+          Sourced from ${{ steps.create_release.outputs.html_url }}.
       env:
         COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
