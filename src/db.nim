@@ -33,8 +33,12 @@ runnableExamples:
 
 # ---
 
-proc open_pg*(envVarKey: string = "DATABASE_URL"): db_postgres.DbConn =
-  db_postgres.open("", "", "", getEnv(envVarKey))
+let postgresUrl = getEnv "DATABASE_URL"
 
-proc open_sqlite*(envVarKey: string = "DATABASE_FILEPATH"): db_sqlite.DbConn =
-  db_sqlite.open(getEnv(envVarKey), "", "", "")
+proc open_pg*() : db_postgres.DbConn =
+  db_postgres.open("", "", "", postgresUrl)
+
+let sqliteFilepath = getEnv "DATABASE_FILEPATH"
+
+proc open_sqlite*(): db_sqlite.DbConn =
+  db_sqlite.open(sqliteFilepath, "", "", "")
