@@ -1,6 +1,7 @@
 import json
-import options
 import logs
+import options
+import os
 
 const UserName = "user_name"
 
@@ -58,6 +59,9 @@ proc tryRead(filepath: ConfigFilepath): Option[CheckerConfig] =
     none CheckerConfig
 
 proc write(config: CheckerConfig, filepath: ConfigFilepath) =
+  block:
+    let (dir, _, _) = splitFile filepath.string
+    createDir dir
   writeFile filepath.string, $ %config
 
 proc tryReadConfigFile*(filepath: string): Option[CheckerConfig] =
