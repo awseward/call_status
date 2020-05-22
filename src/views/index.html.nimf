@@ -2,7 +2,8 @@
 #
 #import assets_file
 #
-#let css = assets_file.getAsset("public/style.css")
+#let css = getAsset("public/style.css")
+#let js = getAsset("public/index.js")
 #
 #proc renderIndex*(left: string, right: string): string =
 ##  result = ""
@@ -11,6 +12,7 @@
   <head>
     <title>Call Status</title>
     <style type="text/css">${css}</style>
+    <script>${js}</script>
   </head>
   <body>
     <div class="main-wrapper">
