@@ -1,5 +1,3 @@
-console.log("TODO");
-
 window.onload = function() {
   const wsProtocol = location.protocol === "https:" ? "wss" : "ws";
   const wsUrl = `${wsProtocol}://${window.location.host}/ws`;
