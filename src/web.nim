@@ -28,7 +28,7 @@ logs.setupWeb()
 info "version:  ", pkgVersion
 info "revision: ", pkgRevision
 
-var websockets : seq[WebSocket] = @[]
+var websockets: seq[WebSocket] = @[]
 
 proc wsRefresh(): Future[void] {.async.} =
   # TODO: Also clean up Closed ones
