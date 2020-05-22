@@ -6,6 +6,8 @@ import os
 import sequtils
 import strutils
 
+import ws, ws/jester_extra
+
 import ./db
 import ./deprecations
 import ./logs
@@ -25,6 +27,14 @@ logs.setupWeb()
 
 info "version:  ", pkgVersion
 info "revision: ", pkgRevision
+
+var websockets: seq[WebSocket] = @[]
+
+proc wsRefresh(): Future[void] {.async.} =
+  # TODO: Also clean up Closed ones
+  for ws in websockets:
+    if ws.readyState == Open:
+      await ws.send "REFRESH"
 
 proc updateStatus(person: Person) =
   let query = sql dedent """
@@ -82,6 +92,7 @@ router api:
     let jsonNode = parseJson request.body
     debug jsonNode
     updateStatus person.fromJson(jsonNode)
+    discard wsRefresh()
     resp Http204
 
   put "/person/@name":
@@ -95,6 +106,7 @@ router api:
     if not(person.name == rawName.string): halt Http422
 
     updateStatus person
+    discard wsRefresh()
     resp Http204
 
 router web:
@@ -102,11 +114,18 @@ router web:
     let forms = getPeople().map(renderPerson)
     resp renderIndex(forms[0], forms[1])
 
+  get "/ws":
+    let ws = await newWebSocket(request)
+    websockets.add ws
+    discard ws.send("Hello from Websocket server")
+    resp Http101
+
   # I'd like for this to be PUT, but browser forms are GET and POST only
   post "/person/@name":
     let status = status.fromIsOnCall parseBool(request.params["is_on_call"])
     let person = Person(name: @"name", status: status)
     updateStatus person
+    discard wsRefresh()
     redirect "/"
 
 routes:

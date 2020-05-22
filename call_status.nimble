@@ -14,12 +14,13 @@ requires "jester >= 0.4.3"
 requires "nim >= 1.2.0"
 requires "argparse >= 0.10.1"
 requires "nimassets >= 0.1.0"
+requires "ws >= 0.4.0"
 
 # Tasks
 
 # See: https://web.archive.org/web/20200515050555/https://www.rockyourcode.com/how-to-serve-static-files-with-nim-and-jester-on-heroku/
 task assets, "Generate packaged assets":
-  exec "nimassets --dir=public --output=src/views/assets_file.nim"
+  exec "echo src/views/assets_file.nim | xargs -t -I{} nimassets --dir=public --output={}"
 
 task db_setup, "Set up the DB":
   exec "./misc/db_setup.sh"

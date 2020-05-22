@@ -35,7 +35,7 @@ runnableExamples:
 
 let postgresUrl = getEnv "DATABASE_URL"
 
-proc open_pg*() : db_postgres.DbConn =
+proc open_pg*(): db_postgres.DbConn =
   db_postgres.open("", "", "", postgresUrl)
 
 let sqliteFilepath = getEnv "DATABASE_FILEPATH"
