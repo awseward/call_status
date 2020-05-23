@@ -28,7 +28,7 @@ let db_open = open_sqlite
 
 proc dbSetup() =
   let query = sql dedent """
-    CREATE TABLE IF NOT EXISTS statuses (
+    CREATE TABLE IF NOT EXISTS people (
       name         TEXT UNIQUE NOT NULL,
       is_on_call   BOOLEAN NOT NULL,
       last_checked DATETIME NOT NULL
@@ -44,10 +44,10 @@ proc tryParseBool(str: string): Option[bool] =
   else:
     try: some parseBool(str) except ValueError: none bool
 
-proc getLastKnownLocalStatus(name: string): Option[bool] =
+proc getLastKnownIsOnCall(name: string): Option[bool] =
   let query = sql dedent """
     SELECT is_on_call
-    FROM statuses
+    FROM people
     WHERE name = ?"""
   debug query.string
   db_open.use conn:
@@ -55,7 +55,7 @@ proc getLastKnownLocalStatus(name: string): Option[bool] =
 
 proc updatePerson(person: Person) =
   let query = sql dedent """
-    INSERT INTO statuses (name, is_on_call, last_checked) VALUES
+    INSERT INTO people (name, is_on_call, last_checked) VALUES
       (?, ?, current_timestamp)
       ON CONFLICT(name) DO UPDATE SET
         is_on_call = ?,
@@ -64,25 +64,67 @@ proc updatePerson(person: Person) =
   let isOnCall = person.isOnCall()
   db_open.use conn: conn.exec query, person.name, isOnCall, isOnCall
 
-proc runCheck(name: string, apiBaseUrl: string, dryRun: bool, force: bool) =
-  dbSetup()
-  let lastKnown = getLastKnownLocalStatus(name)
-  let current = isZoomCallActive()
+type Change = enum
+  unchanged,
+  changed,
+  unknown
 
-  if (not force) and lastKnown.isSome and lastKnown.get() == current:
-    info "Status unchanged; doing nothing."
-    quit 0
+proc determineChange[T](previous: Option[T], current: T): Change =
+  if not previous.isSome:
+    unknown
+  elif previous.get() == current:
+    unchanged
   else:
-    if dryRun:
-      info "New status (or just forced update), but dry run; doing nothing."
-      return
-    info "New status (or just forced update); updating."
-    let person = Person(
-      name: name,
-      status: status.fromIsOnCall current
-    )
-    newApiClient(apiBaseUrl).updatePerson person
-    updatePerson person
+    changed
+
+type Override = enum
+  none,
+  dryRun,
+  force
+
+proc determineOverride(dryRun: bool, force: bool): Override =
+  if dryRun:
+    Override.dryRun
+  elif force:
+    Override.force
+  else:
+    none
+
+proc getPreviousStatus(name: string): Option[Status] =
+  name.getLastKnownIsOnCall().map fromIsOnCall
+
+proc getCurrentStatus(): Status =
+  fromIsOnCall isZoomCallActive()
+
+proc runCheck(name: string, apiBaseUrl: string, override: Override) =
+  dbSetup()
+  let previous = getPreviousStatus name
+  let current = getCurrentStatus()
+
+  case determineChange(previous, current):
+    of changed, unknown:
+      if override == Override.dryRun:
+        info "Status changed; would update status, but not doing so (dry run)."
+        return
+      else:
+        info "Status changed; updating."
+    of unchanged:
+      case override:
+        of Override.dryRun:
+          info "Status unchanged; would do nothing."
+          return
+        of Override.force:
+          info "Status unchanged, but update forced; updating."
+        else:
+          info "Status unchanged; doing nothing."
+          return
+
+  let person = Person(
+    name: name,
+    status: current
+  )
+  newApiClient(apiBaseUrl).updatePerson person
+  updatePerson person
 
 proc runConfig(name: string) =
   CheckerConfig(userName: name).writeConfigFile getEnv("CONFIG_FILEPATH")
@@ -131,7 +173,7 @@ let p = newParser(AppName):
         echo p.help
         quit 1
 
-      runCheck user, opts.apiBaseUrl, opts.dryRun, opts.force
+      runCheck user, opts.apiBaseUrl, determineOverride(opts.dryRun, opts.force)
 
   run:
     if opts.version:

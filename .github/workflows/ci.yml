@@ -6,6 +6,9 @@ on:
 
 jobs:
   assets:
+    # FIXME: Solve the entry ordering discrepancy between different runners and
+    # then turn this job back on
+    if: false
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -13,7 +16,7 @@ jobs:
 
     - run: nimble install -y nimassets
     - run: nimble assets
-    - run: git diff --exit-code
+    - run: git diff --exit-code --color
 
   build-call_status_checker:
     # FIXME: Solve the flaky cache issue and then turn this job back on
