@@ -6,6 +6,9 @@ on:
 
 jobs:
   assets:
+    # FIXME: Solve the entry ordering discrepancy between different runners and
+    # then turn this job back on
+    if: false
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
