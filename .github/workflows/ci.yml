@@ -13,7 +13,7 @@ jobs:
 
     - run: nimble install -y nimassets
     - run: nimble assets
-    - run: git diff --exit-code
+    - run: git diff --exit-code --color
 
   build-call_status_checker:
     # FIXME: Solve the flaky cache issue and then turn this job back on
