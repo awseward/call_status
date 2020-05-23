@@ -1,6 +1,4 @@
 import argparse
-import db_sqlite
-import httpClient
 import options
 import os
 import strutils
@@ -8,7 +6,7 @@ import sugar
 
 import ./api_client
 import ./checker_config
-import ./db
+import ./db_call_status_checker
 import ./detect_zoom
 import ./logs
 import ./misc
@@ -23,46 +21,6 @@ block tempBackwardsCompat:
   # installs to be safe. In the meantime, this should do it.
   if not(existsEnv "DATABASE_FILEPATH") and existsEnv "DB_FILEPATH":
     putEnv("DATABASE_FILEPATH", getEnv("DB_FILEPATH"))
-
-let db_open = open_sqlite
-
-proc dbSetup() =
-  let query = sql dedent """
-    CREATE TABLE IF NOT EXISTS people (
-      name         TEXT UNIQUE NOT NULL,
-      is_on_call   BOOLEAN NOT NULL,
-      last_checked DATETIME NOT NULL
-    )"""
-  debug query.string
-
-  db_open.use conn:
-    conn.exec query
-
-proc tryParseBool(str: string): Option[bool] =
-  if str == "":
-    none bool
-  else:
-    try: some parseBool(str) except ValueError: none bool
-
-proc getLastKnownIsOnCall(name: string): Option[bool] =
-  let query = sql dedent """
-    SELECT is_on_call
-    FROM people
-    WHERE name = ?"""
-  debug query.string
-  db_open.use conn:
-    tryParseBool conn.getValue(query, name)
-
-proc updatePerson(person: Person) =
-  let query = sql dedent """
-    INSERT INTO people (name, is_on_call, last_checked) VALUES
-      (?, ?, current_timestamp)
-      ON CONFLICT(name) DO UPDATE SET
-        is_on_call = ?,
-        last_checked = current_timestamp"""
-  debug query.string
-  let isOnCall = person.isOnCall()
-  db_open.use conn: conn.exec query, person.name, isOnCall, isOnCall
 
 type Change = enum
   unchanged,

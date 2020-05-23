@@ -1,5 +1,4 @@
 import asyncdispatch
-import db_postgres
 import jester
 import json
 import os
@@ -8,16 +7,13 @@ import strutils
 
 import ws, ws/jester_extra
 
-import ./db
+import ./db_web
 import ./deprecations
 import ./logs
-import ./misc
 import ./models/person
 import ./models/status
 import ./views/index
 import ./statics
-
-let db_open = open_pg
 
 let settings = newSettings()
 if existsEnv("PORT"):
@@ -35,42 +31,6 @@ proc wsRefresh(): Future[void] {.async.} =
   for ws in websockets:
     if ws.readyState == Open:
       await ws.send "REFRESH"
-
-proc updateStatus(person: Person) =
-  let query = sql dedent """
-    UPDATE people
-    SET is_on_call = $1
-    WHERE name = $2;"""
-  db_open.use conn:
-    debug query.string
-    let prepared = conn.prepare("update_status", query, 2)
-    conn.exec prepared, $person.isOnCall(), person.name
-
-proc nameExists(name: string): bool =
-  let query = sql dedent """
-    SELECT name
-    FROM people
-    WHERE name = $1
-    LIMIT 1;"""
-  db_open.use conn:
-    debug query.string
-    let prepared = conn.prepare("check_name", query, 1)
-    conn.getValue(prepared, name) == name
-
-proc getPeople(): seq[Person] =
-  let query = sql dedent """
-    SELECT
-      name
-    , is_on_call
-    FROM people
-    WHERE name IN ($1, $2)
-    ORDER BY name;"""
-  let rows = db_open.use conn:
-    debug query.string
-    let prepared = conn.prepare("get_people", query, 2)
-    conn.getAllrows prepared, "D", "N"
-
-  rows.map fromPgRow
 
 router api:
   # DEPRECATED
@@ -91,7 +51,7 @@ router api:
 
     let jsonNode = parseJson request.body
     debug jsonNode
-    updateStatus person.fromJson(jsonNode)
+    updatePerson person.fromJson(jsonNode)
     discard wsRefresh()
     resp Http204
 
@@ -105,7 +65,7 @@ router api:
     let person = person.fromJson jsonNode
     if not(person.name == rawName.string): halt Http422
 
-    updateStatus person
+    updatePerson person
     discard wsRefresh()
     resp Http204
 
@@ -124,7 +84,7 @@ router web:
   post "/person/@name":
     let status = status.fromIsOnCall parseBool(request.params["is_on_call"])
     let person = Person(name: @"name", status: status)
-    updateStatus person
+    updatePerson person
     discard wsRefresh()
     redirect "/"
 
