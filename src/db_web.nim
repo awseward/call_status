@@ -8,7 +8,7 @@ import ./models/person
 
 let db_open = open_pg
 
-proc updateStatus*(person: Person) =
+proc updatePerson*(person: Person) =
   let query = sql dedent """
     UPDATE people
     SET is_on_call = $1

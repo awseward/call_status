@@ -51,7 +51,7 @@ router api:
 
     let jsonNode = parseJson request.body
     debug jsonNode
-    updateStatus person.fromJson(jsonNode)
+    updatePerson person.fromJson(jsonNode)
     discard wsRefresh()
     resp Http204
 
@@ -65,7 +65,7 @@ router api:
     let person = person.fromJson jsonNode
     if not(person.name == rawName.string): halt Http422
 
-    updateStatus person
+    updatePerson person
     discard wsRefresh()
     resp Http204
 
@@ -84,7 +84,7 @@ router web:
   post "/person/@name":
     let status = status.fromIsOnCall parseBool(request.params["is_on_call"])
     let person = Person(name: @"name", status: status)
-    updateStatus person
+    updatePerson person
     discard wsRefresh()
     redirect "/"
 
