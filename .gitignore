@@ -19,3 +19,6 @@ nimcache/
 call_status_checker
 call_status_cli
 web
+
+# misc custom heroku build stuff
+.bin/
