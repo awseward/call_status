@@ -1,18 +1,9 @@
+import junk_drawer/flogging
 import logging
 import os
 import strutils
 
-template flush(actions: untyped): untyped =
-  actions
-  flushFile stdout
-
-type Args = varargs[string, `$`]
-template debug*(args: Args) = flush: debug args
-template info*(args: Args) = flush: info args
-template notice*(args: Args) = flush: notice args
-template warn*(args: Args) = flush: warn args
-template error*(args: Args) = flush: error args
-template fatal*(args: Args) = flush: fatal args
+export flogging
 
 proc chooseLevel(): Level =
   result = parseEnum[Level](
