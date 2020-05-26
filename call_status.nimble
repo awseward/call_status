@@ -41,3 +41,15 @@ task watch_zoom, "Simulate a zoom watching daemon (launchd LaunchAgent on MacOS)
   while true:
     exec "nimble -d:ssl run call_status_checker; sleep 10"
 
+task heroku_build, "Steps to perform during the heroku build phase":
+  exec "nimble install --accept nimassets"
+  exec "nimble assets"
+  exec "nimble install --accept 'https://github.com/awseward/heroku_database_url_splitter'"
+  exec "mkdir -vp .bin/"
+  exec "echo .bin/ | xargs -t cp \"$(which heroku_database_url_splitter)\""
+  exec """
+temp_dir="$(mktemp -d)"
+mkdir -vp "${temp_dir}"
+echo "${temp_dir}" | xargs -t git clone git://github.com/mbucc/shmig.git
+echo .bin/ | xargs -t cp "${temp_dir}/shmig"
+"""

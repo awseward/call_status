@@ -1,6 +1,13 @@
 export CALL_STATUS_API_BASE_URL=http://localhost:5000
 export CALL_STATUS_USER=__fixme__
 export CONFIG_FILEPATH=config.json
+
 export DATABASE_URL=postgres://localhost:5432/call_status_development
-export DB_FILEPATH=call_status_checker.db
-export HEROKU_APPNAME=__fixme__
+# It's a little weird to have these in both spots, but these are here for
+# shmig, which can't just take a DATABASE_URL and figure it out. It needs the
+# parts broken out instead.
+export DATABASE_NAME=call_status_development
+export DATABASE_HOST=localhost
+export DATABASE_PORT=5432
+
+export DATABASE_FILEPATH=call_status_checker.db
