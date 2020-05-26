@@ -1,5 +1,5 @@
-from logging import Level, addHandler, newConsoleLogger, setLogFilter
 import junk_drawer/flogging
+import logging
 import os
 import strutils
 
