@@ -16,7 +16,7 @@ requires "argparse >= 0.10.1"
 requires "nimassets >= 0.1.0"
 requires "ws >= 0.4.0"
 
-requires "https://github.com/awseward/nim-junk-drawer#misc-changes"
+requires "https://github.com/awseward/nim-junk-drawer#9ff04c5c70b2fe5d24f951f0ff8f408a108ee059"
 
 # Tasks
 
