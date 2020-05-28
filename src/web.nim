@@ -26,11 +26,11 @@ info "revision: ", pkgRevision
 
 var websockets: seq[WebSocket] = @[]
 
-proc wsRefresh(): Future[void] {.async.} =
+proc wsRefresh() =
   # TODO: Also clean up Closed ones
   for ws in websockets:
     if ws.readyState == Open:
-      await ws.send "REFRESH"
+      discard ws.send "REFRESH"
 
 router api:
   # DEPRECATED
@@ -52,7 +52,7 @@ router api:
     let jsonNode = parseJson request.body
     debug jsonNode
     updatePerson person.fromJson(jsonNode)
-    discard wsRefresh()
+    wsRefresh()
     resp Http204
 
   put "/person/@name":
@@ -66,7 +66,7 @@ router api:
     if not(person.name == rawName.string): halt Http422
 
     updatePerson person
-    discard wsRefresh()
+    wsRefresh()
     resp Http204
 
 router web:
@@ -75,17 +75,22 @@ router web:
     resp renderIndex(forms[0], forms[1])
 
   get "/ws":
+    const supportedProtocol = "REFRESH"
     let ws = await newWebSocket(request)
-    websockets.add ws
-    discard ws.send("Hello from Websocket server")
-    resp Http101
+    if ws.protocol != supportedProtocol:
+      await ws.send("Bad protocol")
+      ws.close()
+      resp Http400
+    else:
+      websockets.add ws
+      resp Http101
 
   # I'd like for this to be PUT, but browser forms are GET and POST only
   post "/person/@name":
     let status = status.fromIsOnCall parseBool(request.params["is_on_call"])
     let person = Person(name: @"name", status: status)
     updatePerson person
-    discard wsRefresh()
+    wsRefresh()
     redirect "/"
 
 routes:
