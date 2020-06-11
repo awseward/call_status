@@ -12,7 +12,7 @@ type ApiClient* = object
 proc newApiClient*(baseUrl: string): ApiClient =
   ApiClient(baseUri: parseUri baseUrl)
 
-proc sendJson(api: ApiClient, httpMethod: HttpMethod, relativeUrl: string, bodyJson: JsonNode = nil): Response =
+proc sendJson*(api: ApiClient, httpMethod: HttpMethod, relativeUrl: string, bodyJson: JsonNode = nil): Response =
   let uri = api.baseUri / relativeUrl
   let body = $bodyJson
   let http = block:

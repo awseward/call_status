@@ -7,11 +7,13 @@ import strutils
 
 import ws, ws/jester_extra
 
+import ./api_client
 import ./db_web
 import ./deprecations
 import ./logs
 import ./models/person
 import ./models/status
+import ./patchbay
 import ./views/index
 import ./statics
 
@@ -31,6 +33,15 @@ proc wsRefresh() =
   for ws in websockets:
     if ws.readyState == Open:
       discard ws.send "REFRESH"
+
+proc publishUpdates() =
+  wsRefresh()
+  for channelId in getPatchBayChannelIds():
+    let client = newApiClient("https://patchbay.pub/pubsub/" & channelId)
+    discard client.sendJson(HttpPost, "/api/people", %*getPeople())
+
+if defined(release):
+  publishUpdates()
 
 router api:
   # DEPRECATED
@@ -52,7 +63,7 @@ router api:
     let jsonNode = parseJson request.body
     debug jsonNode
     updatePerson person.fromJson(jsonNode)
-    wsRefresh()
+    publishUpdates()
     resp Http204
 
   put "/person/@name":
@@ -66,8 +77,12 @@ router api:
     if not(person.name == rawName.string): halt Http422
 
     updatePerson person
-    wsRefresh()
+    publishUpdates()
     resp Http204
+
+  post "/register/@client_id":
+    info @"client_id"
+    resp registerPatchBay(@"client_id") & "/api/people"
 
 router web:
   get "/":
@@ -90,7 +105,7 @@ router web:
     let status = status.fromIsOnCall parseBool(request.params["is_on_call"])
     let person = Person(name: @"name", status: status)
     updatePerson person
-    wsRefresh()
+    publishUpdates()
     redirect "/"
 
 routes:

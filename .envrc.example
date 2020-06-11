@@ -11,3 +11,5 @@ export DATABASE_HOST=localhost
 export DATABASE_PORT=5432
 
 export DATABASE_FILEPATH=call_status_checker.db
+
+export REDIS_URL=redis://localhost:6379
