@@ -32,13 +32,11 @@ proc wsRefresh() =
   # TODO: Also clean up Closed ones
   for ws in websockets:
     if ws.readyState == Open:
-      discard ws.send "REFRESH"
+      asyncCheck ws.send "REFRESH"
 
 proc publishUpdates() =
   wsRefresh()
-  for channelId in getPatchBayChannelIds():
-    let client = newApiClient("https://patchbay.pub/pubsub/" & channelId)
-    discard client.sendJson(HttpPost, "/api/people", %*getPeople())
+  foo "/api/people", %*getPeople()
 
 if defined(release):
   publishUpdates()
@@ -52,8 +50,6 @@ router api:
 
     redirect "/api/people"
 
-  get "/people": resp %*getPeople()
-
   # DEPRECATED
   post "/status":
     deprecations.ApiStatusEndpoints.check(supported, logProc):
@@ -65,6 +61,8 @@ router api:
     updatePerson person.fromJson(jsonNode)
     publishUpdates()
     resp Http204
+
+  get "/people": resp %*getPeople()
 
   put "/person/@name":
     let rawName: TaintedString = @"name"

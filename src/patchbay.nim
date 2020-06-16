@@ -1,4 +1,7 @@
+import asyncdispatch
 import base64
+import httpClient
+import json
 import net
 import os
 import redis
@@ -8,6 +11,8 @@ import sugar
 import uri
 
 import ./logs
+
+const pubsubBaseUri = parseUri "https://patchbay.pub/pubsub"
 
 type ChannelId = distinct string
 
@@ -28,8 +33,15 @@ proc registerPatchBay*(clientId: string): string =
   let channelId = encode(clientId, safe = true)
   let client = getRedisClient()
   discard client.setEx("clientid:" & clientId, DaySeconds, channelId)
-  "https://patchbay.pub/pubsub/" & channelId
+  $ (pubsubBaseUri / channelId)
 
-proc getPatchBayChannelIds*(): seq[string] =
+proc getChannelIds(): seq[ChannelId] =
   let client = getRedisClient()
-  client.keys("clientid:*").map(k => client.get k)
+  client.keys("clientid:*").map(k => ChannelId client.get(k))
+
+proc foo*(path: string, json: JsonNode) =
+  let http = newAsyncHttpClient()
+  http.headers = newHttpHeaders { "Content-Type": "application/json" }
+  for channelId in getChannelIds():
+    let uri = pubsubBaseUri / channelId.string / path
+    asyncCheck http.request($uri, httpMethod = HttpPost, body = $json)
