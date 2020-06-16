@@ -4,6 +4,7 @@ import json
 import os
 import sequtils
 import strutils
+import uri
 
 import ws, ws/jester_extra
 
@@ -79,8 +80,7 @@ router api:
     resp Http204
 
   post "/register/@client_id":
-    info @"client_id"
-    resp registerPatchBay(@"client_id") & "/api/people"
+    resp $registerPatchBay(@"client_id", path = "/api/people")
 
 router web:
   get "/":

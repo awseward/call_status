@@ -29,11 +29,11 @@ proc getRedisClient(): Redis =
   if rUri.password != "":
     result.auth rUri.password
 
-proc registerPatchBay*(clientId: string): string =
+proc registerPatchBay*(clientId: string, path = ""): Uri =
   let channelId = encode(clientId, safe = true)
   let client = getRedisClient()
   discard client.setEx("clientid:" & clientId, DaySeconds, channelId)
-  $ (pubsubBaseUri / channelId)
+  pubsubBaseUri / channelId / path
 
 proc getChannelIds(): seq[ChannelId] =
   let client = getRedisClient()
@@ -42,6 +42,8 @@ proc getChannelIds(): seq[ChannelId] =
 proc foo*(path: string, json: JsonNode) =
   let http = newAsyncHttpClient()
   http.headers = newHttpHeaders { "Content-Type": "application/json" }
+  let httpMethod = HttpPost
   for channelId in getChannelIds():
     let uri = pubsubBaseUri / channelId.string / path
-    asyncCheck http.request($uri, httpMethod = HttpPost, body = $json)
+    debug httpMethod, " ", uri
+    asyncCheck http.request($uri, httpMethod, body = $json)
