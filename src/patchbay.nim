@@ -1,4 +1,5 @@
 import asyncdispatch
+import asyncfutures
 import base64
 import httpClient
 import json
@@ -40,10 +41,13 @@ proc getChannelIds(): seq[ChannelId] =
   client.keys("clientid:*").map(k => ChannelId client.get(k))
 
 proc foo*(path: string, json: JsonNode) =
-  let http = newAsyncHttpClient()
-  http.headers = newHttpHeaders { "Content-Type": "application/json" }
+  let http = newAsyncHttpClient(
+    headers = newHttpHeaders { "Content-Type": "application/json" }
+  )
   let httpMethod = HttpPost
-  for channelId in getChannelIds():
+
+  waitFor all getChannelIds().map(proc (channelId: ChannelId): Future[void] {.async.} =
     let uri = pubsubBaseUri / channelId.string / path
     debug httpMethod, " ", uri
-    asyncCheck http.request($uri, httpMethod, body = $json)
+    yield http.request($uri, httpMethod, body = $json)
+  )
