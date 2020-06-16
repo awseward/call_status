@@ -46,4 +46,4 @@ proc foo*(path: string, json: JsonNode) =
   for channelId in getChannelIds():
     let uri = pubsubBaseUri / channelId.string / path
     debug httpMethod, " ", uri
-    asyncCheck http.request($uri, httpMethod, body = $json)
+    discard waitFor http.request($uri, httpMethod, body = $json)
