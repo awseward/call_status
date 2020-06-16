@@ -46,8 +46,8 @@ proc foo*(path: string, json: JsonNode) =
   )
   let httpMethod = HttpPost
 
-  waitFor all getChannelIds().map(proc (channelId: ChannelId): Future[void] {.async.} =
+  discard waitFor all getChannelIds().map(proc (channelId: ChannelId): Future[AsyncResponse] =
     let uri = pubsubBaseUri / channelId.string / path
     debug httpMethod, " ", uri
-    yield http.request($uri, httpMethod, body = $json)
+    http.request($uri, httpMethod, body = $json)
   )
