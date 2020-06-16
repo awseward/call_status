@@ -37,7 +37,7 @@ proc wsRefresh() =
 
 proc publishUpdates() =
   wsRefresh()
-  foo "/api/people", %*getPeople()
+  waitFor foo("/api/people", %*getPeople())
 
 if defined(release):
   publishUpdates()

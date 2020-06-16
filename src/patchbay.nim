@@ -40,14 +40,12 @@ proc getChannelIds(): seq[ChannelId] =
   let client = getRedisClient()
   client.keys("clientid:*").map(k => ChannelId client.get(k))
 
-proc foo*(path: string, json: JsonNode) =
+proc foo*(path: string, json: JsonNode): Future[void] {.async.} =
   let http = newAsyncHttpClient(
     headers = newHttpHeaders { "Content-Type": "application/json" }
   )
   let httpMethod = HttpPost
-
-  discard waitFor all getChannelIds().map(proc (channelId: ChannelId): Future[AsyncResponse] =
+  for channelId in getChannelIds():
     let uri = pubsubBaseUri / channelId.string / path
     debug httpMethod, " ", uri
-    http.request($uri, httpMethod, body = $json)
-  )
+    discard (await http.request($uri, httpMethod, body = $json))
