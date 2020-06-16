@@ -37,7 +37,7 @@ proc wsRefresh() =
 
 proc publishUpdates() =
   wsRefresh()
-  waitFor foo("/api/people", %*getPeople())
+  waitFor pbPublish("/api/people", %*getPeople())
 
 if defined(release):
   publishUpdates()
@@ -80,7 +80,7 @@ router api:
     resp Http204
 
   post "/register/@client_id":
-    resp $registerPatchBay(@"client_id", path = "/api/people")
+    resp $pbRegister(@"client_id", path = "/api/people")
 
 router web:
   get "/":

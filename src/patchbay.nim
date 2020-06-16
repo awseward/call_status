@@ -30,7 +30,7 @@ proc getRedisClient(): Redis =
   if rUri.password != "":
     result.auth rUri.password
 
-proc registerPatchBay*(clientId: string, path = ""): Uri =
+proc pbRegister*(clientId: string, path = ""): Uri =
   let channelId = encode(clientId, safe = true)
   let client = getRedisClient()
   discard client.setEx("clientid:" & clientId, DaySeconds, channelId)
@@ -40,7 +40,7 @@ proc getChannelIds(): seq[ChannelId] =
   let client = getRedisClient()
   client.keys("clientid:*").map(k => ChannelId client.get(k))
 
-proc foo*(path: string, json: JsonNode): Future[void] {.async.} =
+proc pbPublish*(path: string, json: JsonNode): Future[void] {.async.} =
   let http = newAsyncHttpClient(
     headers = newHttpHeaders { "Content-Type": "application/json" }
   )
