@@ -7,10 +7,9 @@ import strutils
 import sugar
 import uri
 
-type ChannelId = distinct string
+import ./logs
 
-proc patchBayPubSubUrlBase(channelId: ChannelId): string =
-  "https://patchbay.pub/pubsub/" & channelId.string
+type ChannelId = distinct string
 
 # Redis stuff...
 
@@ -20,16 +19,17 @@ proc getRedisClient(): Redis =
   let rUri = parseUri getEnv("REDIS_URL")
   let hostname = rUri.hostname
   let port = rUri.port
+  debug "Opening ", hostname, ":", port, "..."
   result = redis.open(hostname, Port parseInt(port))
   if rUri.password != "":
     result.auth rUri.password
 
 proc registerPatchBay*(clientId: string): string =
-  let encoded = encode(clientId, safe = true)
+  let channelId = encode(clientId, safe = true)
   let client = getRedisClient()
-  discard client.setEx(clientId, DaySeconds, encoded)
-  patchBayPubSubUrlBase ChannelId(encoded)
+  discard client.setEx("clientid:" & clientId, DaySeconds, channelId)
+  "https://patchbay.pub/pubsub/" & channelId
 
 proc getPatchBayChannelIds*(): seq[string] =
   let client = getRedisClient()
-  client.keys("mac:*").map(k => client.get k)
+  client.keys("clientid:*").map(k => client.get k)
