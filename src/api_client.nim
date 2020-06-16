@@ -35,7 +35,6 @@ proc sendJson*(api: ApiClient, httpMethod: HttpMethod, relativeUrl: string, body
 
 
 proc getPeople*(api: ApiClient): seq[Person] =
-  # The relative path is a little weird, but it's fine for now
   let response = api.sendJson(HttpGet, "/api/people")
   person.fromJsonMany parseJson(response.body)
 
