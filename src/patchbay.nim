@@ -19,7 +19,7 @@ proc getRedisClient(): Redis =
   let rUri = parseUri getEnv("REDIS_URL")
   let hostname = rUri.hostname
   let port = rUri.port
-  debug "Opening ", hostname, ":", port, "..."
+  debug "Opening Redis connection to ", hostname, ":", port, "..."
   result = redis.open(hostname, Port parseInt(port))
   if rUri.password != "":
     result.auth rUri.password
