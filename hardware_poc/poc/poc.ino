@@ -2,40 +2,55 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
-HTTPClient http;
-
 const int LED_BUILTIN = 2;
 
 const char* ssid     = "[REDACTED]";
 const char* password = "[REDACTED]";
 
-const String urlBase = "https://call-status.herokuapp.com";
+const String appUrl = "https://call-status.herokuapp.com";
+String pollUrl;
 
 const char * headerKeys[] = {"location"};
 
 boolean isOnCall = false;
 
 void setup() {
+  // Set up onboard LED writing
   pinMode(LED_BUILTIN, OUTPUT);
-  Serial.begin(115200);
-  WiFi.begin(ssid, password);
 
+  // Set up serial console
+  Serial.begin(115200);
+
+  // Join the wifi
+  WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.println("Connecting to WiFi..");
   }
-
   Serial.println("Connected to the WiFi network");
+
+  // This seems a little hacky, but it works
+  pollUrl = appUrl + "/api/people";
+  loop();
+
+  // Register for callback hooks
+  String registerUrl = appUrl + "/api/register/" + WiFi.macAddress();
+  Serial.println("register url: " + registerUrl);
+  HTTPClient http;
+  http.begin(registerUrl);
+  int httpCode = http.POST("");
+  pollUrl = http.getString();
+  Serial.println("poll url: " + pollUrl);
+  http.end();
 }
 
 void flash() {
-  for (int i = 0; i < 20; i++) {
+  for (int i = 0; i < 10; i++) {
     digitalWrite(LED_BUILTIN, HIGH);
     delay(50);
     digitalWrite(LED_BUILTIN, LOW);
-    delay(50);
+    delay(20);
   }
-  delay(100);
 }
 
 void handleResponse(String payload) {
@@ -47,7 +62,6 @@ void handleResponse(String payload) {
   if (error) {
     Serial.print(F("deserializeJson() failed with code "));
     Serial.println(error.c_str());
-    delay(5000);
     return;
   }
 
@@ -57,7 +71,7 @@ void handleResponse(String payload) {
     const char* name = object["name"];
     std::string str(name);
 
-    if (!str.compare("D")) {
+    if (!str.compare("N")) {
       boolean latestIsOnCall = v["is_on_call"];
 
       Serial.print("name:     "); Serial.println(name);
@@ -82,15 +96,16 @@ void handleResponse(String payload) {
 void loop() {
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
-    Serial.println(urlBase + "/api/status");
-    http.begin(urlBase + "/api/status");
+    http.setTimeout(60000);
+    Serial.println(pollUrl);
+    http.begin(pollUrl);
     http.collectHeaders(headerKeys, 1);
     int httpCode = http.GET();
 
     if (300 <= httpCode && httpCode < 400) {
       http.end();
 
-      String redirectUrl = urlBase + http.header("location");
+      String redirectUrl = appUrl + http.header("location");
       Serial.println(redirectUrl);
       http.begin(redirectUrl);
 
@@ -116,6 +131,4 @@ void loop() {
 
     http.end();
   }
-
-  delay(1000);
 }
