@@ -2,9 +2,6 @@ import junk_drawer/db
 import os
 import db_postgres
 import db_sqlite
-import typetraits
-
-import ./logs
 
 export db
 
