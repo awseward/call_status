@@ -5,6 +5,9 @@
 #include "freertos/task.h"
 
 const int LED_BUILTIN = 2;
+const int LED_WIFI_CONNECTED = 16;
+const int LED_P1 = 17;
+const int LED_P2 = 18;
 
 const char* ssid     = "[REDACTED]";
 const char* password = "[REDACTED]";
@@ -13,10 +16,12 @@ String pbUrl;
 
 const char * headerKeys[] = {"location"};
 
-boolean isOnCall = false;
+boolean isOnCallP1 = false;
+boolean isOnCallP2 = false;
 
 TaskHandle_t Task1;
 TaskHandle_t Task2;
+TaskHandle_t Task3;
 
 StaticJsonDocument<300> apiUp() {
   String clientUpUrl = "https://call-status.herokuapp.com/api/client/" + WiFi.macAddress() + "/up";
@@ -68,7 +73,9 @@ void handleResponse(String responseBody) {
     std::string str(name);
 
     if (!str.compare("N")) {
-      isOnCall = v["is_on_call"];
+      isOnCallP1 = v["is_on_call"];
+    } else if (!str.compare("D")) {
+      isOnCallP2 = v["is_on_call"];
     }
   }
 }
@@ -96,29 +103,58 @@ void apiGet(String url) {
 }
 
 void loopApi(void* parameter) {
-  Serial.print("loopApi() function running on core: "); Serial.println(xPortGetCoreID());
+  logTaskFnStart("loopApi");
   while(true) {
     apiGet(pbUrl);
   }
 }
 
-void loopLEDs(void* parameter) {
-  Serial.print("loopLEDs() function running on core: "); Serial.println(xPortGetCoreID());
+void logTaskFnStart(String fnName) {
+  Serial.print("Task function `"); Serial.print(fnName); Serial.print("` running on core: "); Serial.println(xPortGetCoreID());
+}
+
+void logDigitalWrite(int pin, int value) {
+  Serial.print("Setting pin "); Serial.print(pin); Serial.print(" to: "); Serial.println(value);
+}
+
+void reconcileLED(int pin, boolean shouldBeOn) {
+  boolean ledIsOn = digitalRead(pin) == HIGH;
+  if (ledIsOn == shouldBeOn) { return; }
+
+  int writeVal = shouldBeOn ? HIGH : LOW;
+  logDigitalWrite(pin, writeVal);
+  flash(pin);
+  digitalWrite(pin, writeVal);
+}
+
+void loopPeopleLEDs(void* parameter) {
+  logTaskFnStart("loopPeopleLEDs");
+
   while(true) {
-    boolean ledIsOn = digitalRead(LED_BUILTIN) == HIGH;
+    // Once LEDs wired up, remove LED_BUILTIN from here
+    reconcileLED(LED_BUILTIN, isOnCallP1);
+    reconcileLED(LED_P1, isOnCallP1);
+    reconcileLED(LED_P2, isOnCallP2);
 
-    if (ledIsOn == isOnCall) { continue; }
+    delay(200);
+  }
+}
 
-    int writeVal;
-    if (isOnCall) {
-      writeVal = HIGH;
-    } else {
-      writeVal = LOW;
-    }
+void loopWifiLED(void* parameter) {
+  logTaskFnStart("loopWifiLED");
+  int pin = LED_WIFI_CONNECTED;
 
-    flash(LED_BUILTIN);
-    digitalWrite(LED_BUILTIN, writeVal);
-    delay(100);
+  while(true) {
+    boolean ledIsOn = digitalRead(pin) == HIGH;
+    boolean shouldBeOn = WiFi.status() == WL_CONNECTED;
+    if (ledIsOn == shouldBeOn) { continue; }
+
+    int writeVal = shouldBeOn ? HIGH : LOW;
+    //// Commenting this out since it just makes a ton of noise if there's
+    //// nothing actually connected to the pin
+    // logDigitalWrite(pin, writeVal);
+    digitalWrite(pin, writeVal);
+    delay(200);
   }
 }
 
@@ -129,10 +165,9 @@ void setup() {
   // Set up serial console
   Serial.begin(115200);
 
-  Serial.print("setup() function running on core: "); Serial.println(xPortGetCoreID());
-
   // Start task which reacts to state by setting LEDs
-  xTaskCreatePinnedToCore(loopLEDs, "Task2", 10000, NULL, 1, &Task2, 1);
+  xTaskCreatePinnedToCore(loopPeopleLEDs, "Task2", 10000, NULL, 2, &Task2, 1);
+  xTaskCreatePinnedToCore(loopWifiLED, "Task3", 10000, NULL, 1, &Task3, 1);
 
   // Join the wifi
   WiFi.begin(ssid, password);
