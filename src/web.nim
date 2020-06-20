@@ -11,7 +11,6 @@ import ws, ws/jester_extra
 
 import ./api_client
 import ./db_web
-import ./deprecations
 import ./logs
 import ./models/person
 import ./models/status
@@ -37,26 +36,6 @@ if defined(release):
   publishUpdates()
 
 router api:
-  # DEPRECATED
-  get "/status":
-    deprecations.ApiStatusEndpoints.check(supported, logProc):
-      logProc()
-      if not supported: halt Http404
-
-    redirect "/api/people"
-
-  # DEPRECATED
-  post "/status":
-    deprecations.ApiStatusEndpoints.check(supported, logProc):
-      logProc()
-      if not supported: halt Http404
-
-    let jsonNode = parseJson request.body
-    debug jsonNode
-    updatePerson person.fromJson(jsonNode)
-    publishUpdates()
-    resp Http204
-
   get "/people": resp %*getPeople()
 
   put "/person/@name":
@@ -73,10 +52,6 @@ router api:
     publishUpdates()
     resp Http204
 
-  post "/register/@client_id":
-    let pbChannel = pbRegister(@"client_id", path = "/api/people")
-    resp $pbChannel.uri
-
   post "/client/@client_id/up":
     let path = "/api/people"
     let pbChannel = pbRegister(@"client_id", path = path)
@@ -85,7 +60,6 @@ router api:
       "pb_url": $pbChannel.uri,
       "pb_url_expires": $pbChannel.expires
     }
-
 
 router web:
   get "/":
