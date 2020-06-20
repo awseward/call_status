@@ -1,6 +1,8 @@
-#include <WiFi.h>
-#include <HTTPClient.h>
-#include <ArduinoJson.h>
+#include "WiFi.h"
+#include "HTTPClient.h"
+#include "ArduinoJson.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 const int LED_BUILTIN = 2;
 
@@ -12,6 +14,9 @@ String pbUrl;
 const char * headerKeys[] = {"location"};
 
 boolean isOnCall = false;
+
+TaskHandle_t Task1;
+TaskHandle_t Task2;
 
 StaticJsonDocument<300> apiUp() {
   String clientUpUrl = "https://call-status.herokuapp.com/api/client/" + WiFi.macAddress() + "/up";
@@ -38,33 +43,12 @@ StaticJsonDocument<300> apiUp() {
   throw "FIXME";
 }
 
-void setup() {
-  // Set up onboard LED writing
-  pinMode(LED_BUILTIN, OUTPUT);
-
-  // Set up serial console
-  Serial.begin(115200);
-
-  // Join the wifi
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.println("Connecting to WiFi...");
-  }
-  Serial.println("Connected to the WiFi network");
-
-  // Register for callback hooks
-  auto upResponseJson = apiUp();
-  doTheThing(upResponseJson["app_url"].as<String>());
-  pbUrl = upResponseJson["pb_url"].as<String>();
-}
-
-void flash() {
-  for (int i = 0; i < 10; i++) {
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(50);
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(20);
+void flash(int pin) {
+  for (int i = 0; i < 25; i++) {
+    digitalWrite(pin, HIGH);
+    delay(75);
+    digitalWrite(pin, LOW);
+    delay(25);
   }
 }
 
@@ -84,25 +68,12 @@ void handleResponse(String responseBody) {
     std::string str(name);
 
     if (!str.compare("N")) {
-      boolean latestIsOnCall = v["is_on_call"];
-
-      if (isOnCall != latestIsOnCall) {
-        flash();
-      }
-
-      isOnCall = latestIsOnCall;
-
-      if (isOnCall) {
-        digitalWrite(LED_BUILTIN, HIGH);
-      }
-      else {
-        digitalWrite(LED_BUILTIN, LOW);
-      }
+      isOnCall = v["is_on_call"];
     }
   }
 }
 
-void doTheThing(String url) {
+void apiGet(String url) {
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
     http.setTimeout(60000);
@@ -124,6 +95,60 @@ void doTheThing(String url) {
   }
 }
 
-void loop() {
-  doTheThing(pbUrl);
+void loopApi(void* parameter) {
+  Serial.print("loopApi() function running on core: "); Serial.println(xPortGetCoreID());
+  while(true) {
+    apiGet(pbUrl);
+  }
 }
+
+void loopLEDs(void* parameter) {
+  Serial.print("loopLEDs() function running on core: "); Serial.println(xPortGetCoreID());
+  while(true) {
+    boolean ledIsOn = digitalRead(LED_BUILTIN) == HIGH;
+
+    if (ledIsOn == isOnCall) { continue; }
+
+    int writeVal;
+    if (isOnCall) {
+      writeVal = HIGH;
+    } else {
+      writeVal = LOW;
+    }
+
+    flash(LED_BUILTIN);
+    digitalWrite(LED_BUILTIN, writeVal);
+    delay(100);
+  }
+}
+
+void setup() {
+  // Set up onboard LED writing
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  // Set up serial console
+  Serial.begin(115200);
+
+  Serial.print("setup() function running on core: "); Serial.println(xPortGetCoreID());
+
+  // Start task which reacts to state by setting LEDs
+  xTaskCreatePinnedToCore(loopLEDs, "Task2", 10000, NULL, 1, &Task2, 1);
+
+  // Join the wifi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.println("Connecting to WiFi...");
+  }
+  Serial.println("Connected to the WiFi network");
+
+  // Register for callback hooks
+  auto upResponseJson = apiUp();
+  apiGet(upResponseJson["app_url"].as<String>());
+  pbUrl = upResponseJson["pb_url"].as<String>();
+
+  // Start task which polls API requests
+  xTaskCreatePinnedToCore(loopApi, "Task1", 10000, NULL, 1, &Task1, 0);
+}
+
+void loop() { }
