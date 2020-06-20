@@ -10,6 +10,7 @@ import sequtils
 import strutils
 import sugar
 import times
+import typetraits
 import uri
 
 import ./logs
@@ -24,12 +25,26 @@ type PatchbayChannel* = object
 
 # Redis stuff...
 
+type Quittable = concept x
+  quit x
+
+proc logQuit[T: Quittable](qt: T) =
+  debug "Closing ", qt.type.name, "..."
+  quit qt
+
+template use(getClient, client, actions: untyped): untyped =
+  let client: Quittable = getClient()
+  try:
+    actions
+  finally:
+    logQuit client
+
 const DaySeconds = 1 * 24 * 60 * 60
 
 proc whUrlKey(clientId: ClientId): string =
   "webhookUrl:" & clientId.string
 
-proc getRedisClient(): Redis =
+proc redis_open(): Redis =
   let rUri = parseUri getEnv("REDIS_URL")
   let hostname = rUri.hostname
   let port = rUri.port
@@ -41,17 +56,15 @@ proc getRedisClient(): Redis =
 proc pbRegister*(rawClientId: string, path = ""): PatchbayChannel =
   let key = whUrlKey ClientId(rawClientId)
   let uri = pubsubBaseUri / encode(rawClientId, safe = true) / path
-  let client = getRedisClient()
-  discard client.setEx(key, DaySeconds, $uri)
-  let expires = getTime() + client.ttl(key).int.seconds
-  result = PatchbayChannel(uri: uri, expires: expires)
-  client.quit()
+  redis_open.use client:
+    discard client.setEx(key, DaySeconds, $uri)
+    let expires = getTime() + client.ttl(key).int.seconds
+    PatchbayChannel(uri: uri, expires: expires)
 
 proc getAllPbUris(): seq[Uri] =
-  let client = getRedisClient()
   let pattern = whUrlKey ClientId("*")
-  result = client.keys(pattern).map(key => parseUri client.get(key))
-  client.quit()
+  redis_open.use client:
+    client.keys(pattern).map(key => parseUri client.get(key))
 
 proc pbPublish*(json: JsonNode): Future[void] {.async.} =
   let http = newAsyncHttpClient(
