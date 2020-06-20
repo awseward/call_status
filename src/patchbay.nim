@@ -55,7 +55,7 @@ proc getAllPbUris(): seq[Uri] =
 
 proc pbPublish*(json: JsonNode): Future[void] {.async.} =
   let http = newAsyncHttpClient(
-    headers = newHttpHeaders { "Content-Type": "application/json" }
+    headers = newHttpHeaders {"Content-Type": "application/json"}
   )
   let httpMethod = HttpPost
   for pbUri in getAllPbUris():
