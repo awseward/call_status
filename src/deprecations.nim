@@ -37,6 +37,7 @@ proc warnOrError*(deprecation: DeprecationKey, supported: bool) =
 
 const UserKey* = DeprecationKey "USER_KEY"
 const ApiStatusEndpoints* = DeprecationKey "API_STATUS_ENDPOINTS"
+const ApiRegisterEndpoint* = DeprecationKey "API_REGISTER_ENDPOINT"
 
 let deprecations = load @[UserKey, ApiStatusEndpoints]
 
