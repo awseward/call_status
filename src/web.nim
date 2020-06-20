@@ -4,6 +4,7 @@ import json
 import os
 import sequtils
 import strutils
+import times
 import uri
 
 import ws, ws/jester_extra
@@ -17,6 +18,7 @@ import ./models/status
 import ./patchbay
 import ./views/index
 import ./statics
+import ./websockets
 
 let settings = newSettings()
 if existsEnv("PORT"):
@@ -27,17 +29,9 @@ logs.setupWeb()
 info "version:  ", pkgVersion
 info "revision: ", pkgRevision
 
-var websockets: seq[WebSocket] = @[]
-
-proc wsRefresh() =
-  # TODO: Also clean up Closed ones
-  for ws in websockets:
-    if ws.readyState == Open:
-      asyncCheck ws.send "REFRESH"
-
 proc publishUpdates() =
-  wsRefresh()
-  waitFor pbPublish("/api/people", %*getPeople())
+  wsRefreshAll()
+  waitFor pbPublish(%*getPeople())
 
 if defined(release):
   publishUpdates()
@@ -80,7 +74,18 @@ router api:
     resp Http204
 
   post "/register/@client_id":
-    resp $pbRegister(@"client_id", path = "/api/people")
+    let pbChannel = pbRegister(@"client_id", path = "/api/people")
+    resp $pbChannel.uri
+
+  post "/client/@client_id/up":
+    let path = "/api/people"
+    let pbChannel = pbRegister(@"client_id", path = path)
+    resp %*{
+      "app_url": request.makeUri path,
+      "pb_url": $pbChannel.uri,
+      "pb_url_expires": $pbChannel.expires
+    }
+
 
 router web:
   get "/":
@@ -95,7 +100,7 @@ router web:
       ws.close()
       resp Http400
     else:
-      websockets.add ws
+      wsAdd ws
       resp Http101
 
   # I'd like for this to be PUT, but browser forms are GET and POST only

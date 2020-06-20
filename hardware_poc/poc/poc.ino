@@ -7,12 +7,36 @@ const int LED_BUILTIN = 2;
 const char* ssid     = "[REDACTED]";
 const char* password = "[REDACTED]";
 
-const String appUrl = "https://call-status.herokuapp.com";
-String pollUrl;
+String pbUrl;
 
 const char * headerKeys[] = {"location"};
 
 boolean isOnCall = false;
+
+StaticJsonDocument<300> apiUp() {
+  String clientUpUrl = "https://call-status.herokuapp.com/api/client/" + WiFi.macAddress() + "/up";
+
+  HTTPClient http;
+  http.begin(clientUpUrl);
+  Serial.println("POST " + clientUpUrl);
+  int httpCode = http.POST("");
+
+  if (200 <= httpCode && httpCode < 300) {
+    String responseBody = http.getString();
+    Serial.print(httpCode); Serial.println(" " + responseBody);
+
+    StaticJsonDocument<300> doc;
+    auto error = deserializeJson(doc, responseBody);
+    if (error) {
+      Serial.print(F("deserializeJson() failed with code ")); Serial.println(error.c_str());
+      throw "FIXME";
+    } else {
+      return doc;
+    }
+  }
+
+  throw "FIXME";
+}
 
 void setup() {
   // Set up onboard LED writing
@@ -25,23 +49,14 @@ void setup() {
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.println("Connecting to WiFi..");
+    Serial.println("Connecting to WiFi...");
   }
   Serial.println("Connected to the WiFi network");
 
-  // This seems a little hacky, but it works
-  pollUrl = appUrl + "/api/people";
-  loop();
-
   // Register for callback hooks
-  String registerUrl = appUrl + "/api/register/" + WiFi.macAddress();
-  Serial.println("register url: " + registerUrl);
-  HTTPClient http;
-  http.begin(registerUrl);
-  int httpCode = http.POST("");
-  pollUrl = http.getString();
-  Serial.println("poll url: " + pollUrl);
-  http.end();
+  auto upResponseJson = apiUp();
+  doTheThing(upResponseJson["app_url"].as<String>());
+  pbUrl = upResponseJson["pb_url"].as<String>();
 }
 
 void flash() {
@@ -53,15 +68,12 @@ void flash() {
   }
 }
 
-void handleResponse(String payload) {
-  Serial.println(payload);
-
+void handleResponse(String responseBody) {
   StaticJsonDocument<300> doc;
-  auto error = deserializeJson(doc, payload);
+  auto error = deserializeJson(doc, responseBody);
 
   if (error) {
-    Serial.print(F("deserializeJson() failed with code "));
-    Serial.println(error.c_str());
+    Serial.print(F("deserializeJson() failed with code ")); Serial.println(error.c_str());
     return;
   }
 
@@ -73,9 +85,6 @@ void handleResponse(String payload) {
 
     if (!str.compare("N")) {
       boolean latestIsOnCall = v["is_on_call"];
-
-      Serial.print("name:     "); Serial.println(name);
-      Serial.print("isOnCall: "); Serial.println(latestIsOnCall);
 
       if (isOnCall != latestIsOnCall) {
         flash();
@@ -93,37 +102,19 @@ void handleResponse(String payload) {
   }
 }
 
-void loop() {
+void doTheThing(String url) {
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
     http.setTimeout(60000);
-    Serial.println(pollUrl);
-    http.begin(pollUrl);
+    Serial.println("GET " + url);
+    http.begin(url);
     http.collectHeaders(headerKeys, 1);
     int httpCode = http.GET();
 
-    if (300 <= httpCode && httpCode < 400) {
-      http.end();
-
-      String redirectUrl = appUrl + http.header("location");
-      Serial.println(redirectUrl);
-      http.begin(redirectUrl);
-
-      int httpCode = http.GET();
-
-      if (200 <= httpCode && httpCode < 300) {
-        String payload = http.getString();
-        Serial.println(httpCode);
-        handleResponse(payload);
-      }
-      else {
-        Serial.print("HTTP error: "); Serial.print(httpCode);
-      }
-    }
-    else if (200 <= httpCode && httpCode < 300) {
-      String payload = http.getString();
-      Serial.println(httpCode);
-      handleResponse(payload);
+    if (200 <= httpCode && httpCode < 300) {
+      String responseBody = http.getString();
+      Serial.print(httpCode); Serial.println(" " + responseBody);
+      handleResponse(responseBody);
     }
     else {
       Serial.print("HTTP error: "); Serial.println(httpCode);
@@ -131,4 +122,8 @@ void loop() {
 
     http.end();
   }
+}
+
+void loop() {
+  doTheThing(pbUrl);
 }

@@ -9,19 +9,42 @@ import redis
 import sequtils
 import strutils
 import sugar
+import times
+import typetraits
 import uri
 
 import ./logs
 
 const pubsubBaseUri = parseUri "https://patchbay.pub/pubsub"
 
-type ChannelId = distinct string
+type ClientId = distinct string
+
+type PatchbayChannel* = object
+  uri*: Uri
+  expires*: Time
 
 # Redis stuff...
 
+type Quittable = concept x
+  quit x
+
+proc logQuit[T: Quittable](qt: T) =
+  debug "Closing ", qt.type.name, "..."
+  quit qt
+
+template use(getClient, client, actions: untyped): untyped =
+  let client: Quittable = getClient()
+  try:
+    actions
+  finally:
+    logQuit client
+
 const DaySeconds = 1 * 24 * 60 * 60
 
-proc getRedisClient(): Redis =
+proc whUrlKey(clientId: ClientId): string =
+  "webhookUrl:" & clientId.string
+
+proc redis_open(): Redis =
   let rUri = parseUri getEnv("REDIS_URL")
   let hostname = rUri.hostname
   let port = rUri.port
@@ -30,22 +53,24 @@ proc getRedisClient(): Redis =
   if rUri.password != "":
     result.auth rUri.password
 
-proc pbRegister*(clientId: string, path = ""): Uri =
-  let channelId = encode(clientId, safe = true)
-  let client = getRedisClient()
-  discard client.setEx("clientid:" & clientId, DaySeconds, channelId)
-  pubsubBaseUri / channelId / path
+proc pbRegister*(rawClientId: string, path = ""): PatchbayChannel =
+  let key = whUrlKey ClientId(rawClientId)
+  let uri = pubsubBaseUri / encode(rawClientId, safe = true) / path
+  redis_open.use client:
+    discard client.setEx(key, DaySeconds, $uri)
+    let expires = getTime() + client.ttl(key).int.seconds
+    PatchbayChannel(uri: uri, expires: expires)
 
-proc getChannelIds(): seq[ChannelId] =
-  let client = getRedisClient()
-  client.keys("clientid:*").map(k => ChannelId client.get(k))
+proc getAllPbUris(): seq[Uri] =
+  let pattern = whUrlKey ClientId("*")
+  redis_open.use client:
+    client.keys(pattern).map(key => parseUri client.get(key))
 
-proc pbPublish*(path: string, json: JsonNode): Future[void] {.async.} =
+proc pbPublish*(json: JsonNode): Future[void] {.async.} =
   let http = newAsyncHttpClient(
-    headers = newHttpHeaders { "Content-Type": "application/json" }
+    headers = newHttpHeaders {"Content-Type": "application/json"}
   )
   let httpMethod = HttpPost
-  for channelId in getChannelIds():
-    let uri = pubsubBaseUri / channelId.string / path
-    debug httpMethod, " ", uri
-    discard (await http.request($uri, httpMethod, body = $json))
+  for pbUri in getAllPbUris():
+    debug httpMethod, " ", pbUri
+    discard await http.request($pbUri, httpMethod, body = $json)
