@@ -4,7 +4,6 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-const int LED_BUILTIN = 2;
 const int LED_WIFI_CONNECTED = 16;
 const int LED_P1 = 17;
 const int LED_P2 = 18;
@@ -72,9 +71,9 @@ void handleResponse(String responseBody) {
     const char* name = object["name"];
     std::string str(name);
 
-    if (!str.compare("N")) {
+    if (!str.compare("D")) {
       isOnCallP1 = v["is_on_call"];
-    } else if (!str.compare("D")) {
+    } else if (!str.compare("N")) {
       isOnCallP2 = v["is_on_call"];
     }
   }
@@ -131,8 +130,6 @@ void loopPeopleLEDs(void* parameter) {
   logTaskFnStart("loopPeopleLEDs");
 
   while(true) {
-    // Once LEDs wired up, remove LED_BUILTIN from here
-    reconcileLED(LED_BUILTIN, isOnCallP1);
     reconcileLED(LED_P1, isOnCallP1);
     reconcileLED(LED_P2, isOnCallP2);
 
@@ -159,8 +156,10 @@ void loopWifiLED(void* parameter) {
 }
 
 void setup() {
-  // Set up onboard LED writing
-  pinMode(LED_BUILTIN, OUTPUT);
+  // Set up  LED pins
+  pinMode(LED_WIFI_CONNECTED, OUTPUT);
+  pinMode(LED_P1, OUTPUT);
+  pinMode(LED_P2, OUTPUT);
 
   // Set up serial console
   Serial.begin(115200);
