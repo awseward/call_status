@@ -4,10 +4,9 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-const int LED_BUILTIN = 2;
 const int LED_WIFI_CONNECTED = 16;
 const int LED_P1 = 17;
-const int LED_P2 = LED_BUILTIN;
+const int LED_P2 = 18;
 
 const char* ssid     = "[REDACTED]";
 const char* password = "[REDACTED]";
