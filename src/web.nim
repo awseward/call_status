@@ -14,6 +14,7 @@ import ./db_web
 import ./logs
 import ./models/person
 import ./models/status
+import ./mqtt
 import ./patchbay
 import ./views/index
 import ./statics
@@ -55,10 +56,12 @@ router api:
   post "/client/@client_id/up":
     let path = "/api/people"
     let pbChannel = pbRegister(@"client_id", path = path)
+
     resp %*{
       "app_url": request.makeUri path,
       "pb_url": $pbChannel.uri,
-      "pb_url_expires": $pbChannel.expires
+      "pb_url_expires": $pbChannel.expires,
+      "mqtt": mqtt.configured
     }
 
 router web:

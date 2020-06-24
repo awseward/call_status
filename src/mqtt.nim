@@ -7,7 +7,7 @@ type MqttInfo* = object
   port*: int
   topic*: string
 
-let mqttInfo = block:
+let configured* = block:
   let uri = parseUri getEnv("MQTT_SERVER")
   MqttInfo(
     host: uri.hostname,
