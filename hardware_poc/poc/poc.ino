@@ -183,6 +183,8 @@ void setup() {
     Serial.println("Connecting to WiFi...");
   }
   Serial.println("Connected to the WiFi network");
+
+  // Set up loop that checks wifi status
   xTaskCreatePinnedToCore(
     loopCheckWifiStatus,
     "T_loopCheckWifiStatus",
