@@ -15,12 +15,14 @@ String pbUrl;
 
 const char * headerKeys[] = {"location"};
 
+boolean wifiConnected = false;
 boolean isOnCallP1 = false;
 boolean isOnCallP2 = false;
 
-TaskHandle_t Task1;
-TaskHandle_t Task2;
-TaskHandle_t Task3;
+TaskHandle_t T_loopApi;
+TaskHandle_t T_loopPeopleLEDs;
+TaskHandle_t T_loopWifiLED;
+TaskHandle_t T_loopCheckWifiStatus;
 
 StaticJsonDocument<300> apiUp() {
   String clientUpUrl = "https://call-status.herokuapp.com/api/client/" + WiFi.macAddress() + "/up";
@@ -80,25 +82,23 @@ void handleResponse(String responseBody) {
 }
 
 void apiGet(String url) {
-  if (WiFi.status() == WL_CONNECTED) {
-    HTTPClient http;
-    http.setTimeout(60000);
-    Serial.println("GET " + url);
-    http.begin(url);
-    http.collectHeaders(headerKeys, 1);
-    int httpCode = http.GET();
+  HTTPClient http;
+  http.setTimeout(60000);
+  Serial.println("GET " + url);
+  http.begin(url);
+  http.collectHeaders(headerKeys, 1);
+  int httpCode = http.GET();
 
-    if (200 <= httpCode && httpCode < 300) {
-      String responseBody = http.getString();
-      Serial.print(httpCode); Serial.println(" " + responseBody);
-      handleResponse(responseBody);
-    }
-    else {
-      Serial.print("HTTP error: "); Serial.println(httpCode);
-    }
-
-    http.end();
+  if (200 <= httpCode && httpCode < 300) {
+    String responseBody = http.getString();
+    Serial.print(httpCode); Serial.println(" " + responseBody);
+    handleResponse(responseBody);
   }
+  else {
+    Serial.print("HTTP error: "); Serial.println(httpCode);
+  }
+
+  http.end();
 }
 
 void loopApi(void* parameter) {
@@ -137,13 +137,21 @@ void loopPeopleLEDs(void* parameter) {
   }
 }
 
+void loopCheckWifiStatus(void* parameter) {
+  logTaskFnStart("loopCheckWifiStatus");
+  while(true) {
+    wifiConnected = WiFi.status() == WL_CONNECTED;
+    delay(10000);
+  }
+}
+
 void loopWifiLED(void* parameter) {
   logTaskFnStart("loopWifiLED");
   int pin = LED_WIFI_CONNECTED;
 
   while(true) {
     boolean ledIsOn = digitalRead(pin) == HIGH;
-    boolean shouldBeOn = WiFi.status() == WL_CONNECTED;
+    boolean shouldBeOn = wifiConnected;
     if (ledIsOn == shouldBeOn) { continue; }
 
     int writeVal = shouldBeOn ? HIGH : LOW;
@@ -151,7 +159,7 @@ void loopWifiLED(void* parameter) {
     //// nothing actually connected to the pin
     // logDigitalWrite(pin, writeVal);
     digitalWrite(pin, writeVal);
-    delay(200);
+    delay(1000);
   }
 }
 
@@ -165,8 +173,8 @@ void setup() {
   Serial.begin(115200);
 
   // Start task which reacts to state by setting LEDs
-  xTaskCreatePinnedToCore(loopPeopleLEDs, "Task2", 10000, NULL, 2, &Task2, 1);
-  xTaskCreatePinnedToCore(loopWifiLED, "Task3", 10000, NULL, 1, &Task3, 1);
+  xTaskCreatePinnedToCore(loopPeopleLEDs, "T_loopPeopleLEDs", 10000, NULL, 2, &T_loopPeopleLEDs, 1);
+  xTaskCreatePinnedToCore(loopWifiLED, "T_loopWifiLED", 10000, NULL, 1, &T_loopWifiLED, 1);
 
   // Join the wifi
   WiFi.begin(ssid, password);
@@ -175,6 +183,15 @@ void setup() {
     Serial.println("Connecting to WiFi...");
   }
   Serial.println("Connected to the WiFi network");
+  xTaskCreatePinnedToCore(
+    loopCheckWifiStatus,
+    "T_loopCheckWifiStatus",
+    10000,
+    NULL,
+    1,
+    &T_loopCheckWifiStatus,
+    0
+  );
 
   // Register for callback hooks
   auto upResponseJson = apiUp();
@@ -182,7 +199,7 @@ void setup() {
   pbUrl = upResponseJson["pb_url"].as<String>();
 
   // Start task which polls API requests
-  xTaskCreatePinnedToCore(loopApi, "Task1", 10000, NULL, 1, &Task1, 0);
+  xTaskCreatePinnedToCore(loopApi, "T_loopApi", 10000, NULL, 1, &T_loopApi, 0);
 }
 
 void loop() { }
