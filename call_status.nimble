@@ -14,6 +14,7 @@ requires "argparse >= 0.10.1"
 requires "jester >= 0.4.3"
 requires "nim >= 1.2.0"
 requires "nimassets >= 0.1.0"
+requires "nmqtt >= 1.0.2"
 requires "redis >= 0.2.0"
 requires "ws >= 0.4.0"
 

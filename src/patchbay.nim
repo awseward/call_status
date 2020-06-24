@@ -66,7 +66,7 @@ proc getAllPbUris(): seq[Uri] =
   redis_open.use client:
     client.keys(pattern).map(key => parseUri client.get(key))
 
-proc pbPublish*(json: JsonNode): Future[void] {.async.} =
+proc pbPublish*(json: JsonNode) {.async.} =
   let http = newAsyncHttpClient(
     headers = newHttpHeaders {"Content-Type": "application/json"}
   )

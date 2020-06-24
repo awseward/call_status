@@ -31,7 +31,9 @@ info "revision: ", pkgRevision
 
 proc publishUpdates() =
   wsRefreshAll()
-  waitFor pbPublish(%*getPeople())
+  let json = %*getPeople()
+  waitFor json.mqttPublish()
+  waitFor json.pbPublish()
 
 if defined(release):
   publishUpdates()
