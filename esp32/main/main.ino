@@ -1,8 +1,9 @@
-#include "WiFi.h"
-#include "HTTPClient.h"
 #include "ArduinoJson.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "HTTPClient.h"
+#include "PubSubClient.h"
+#include "WiFi.h"
 
 const int LED_WIFI_CONNECTED = 16;
 const int LED_P1 = 17;
@@ -25,6 +26,9 @@ TaskHandle_t T_loopMqtt;
 TaskHandle_t T_loopPeopleLEDs;
 TaskHandle_t T_loopWifiLED;
 TaskHandle_t T_loopCheckWifiStatus;
+
+WiFiClient espClient;
+PuSubClient pubsubClient(espClient);
 
 StaticJsonDocument<500> apiUp() {
   String clientUpUrl = "https://call-status.herokuapp.com/api/client/" + WiFi.macAddress() + "/up";
@@ -119,7 +123,8 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 void loopMqtt(void* parameter) {
   logTaskFnStart("loopMqtt");
   while(true) {
-    // apiGet(pbUrl);
+    // TODO: add the reconnect bit
+    pubsubClient.loop();
     delay(1000);
   }
 }
@@ -188,7 +193,6 @@ void setup() {
   // Set up serial console
   Serial.begin(115200);
 
-
   // Join the wifi
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
@@ -205,13 +209,16 @@ void setup() {
   mqttPort = upResponseJson["mqtt"]["port"].as<int>();
   mqttTopic = upResponseJson["mqtt"]["topic"].as<String>();
 
-  /*
+  pubsubClient.setServer(mqttHost, mqttPort);
+  pubsubClient.setCallback(mqqtCallback);
+  pubsubClient.connect(WiFi.macAddress());
+
   // Start task which reacts to state by setting LEDs
   xTaskCreatePinnedToCore(loopPeopleLEDs, "T_loopPeopleLEDs", 10000, NULL, 2, &T_loopPeopleLEDs, 1);
   xTaskCreatePinnedToCore(loopWifiLED, "T_loopWifiLED", 10000, NULL, 1, &T_loopWifiLED, 1);
 
   // Start task which subscribes to MQTT
-  xTaskCreatePinnedToCore(loopMqtt, "T_loopMqtt", 10000, NULL, 1, &T_loopMqtt, 0);
+  xTaskCreatePinnedToCore(loopMqtt, "T_loopMqtt", 10000, NULL, 2, &T_loopMqtt, 0);
 
   // Set up task that periodically checks wifi status
   xTaskCreatePinnedToCore(
@@ -223,7 +230,6 @@ void setup() {
     &T_loopCheckWifiStatus,
     0
   );
-  */
 }
 
 void loop() { }
