@@ -12,11 +12,12 @@ const int LED_P2 = 18;
 const char* ssid     = "[REDACTED]";
 const char* password = "[REDACTED]";
 
-String mqttHost;
+const char* mqttHost;
 int    mqttPort;
-String mqttTopic;
+const char* mqttTopic;
+const char* mqttClientId;
 
-const char * headerKeys[] = {"location"};
+const char* headerKeys[] = {"location"};
 
 boolean wifiConnected = false;
 boolean isOnCallP1 = false;
@@ -28,7 +29,7 @@ TaskHandle_t T_loopWifiLED;
 TaskHandle_t T_loopCheckWifiStatus;
 
 WiFiClient espClient;
-PuSubClient pubsubClient(espClient);
+PubSubClient pubsubClient(espClient);
 
 StaticJsonDocument<500> apiUp() {
   String clientUpUrl = "https://call-status.herokuapp.com/api/client/" + WiFi.macAddress() + "/up";
@@ -108,9 +109,7 @@ void apiGet(String url) {
 }
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
+  Serial.print("Message arrived ["); Serial.print(topic); Serial.println("] ");
 
   String json = "";
   for (int i=0;i<length;i++) {
@@ -205,13 +204,24 @@ void setup() {
   auto upResponseJson = apiUp();
   apiGet(upResponseJson["app_url"].as<String>());
 
-  mqttHost = upResponseJson["mqtt"]["host"].as<String>();
+  mqttHost = upResponseJson["mqtt"]["host"].as<const char*>();
   mqttPort = upResponseJson["mqtt"]["port"].as<int>();
-  mqttTopic = upResponseJson["mqtt"]["topic"].as<String>();
+  mqttTopic = upResponseJson["mqtt"]["topic"].as<const char*>();
+  mqttClientId = upResponseJson["mqtt"]["client_id"].as<const char*>();
+
+  Serial.print("MQTT host:     "); Serial.println(mqttHost);
+  Serial.print("MQTT port:     "); Serial.println(mqttPort);
+  Serial.print("MQTT clientId: "); Serial.println(mqttClientId);
 
   pubsubClient.setServer(mqttHost, mqttPort);
-  pubsubClient.setCallback(mqqtCallback);
-  pubsubClient.connect(WiFi.macAddress());
+  pubsubClient.setCallback(mqttCallback);
+
+  Serial.println("Connecting to MQTT...");
+  pubsubClient.connect(mqttClientId);
+  Serial.println("Connected to MQTT");
+
+  Serial.print("Subscribing on MQTT topic "); Serial.println(mqttTopic);
+  pubsubClient.subscribe(mqttTopic);
 
   // Start task which reacts to state by setting LEDs
   xTaskCreatePinnedToCore(loopPeopleLEDs, "T_loopPeopleLEDs", 10000, NULL, 2, &T_loopPeopleLEDs, 1);
