@@ -13,9 +13,9 @@ const char* ssid     = "[REDACTED]";
 const char* password = "[REDACTED]";
 
 const char* mqttHost;
-int    mqttPort;
-const char* mqttTopic;
+int mqttPort;
 const char* mqttClientId;
+const char* mqttTopic;
 
 const char* headerKeys[] = {"location"};
 
@@ -119,12 +119,24 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   handleResponse(json);
 }
 
+void connectMqtt() {
+  Serial.println("Connecting to MQTT...");
+  pubsubClient.connect(mqttClientId);
+  Serial.println("Connected to MQTT");
+
+  Serial.print("Subscribing on MQTT topic "); Serial.println(mqttTopic);
+  pubsubClient.subscribe(mqttTopic, 1);
+}
+
 void loopMqtt(void* parameter) {
   logTaskFnStart("loopMqtt");
   while(true) {
-    // TODO: add the reconnect bit
+    if (!pubsubClient.connected()) {
+      Serial.println("Reconnecting to MQTT");
+      connectMqtt();
+    }
     pubsubClient.loop();
-    delay(1000);
+    vTaskDelay(10);
   }
 }
 
@@ -202,7 +214,7 @@ void setup() {
 
   // Register for callback hooks
   auto upResponseJson = apiUp();
-  apiGet(upResponseJson["app_url"].as<String>());
+  // apiGet(upResponseJson["app_url"].as<String>());
 
   mqttHost = upResponseJson["mqtt"]["host"].as<const char*>();
   mqttPort = upResponseJson["mqtt"]["port"].as<int>();
@@ -215,13 +227,7 @@ void setup() {
 
   pubsubClient.setServer(mqttHost, mqttPort);
   pubsubClient.setCallback(mqttCallback);
-
-  Serial.println("Connecting to MQTT...");
-  pubsubClient.connect(mqttClientId);
-  Serial.println("Connected to MQTT");
-
-  Serial.print("Subscribing on MQTT topic "); Serial.println(mqttTopic);
-  pubsubClient.subscribe(mqttTopic);
+  connectMqtt();
 
   // Start task which reacts to state by setting LEDs
   xTaskCreatePinnedToCore(loopPeopleLEDs, "T_loopPeopleLEDs", 10000, NULL, 2, &T_loopPeopleLEDs, 1);
