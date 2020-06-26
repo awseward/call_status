@@ -6,6 +6,8 @@ import os
 import strutils
 import uri
 
+import ./logs
+
 type MqttInfo* = object
   host*: string
   port*: int
@@ -19,11 +21,17 @@ let configured* = block:
     topic: getEnv "MQTT_TOPIC"
   )
 
-let clientId = "clientId-callstatus-" & $genOid()
+let clientId = "uhhh" & $genOid()
 
-proc mqttPublish*(json: JsonNode) {.async.} =
+proc mqttPublish*(jNode: JsonNode) {.async.} =
   let ctx = newMqttCtx clientId
   ctx.set_host(configured.host, configured.port)
   await ctx.start()
-  await ctx.publish(configured.topic, $json, qos = 1, retain = true)
+  debug "configured: ", configured
+  debug "isConnected: ", ctx.isConnected
+  # debug "Publishing to ", configured.host, ":", configured.port, " [", configured.topic, "]: ", $json
+  await ctx.publish(configured.topic, $jNode, qos = 2, retain = true)
+  await sleepAsync 500
   await ctx.disconnect()
+
+# waitFor mqttPublish(%*{"foo": "wut"})
