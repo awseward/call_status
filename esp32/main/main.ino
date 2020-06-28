@@ -17,8 +17,6 @@ int mqttPort;
 const char* mqttClientId;
 const char* mqttTopic;
 
-const char* headerKeys[] = {"location"};
-
 boolean wifiConnected = false;
 boolean isOnCallP1 = false;
 boolean isOnCallP2 = false;
@@ -93,7 +91,6 @@ void apiGet(String url) {
   http.setTimeout(60000);
   Serial.println("GET " + url);
   http.begin(url);
-  http.collectHeaders(headerKeys, 1);
   int httpCode = http.GET();
 
   if (200 <= httpCode && httpCode < 300) {
