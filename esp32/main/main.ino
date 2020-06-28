@@ -5,6 +5,7 @@
 #include "PubSubClient.h"
 #include "WiFi.h"
 
+const int LED_BUILTIN = 2;
 const int LED_WIFI_CONNECTED = 16;
 const int LED_P1 = 17;
 const int LED_P2 = 18;
