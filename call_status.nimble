@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.3.5"
+version       = "0.4.0"
 author        = "Andrew Seward"
 description   = "An app to indicate who's on a call"
 license       = "MIT"
