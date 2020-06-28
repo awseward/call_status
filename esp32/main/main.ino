@@ -1,9 +1,11 @@
-#include "WiFi.h"
-#include "HTTPClient.h"
 #include "ArduinoJson.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "HTTPClient.h"
+#include "PubSubClient.h"
+#include "WiFi.h"
 
+const int LED_BUILTIN = 2;
 const int LED_WIFI_CONNECTED = 16;
 const int LED_P1 = 17;
 const int LED_P2 = 18;
@@ -11,20 +13,24 @@ const int LED_P2 = 18;
 const char* ssid     = "[REDACTED]";
 const char* password = "[REDACTED]";
 
-String pbUrl;
-
-const char * headerKeys[] = {"location"};
+const char* mqttHost;
+int mqttPort;
+const char* mqttClientId;
+const char* mqttTopic;
 
 boolean wifiConnected = false;
 boolean isOnCallP1 = false;
 boolean isOnCallP2 = false;
 
-TaskHandle_t T_loopApi;
+TaskHandle_t T_loopMqtt;
 TaskHandle_t T_loopPeopleLEDs;
 TaskHandle_t T_loopWifiLED;
 TaskHandle_t T_loopCheckWifiStatus;
 
-StaticJsonDocument<300> apiUp() {
+WiFiClient espClient;
+PubSubClient pubsubClient(espClient);
+
+StaticJsonDocument<500> apiUp() {
   String clientUpUrl = "https://call-status.herokuapp.com/api/client/" + WiFi.macAddress() + "/up";
 
   HTTPClient http;
@@ -36,7 +42,7 @@ StaticJsonDocument<300> apiUp() {
     String responseBody = http.getString();
     Serial.print(httpCode); Serial.println(" " + responseBody);
 
-    StaticJsonDocument<300> doc;
+    StaticJsonDocument<500> doc;
     auto error = deserializeJson(doc, responseBody);
     if (error) {
       Serial.print(F("deserializeJson() failed with code ")); Serial.println(error.c_str());
@@ -59,7 +65,7 @@ void flash(int pin) {
 }
 
 void handleResponse(String responseBody) {
-  StaticJsonDocument<300> doc;
+  StaticJsonDocument<500> doc;
   auto error = deserializeJson(doc, responseBody);
 
   if (error) {
@@ -86,7 +92,6 @@ void apiGet(String url) {
   http.setTimeout(60000);
   Serial.println("GET " + url);
   http.begin(url);
-  http.collectHeaders(headerKeys, 1);
   int httpCode = http.GET();
 
   if (200 <= httpCode && httpCode < 300) {
@@ -101,10 +106,35 @@ void apiGet(String url) {
   http.end();
 }
 
-void loopApi(void* parameter) {
-  logTaskFnStart("loopApi");
+void mqttCallback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived ["); Serial.print(topic); Serial.println("] ");
+
+  String json = "";
+  for (int i=0;i<length;i++) {
+    json += (char)payload[i];
+  }
+
+  handleResponse(json);
+}
+
+void connectMqtt() {
+  Serial.println("Connecting to MQTT...");
+  pubsubClient.connect(mqttClientId);
+  Serial.println("Connected to MQTT");
+
+  Serial.print("Subscribing on MQTT topic "); Serial.println(mqttTopic);
+  pubsubClient.subscribe(mqttTopic, 1);
+}
+
+void loopMqtt(void* parameter) {
+  logTaskFnStart("loopMqtt");
   while(true) {
-    apiGet(pbUrl);
+    if (!pubsubClient.connected()) {
+      Serial.println("Reconnecting to MQTT");
+      connectMqtt();
+    }
+    pubsubClient.loop();
+    vTaskDelay(10);
   }
 }
 
@@ -172,10 +202,6 @@ void setup() {
   // Set up serial console
   Serial.begin(115200);
 
-  // Start task which reacts to state by setting LEDs
-  xTaskCreatePinnedToCore(loopPeopleLEDs, "T_loopPeopleLEDs", 10000, NULL, 2, &T_loopPeopleLEDs, 1);
-  xTaskCreatePinnedToCore(loopWifiLED, "T_loopWifiLED", 10000, NULL, 1, &T_loopWifiLED, 1);
-
   // Join the wifi
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
@@ -184,7 +210,29 @@ void setup() {
   }
   Serial.println("Connected to the WiFi network");
 
-  // Set up loop that checks wifi status
+  // Register for callback hooks
+  auto upJson = apiUp();
+  mqttHost = upJson["mqtt"]["host"].as<const char*>();
+  mqttPort = upJson["mqtt"]["port"].as<int>();
+  mqttTopic = upJson["mqtt"]["topic"].as<const char*>();
+  mqttClientId = upJson["mqtt"]["client_id"].as<const char*>();
+
+  Serial.print("MQTT host:     "); Serial.println(mqttHost);
+  Serial.print("MQTT port:     "); Serial.println(mqttPort);
+  Serial.print("MQTT clientId: "); Serial.println(mqttClientId);
+
+  pubsubClient.setServer(mqttHost, mqttPort);
+  pubsubClient.setCallback(mqttCallback);
+  connectMqtt();
+
+  // Start task which reacts to state by setting LEDs
+  xTaskCreatePinnedToCore(loopPeopleLEDs, "T_loopPeopleLEDs", 10000, NULL, 2, &T_loopPeopleLEDs, 1);
+  xTaskCreatePinnedToCore(loopWifiLED, "T_loopWifiLED", 10000, NULL, 1, &T_loopWifiLED, 1);
+
+  // Start task which subscribes to MQTT
+  xTaskCreatePinnedToCore(loopMqtt, "T_loopMqtt", 10000, NULL, 2, &T_loopMqtt, 0);
+
+  // Set up task that periodically checks wifi status
   xTaskCreatePinnedToCore(
     loopCheckWifiStatus,
     "T_loopCheckWifiStatus",
@@ -194,14 +242,6 @@ void setup() {
     &T_loopCheckWifiStatus,
     0
   );
-
-  // Register for callback hooks
-  auto upResponseJson = apiUp();
-  apiGet(upResponseJson["app_url"].as<String>());
-  pbUrl = upResponseJson["pb_url"].as<String>();
-
-  // Start task which polls API requests
-  xTaskCreatePinnedToCore(loopApi, "T_loopApi", 10000, NULL, 1, &T_loopApi, 0);
 }
 
 void loop() { }

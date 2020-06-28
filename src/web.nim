@@ -15,7 +15,6 @@ import ./logs
 import ./models/person
 import ./models/status
 import ./mqtt
-import ./patchbay
 import ./views/index
 import ./statics
 import ./websockets
@@ -31,9 +30,6 @@ info "revision: ", pkgRevision
 
 proc publishUpdates() =
   wsRefreshAll()
-  let json = %*getPeople()
-  waitFor json.mqttPublish()
-  waitFor json.pbPublish()
 
 if defined(release):
   publishUpdates()
@@ -57,13 +53,12 @@ router api:
 
   post "/client/@client_id/up":
     let path = "/api/people"
-    let pbChannel = pbRegister(@"client_id", path = path)
+    let mqttJson = %*mqtt.configured
+    mqttJson["client_id"] = %(@"client_id")
 
     resp %*{
       "app_url": request.makeUri path,
-      "pb_url": $pbChannel.uri,
-      "pb_url_expires": $pbChannel.expires,
-      "mqtt": mqtt.configured
+      "mqtt": mqttJson
     }
 
 router web:

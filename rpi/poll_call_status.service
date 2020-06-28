@@ -1,0 +1,11 @@
+[Unit]
+Description=Polls call status API and publishes to MQTT.
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /usr/bin/poll_call_status.sh
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=default.target
