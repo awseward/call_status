@@ -210,13 +210,11 @@ void setup() {
   Serial.println("Connected to the WiFi network");
 
   // Register for callback hooks
-  auto upResponseJson = apiUp();
-  // apiGet(upResponseJson["app_url"].as<String>());
-
-  mqttHost = upResponseJson["mqtt"]["host"].as<const char*>();
-  mqttPort = upResponseJson["mqtt"]["port"].as<int>();
-  mqttTopic = upResponseJson["mqtt"]["topic"].as<const char*>();
-  mqttClientId = upResponseJson["mqtt"]["client_id"].as<const char*>();
+  auto upJson = apiUp();
+  mqttHost = upJson["mqtt"]["host"].as<const char*>();
+  mqttPort = upJson["mqtt"]["port"].as<int>();
+  mqttTopic = upJson["mqtt"]["topic"].as<const char*>();
+  mqttClientId = upJson["mqtt"]["client_id"].as<const char*>();
 
   Serial.print("MQTT host:     "); Serial.println(mqttHost);
   Serial.print("MQTT port:     "); Serial.println(mqttPort);
