@@ -14,8 +14,6 @@ requires "argparse >= 0.10.1"
 requires "jester >= 0.4.3"
 requires "nim >= 1.2.0"
 requires "nimassets >= 0.1.0"
-requires "nmqtt >= 1.0.2"
-requires "redis >= 0.2.0"
 requires "ws >= 0.4.0"
 
 requires "https://github.com/awseward/nim-junk-drawer#9ff04c5c70b2fe5d24f951f0ff8f408a108ee059"
