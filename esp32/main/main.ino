@@ -23,9 +23,9 @@ boolean isOnCallP1 = false;
 boolean isOnCallP2 = false;
 
 TaskHandle_t T_loopMqtt;
-TaskHandle_t T_loopPeopleLEDs;
-TaskHandle_t T_loopWifiLED;
-TaskHandle_t T_loopCheckWifiStatus;
+TaskHandle_t T_loopInidicatorPeople;
+TaskHandle_t T_loopIndicatorWifi;
+TaskHandle_t T_loopWifi;
 
 WiFiClient espClient;
 PubSubClient pubsubClient(espClient);
@@ -63,13 +63,31 @@ void startupFlash() {
     LED_P2
   };
 
-  for (int i = 0; i < 2; i++) {
-    for (int j = 0; j < allLEDs.size(); j++) {
-      int pin = allLEDs[j];
-      digitalWrite(pin, HIGH);
-      delay(30);
-      digitalWrite(pin, LOW);
-    }
+  for (int j = 0; j < allLEDs.size(); j++) {
+    int pin = allLEDs[j];
+    digitalWrite(pin, HIGH);
+    delay(500);
+  }
+
+  delay(500);
+
+  for (int j = 0; j < allLEDs.size(); j++) {
+    int pin = allLEDs[j];
+    digitalWrite(pin, LOW);
+  }
+
+  delay(250);
+
+  for (int j = 0; j < allLEDs.size(); j++) {
+    int pin = allLEDs[j];
+    digitalWrite(pin, HIGH);
+  }
+
+  delay(250);
+
+  for (int j = 0; j < allLEDs.size(); j++) {
+    int pin = allLEDs[j];
+    digitalWrite(pin, LOW);
   }
 }
 
@@ -174,8 +192,8 @@ void reconcileLED(int pin, boolean shouldBeOn) {
   digitalWrite(pin, writeVal);
 }
 
-void loopPeopleLEDs(void* parameter) {
-  logTaskFnStart("loopPeopleLEDs");
+void loopIndicatePeopleStatuses(void* parameter) {
+  logTaskFnStart("loopIndicatePeopleStatuses");
 
   while(true) {
     reconcileLED(LED_P1, isOnCallP1);
@@ -185,28 +203,34 @@ void loopPeopleLEDs(void* parameter) {
   }
 }
 
+void captureWifiStatus() {
+  wifiConnected = WiFi.status() == WL_CONNECTED;
+}
+
+void indicateWifiStatus() {
+  int pin = LED_WIFI_CONNECTED;
+  boolean ledIsOn = digitalRead(pin) == HIGH;
+  boolean shouldBeOn = wifiConnected;
+  if (ledIsOn == shouldBeOn) { return; }
+
+  int writeVal = shouldBeOn ? HIGH : LOW;
+  logDigitalWrite(pin, writeVal);
+  digitalWrite(pin, writeVal);
+}
+
 void loopCheckWifiStatus(void* parameter) {
   logTaskFnStart("loopCheckWifiStatus");
   while(true) {
-    wifiConnected = WiFi.status() == WL_CONNECTED;
+    captureWifiStatus();
     delay(10000);
   }
 }
 
-void loopWifiLED(void* parameter) {
-  logTaskFnStart("loopWifiLED");
-  int pin = LED_WIFI_CONNECTED;
+void loopInidcatorWifi(void* parameter) {
+  logTaskFnStart("loopInidcatorWifi");
 
   while(true) {
-    boolean ledIsOn = digitalRead(pin) == HIGH;
-    boolean shouldBeOn = wifiConnected;
-    if (ledIsOn == shouldBeOn) { continue; }
-
-    int writeVal = shouldBeOn ? HIGH : LOW;
-    //// Commenting this out since it just makes a ton of noise if there's
-    //// nothing actually connected to the pin
-    // logDigitalWrite(pin, writeVal);
-    digitalWrite(pin, writeVal);
+    indicateWifiStatus();
     delay(1000);
   }
 }
@@ -218,6 +242,7 @@ void setup() {
   pinMode(LED_P1, OUTPUT);
   pinMode(LED_P2, OUTPUT);
 
+  // Do a quick pseudo-diagnostic "flash all LEDs" kind of thing
   startupFlash();
 
   // Set up serial console
@@ -230,6 +255,8 @@ void setup() {
     Serial.println("Connecting to WiFi...");
   }
   Serial.println("Connected to the WiFi network");
+  captureWifiStatus();
+  indicateWifiStatus();
 
   // Register for callback hooks
   auto upJson = apiUp();
@@ -246,23 +273,17 @@ void setup() {
   pubsubClient.setCallback(mqttCallback);
   connectMqtt();
 
-  // Start task which reacts to state by setting LEDs
-  xTaskCreatePinnedToCore(loopPeopleLEDs, "T_loopPeopleLEDs", 10000, NULL, 2, &T_loopPeopleLEDs, 1);
-  xTaskCreatePinnedToCore(loopWifiLED, "T_loopWifiLED", 10000, NULL, 1, &T_loopWifiLED, 1);
+  // Start task which manages wifi status indication
+  xTaskCreatePinnedToCore(loopInidcatorWifi, "T_loopIndicatorWifi", 10000, NULL, 1, &T_loopIndicatorWifi, 1);
+
+  // Start task which manages people statuses indication
+  xTaskCreatePinnedToCore(loopIndicatePeopleStatuses, "T_loopInidicatorPeople", 10000, NULL, 2, &T_loopInidicatorPeople, 1);
 
   // Start task which subscribes to MQTT
   xTaskCreatePinnedToCore(loopMqtt, "T_loopMqtt", 10000, NULL, 2, &T_loopMqtt, 0);
 
   // Set up task that periodically checks wifi status
-  xTaskCreatePinnedToCore(
-    loopCheckWifiStatus,
-    "T_loopCheckWifiStatus",
-    10000,
-    NULL,
-    1,
-    &T_loopCheckWifiStatus,
-    0
-  );
+  xTaskCreatePinnedToCore(loopCheckWifiStatus, "T_loopWifi", 10000, NULL, 1, &T_loopWifi, 0);
 }
 
 void loop() { }
