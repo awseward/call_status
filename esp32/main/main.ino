@@ -55,6 +55,24 @@ StaticJsonDocument<500> apiUp() {
   throw "FIXME";
 }
 
+void startupFlash() {
+  std::array<int,4> allLEDs = {
+    LED_BUILTIN,
+    LED_WIFI_CONNECTED,
+    LED_P1,
+    LED_P2
+  };
+
+  for (int i = 0; i < 2; i++) {
+    for (int j = 0; j < allLEDs.size(); j++) {
+      int pin = allLEDs[j];
+      digitalWrite(pin, HIGH);
+      delay(30);
+      digitalWrite(pin, LOW);
+    }
+  }
+}
+
 void flash(int pin) {
   for (int i = 0; i < 25; i++) {
     digitalWrite(pin, HIGH);
@@ -195,9 +213,12 @@ void loopWifiLED(void* parameter) {
 
 void setup() {
   // Set up  LED pins
+  pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LED_WIFI_CONNECTED, OUTPUT);
   pinMode(LED_P1, OUTPUT);
   pinMode(LED_P2, OUTPUT);
+
+  startupFlash();
 
   // Set up serial console
   Serial.begin(115200);
