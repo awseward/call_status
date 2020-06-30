@@ -156,6 +156,11 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 void connectMqtt() {
   Serial.println("Connecting to MQTT...");
   pubsubClient.connect(mqttClientId);
+  while (!pubsubClient.connected()) {
+    delay(500);
+    Serial.println("Connecting to MQTT...");
+    pubsubClient.connect(mqttClientId);
+  }
   Serial.println("Connected to MQTT");
 
   Serial.print("Subscribing on MQTT topic "); Serial.println(mqttTopic);
