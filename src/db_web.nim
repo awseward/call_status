@@ -10,7 +10,7 @@ let db_open = open_pg
 
 proc updatePerson*(person: Person) =
   let query = sql dedent """
-    UPDATE people
+    UPDATE people_statuses
     SET is_on_call = $1
     WHERE name = $2;"""
   db_open.use conn:
@@ -21,7 +21,7 @@ proc updatePerson*(person: Person) =
 proc nameExists*(name: string): bool =
   let query = sql dedent """
     SELECT name
-    FROM people
+    FROM people_statuses
     WHERE name = $1
     LIMIT 1;"""
   db_open.use conn:
@@ -34,7 +34,7 @@ proc getPeople*(): seq[Person] =
     SELECT
       name
     , is_on_call
-    FROM people
+    FROM people_statuses
     WHERE name IN ($1, $2)
     ORDER BY name;"""
   let rows = db_open.use conn:
