@@ -11,7 +11,7 @@ import ./models/status
 let db_open = open_sqlite
 
 proc dbSetup*() =
-  let query = sql dedent """
+  let query = sql misc.dedent """
     CREATE TABLE IF NOT EXISTS people (
       name         TEXT UNIQUE NOT NULL,
       is_on_call   BOOLEAN NOT NULL,
@@ -21,7 +21,7 @@ proc dbSetup*() =
   db_open.use conn: conn.exec query
 
 proc updatePerson*(person: Person) =
-  let query = sql dedent """
+  let query = sql misc.dedent """
     INSERT INTO people (name, is_on_call, last_checked) VALUES
       (?, ?, current_timestamp)
       ON CONFLICT(name) DO UPDATE SET
@@ -32,7 +32,7 @@ proc updatePerson*(person: Person) =
   db_open.use conn: conn.exec query, person.name, isOnCall, isOnCall
 
 proc getLastKnownIsOnCall*(name: string): Option[bool] =
-  let query = sql dedent """
+  let query = sql misc.dedent """
     SELECT is_on_call
     FROM people
     WHERE name = ?"""
