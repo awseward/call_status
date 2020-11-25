@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: jiro4989/setup-nim-action@v1.0.2
+    - uses: jiro4989/setup-nim-action@v1.1.4
 
     - run: nimble install -y nimassets
     - run: nimble assets
@@ -36,7 +36,7 @@ jobs:
       with:
         path: ~/.nimble
         key: ${{ runner.os }}-nimble-stable
-    - uses: jiro4989/setup-nim-action@v1.0.2
+    - uses: jiro4989/setup-nim-action@v1.1.4
 
     # (for some reason even w/ a valid binary)
     - run: echo nimble build -y call_status_checker
@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: jiro4989/setup-nim-action@v1.0.2
+    - uses: jiro4989/setup-nim-action@v1.1.4
 
     # (for some reason even w/ a valid binary)
     - run: echo nimble build -y web
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: jiro4989/setup-nim-action@v1.0.2
+    - uses: jiro4989/setup-nim-action@v1.1.4
 
     - run: nimble install -y
     - run: nimble docs
