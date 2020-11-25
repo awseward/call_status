@@ -17,10 +17,11 @@ jobs:
         export TARBALL_FILENAME="${BINARY_FILENAME}-${GIT_TAG}.tar.gz"
         export TARBALL_FILEPATH="./${TARBALL_FILENAME}"
 
-        echo "::set-env name=GIT_TAG::${GIT_TAG}"
-        echo "::set-env name=BINARY_FILENAME::${BINARY_FILENAME}"
-        echo "::set-env name=TARBALL_FILENAME::${TARBALL_FILENAME}"
-        echo "::set-env name=TARBALL_FILEPATH::${TARBALL_FILEPATH}"
+        echo "GIT_TAG=${GIT_TAG}" >> "$GITHUB_ENV"
+        echo "BINARY_FILENAME=${BINARY_FILENAME}" >> "$GITHUB_ENV"
+        echo "TARBALL_FILENAME=${TARBALL_FILENAME}" >> "$GITHUB_ENV"
+        echo "TARBALL_FILEPATH$={TARBALL_FILEPATH}" >> "$GITHUB_ENV"
+
 
         echo "::set-output name=git_tag::${GIT_TAG}"
         echo "::set-output name=binary_filename::${BINARY_FILENAME}"
@@ -48,7 +49,7 @@ jobs:
     - id: checksum
       run: |
         export TARBALL_CHECKSUM="$(shasum -a 256 "${TARBALL_FILENAME}" | cut -d ' ' -f1)"
-        echo "::set-env name=TARBALL_CHECKSUM::${TARBALL_CHECKSUM}"
+        echo "TARBALL_CHECKSUM=${TARBALL_CHECKSUM}" >> "GITHUB_ENV"
         echo "::set-output name=tarball_checksum::${TARBALL_CHECKSUM}"
 
     - id: create_release
