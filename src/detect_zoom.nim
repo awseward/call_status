@@ -17,7 +17,7 @@ proc isZoomCallActive*(): bool =
     elif (not exitZero) and parsedOutput == 0:
       result = false
     else:
-      stderr.writeLine dedent("""
+      stderr.writeLine misc.dedent("""
           ERROR: Nonzero exit code
           Message: $1
         """ % [output]

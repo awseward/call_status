@@ -9,7 +9,7 @@ import ./models/person
 let db_open = open_pg
 
 proc updatePerson*(person: Person) =
-  let query = sql dedent """
+  let query = sql misc.dedent """
     UPDATE people_statuses
     SET is_on_call = $1
     WHERE name = $2;"""
@@ -19,7 +19,7 @@ proc updatePerson*(person: Person) =
     conn.exec prepared, $person.isOnCall(), person.name
 
 proc nameExists*(name: string): bool =
-  let query = sql dedent """
+  let query = sql misc.dedent """
     SELECT name
     FROM people_statuses
     WHERE name = $1
@@ -30,7 +30,7 @@ proc nameExists*(name: string): bool =
     conn.getValue(prepared, name) == name
 
 proc getPeople*(): seq[Person] =
-  let query = sql dedent """
+  let query = sql misc.dedent """
     SELECT
       name
     , is_on_call
