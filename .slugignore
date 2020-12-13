@@ -5,4 +5,5 @@ esp32/
 homebrew/
 misc/
 rpi/
+scripts/heroku_bootstrap.sh
 README.md
