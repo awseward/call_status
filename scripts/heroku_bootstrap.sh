@@ -7,7 +7,11 @@ git remote show heroku \
   && exit 1
 
 heroku create --buildpack heroku/nodejs
+
 heroku buildpacks:add https://github.com/awseward/heroku-buildpack-nim
+heroku buildpacks:add https://github.com/heroku/heroku-buildpack-apt
+heroku buildpacks:add https://github.com/niteoweb/heroku-buildpack-shell
+
 heroku addons:create heroku-postgresql:hobby-dev
 
 heroku config:set IS_HEROKU=true
