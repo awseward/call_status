@@ -1,2 +1,8 @@
 .envrc.example
+.github
 db_up.sh
+esp32/
+homebrew/
+misc/
+rpi/
+README.md
