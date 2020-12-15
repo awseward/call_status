@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+export PATH="/app/.bin:${PATH}"
+
+readonly sj_access_name="${SJ_ACCESS_NAME:-dw-write}"
+uplink import "${sj_access_name}" "${SJ_ACCESS}" || true
+
+readonly sqlite_file="$1"
+readonly sj_prefix="$2"
+
+readonly sj_filename="$(date -u +%Y%m%d%H%M%S_%N)--$(basename "${sqlite_file}")"
+
+echo "${sj_access_name}" \
+  | xargs -t uplink cp "${sqlite_file}" "${sj_prefix}/${sj_filename}" --progress=false --expires="$(date -d '10 days' -u +%FT%TZ)" --access \
+  | sed -E 's/^Created //' \
+  && ( echo "${sqlite_file}" | xargs -t >&2 rm -fv -- ) # Remove the temp file if it made it up.

@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+readonly csv_file="$(mktemp -t people_history-XXXX.csv)"
+readonly sqlite_file="$(mktemp -t call_status-XXXX.db)"
+
+psql -c 'COPY people_history TO STDOUT CSV;' "${DATABASE_URL}" > "${csv_file}"
+chmod -w "${csv_file}"
+
+query_create() {
+  cat <<SQL
+.echo on
+DROP TABLE IF EXISTS load_table;
+CREATE TABLE load_table (
+  person_id  INT         NOT NULL,
+  timestamp  TIMESTAMPTZ NOT NULL,
+  is_on_call BOOLEAN     NOT NULL
+);
+SQL
+}
+
+query_load() {
+  local -r load_file="$1"
+
+  cat <<SQL
+.echo on
+.mode csv
+.import ${load_file} load_table
+SQL
+}
+
+query_move() {
+  cat <<SQL
+.echo on
+DROP TABLE IF EXISTS call_status_events;
+CREATE TABLE call_status_events (
+  timestamp  TIMESTAMPTZ NOT NULL,
+  person_id  INT         NOT NULL,
+  is_on_call BOOLEAN     NOT NULL
+);
+INSERT INTO call_status_events
+        (timestamp, person_id, is_on_call)
+  SELECT timestamp, person_id, is_on_call
+  FROM load_table;
+DROP TABLE load_table;
+SQL
+}
+
+query_create             | sqlite3 "${sqlite_file}"
+query_load "${csv_file}" | sqlite3 "${sqlite_file}"
+query_move               | sqlite3 "${sqlite_file}"
+chmod -w "${sqlite_file}"
+
+readonly url_base="${DW_INGEST_URL}"
+
+readonly sj_prefix="${SJ_PREFIX:-sj://dw-inbox/call-events}"
+readonly sj_path="$(echo "${sqlite_file}" | xargs -t -I{} ./sj_push {} "${sj_prefix}")"
+[ "${sj_path}" == '' ] && exit 1
+
+# Temporary: May need to wake up what's currently a free-tier Heroku dyno
+until echo "${url_base}/wake" | xargs -t curl -s -I; do sleep 2; done
+
+echo "${sj_path}" | xargs -t -I{} \
+  curl -s -I "${url_base}"'/sqlite?sj_path={}&store=call-events'
