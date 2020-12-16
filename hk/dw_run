@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
+export PATH="/app/.bin:${PATH}"
+
+readonly sj_access_name="${SJ_ACCESS_NAME:-dw-write}"
+uplink import "${sj_access_name}" "${SJ_ACCESS}" || true
+
 readonly csv_file="$(mktemp -t people_history-XXXX.csv)"
 readonly sqlite_file="$(mktemp -t call_status-XXXX.db)"
 
@@ -55,7 +60,7 @@ chmod -w "${sqlite_file}"
 readonly url_base="${DW_INGEST_URL}"
 
 readonly sj_prefix="${SJ_PREFIX:-sj://dw-inbox/call-events}"
-readonly sj_path="$(echo "${sqlite_file}" | xargs -t -I{} ./sj_push {} "${sj_prefix}")"
+readonly sj_path="$(echo "${sqlite_file}" | xargs -t -I{} dw_push_sqlite {} "${sj_prefix}")"
 [ "${sj_path}" == '' ] && exit 1
 
 # Temporary: May need to wake up what's currently a free-tier Heroku dyno
