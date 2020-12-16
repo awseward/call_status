@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+#     _  _____ _____ _   _
+#    / \|_   _|_   _| \ | |
+#   / _ \ | |   | | |  \| |
+#  / ___ \| |   | | | |\  |
+# /_/   \_\_|   |_| |_| \_|
+#
+# This file is borrowed from awseward/dw-misc temporarily for expediency.
+#
+# Please refrain from modifying it in this repo, as it will eventually be
+# included automatically as part of build/deploy procedure.
+#
+
+set -euo pipefail
+
+readonly url_base="${DW_INGEST_URL:-localhost:8080}"
+readonly wake_interval_s="${DW_HK_WAKE_INTERVAL_S:-10}"
+
+readonly store="$1"
+readonly sj_path="$2"
+
+# Temporary: May need to wake up what's currently a free-tier Heroku dyno
+until echo "${url_base}/wake" | xargs -t curl -s -I
+  do
+    sleep "${wake_interval_s}"
+  done
+
+echo "${sj_path}" \
+  | xargs -t -I{}  curl -s -I "${url_base}/sqlite?sj_path={}&store=${store}"
