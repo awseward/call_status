@@ -37,6 +37,8 @@ jobs:
         path: ~/.nimble
         key: ${{ runner.os }}-nimble-stable
     - uses: jiro4989/setup-nim-action@v1.1.4
+      with:
+        nim-version: 1.2.0
 
     # (for some reason even w/ a valid binary)
     - run: echo nimble build -y call_status_checker
@@ -47,8 +49,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: jiro4989/setup-nim-action@v1.1.4
+      with:
+        nim-version: 1.2.0
 
-    - run: nimble build --accept web
+    - run: nimble build --accept
 
   docs:
     # FIXME: Figure out what's actually wrong-- I have a feeling it's just a
