@@ -57,14 +57,8 @@ query_load "${csv_file}" | sqlite3 "${sqlite_file}"
 query_move               | sqlite3 "${sqlite_file}"
 chmod -w "${sqlite_file}"
 
-readonly url_base="${DW_INGEST_URL}"
-
 readonly sj_prefix="${SJ_PREFIX:-sj://dw-inbox/call-events}"
 readonly sj_path="$(echo "${sqlite_file}" | xargs -t -I{} dw_push_sqlite {} "${sj_prefix}")"
 [ "${sj_path}" == '' ] && exit 1
 
-# Temporary: May need to wake up what's currently a free-tier Heroku dyno
-until echo "${url_base}/wake" | xargs -t curl -s -I; do sleep 2; done
-
-echo "${sj_path}" | xargs -t -I{} \
-  curl -s -I "${url_base}"'/sqlite?sj_path={}&store=call-events'
+echo "${sj_path}" | xargs -t dw_signal_sqlite 'call-events'
