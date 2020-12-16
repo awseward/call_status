@@ -1,2 +1,2 @@
 web: ./web
-release: ./scripts/heroku_release.sh
+release: ./hk/release
