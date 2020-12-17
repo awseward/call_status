@@ -16,6 +16,6 @@ There's some potential for permissions issues-- in such cases, can run:
 
 ```sh
 mkdir -p /tmp/log/call_status_checker
-touch /tmp/log/call_status_checker/watch.log
-chown "${USER}" /tmp/log/call_status_checker/watch.log
+touch /usr/local/var/log/call_status_checker/watch.log
+chown -R "${USER}" /usr/local/var/log/call_status_checker
 ```
