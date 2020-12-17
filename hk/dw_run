@@ -62,3 +62,10 @@ readonly sj_path="$(echo "${sqlite_file}" | xargs -t -I{} dw_push_sqlite {} "${s
 [ "${sj_path}" == '' ] && exit 1
 
 echo "${sj_path}" | xargs -t dw_signal_sqlite 'call-events'
+
+psql --echo-all "${DATABASE_URL}" <<< "
+  SELECT CURRENT_TIMESTAMP;
+
+  DELETE FROM people_history
+  WHERE timestamp < CURRENT_TIMESTAMP - '${LOCAL_HISTORY_RETENTION:-10 days}'::INTERVAL;
+"
