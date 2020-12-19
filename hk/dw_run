@@ -8,10 +8,9 @@ readonly sj_access_name="${SJ_ACCESS_NAME:-dw-write}"
 uplink import "${sj_access_name}" "${SJ_ACCESS}" || true
 
 readonly csv_file="$(mktemp -t people_history-XXXX.csv)"
-readonly sqlite_file="$(mktemp -t call_status-XXXX.db)"
 
 psql -c 'COPY people_history TO STDOUT CSV;' "${DATABASE_URL}" > "${csv_file}"
-chmod -w "${csv_file}"
+chmod -v 400 "${csv_file}"
 
 query_create() {
   cat <<SQL
@@ -52,16 +51,13 @@ DROP TABLE load_table;
 SQL
 }
 
+sqlite_file="$(mktemp -t call_status-XXXX.db)"
 query_create             | sqlite3 "${sqlite_file}"
 query_load "${csv_file}" | sqlite3 "${sqlite_file}"
 query_move               | sqlite3 "${sqlite_file}"
-chmod -w "${sqlite_file}"
+chmod -v 400 "${sqlite_file}"
 
-readonly sj_prefix="${SJ_PREFIX:-sj://dw-inbox/call-events}"
-readonly sj_path="$(echo "${sqlite_file}" | xargs -t -I{} dw_push_sqlite {} "${sj_prefix}")"
-[ "${sj_path}" == '' ] && exit 1
-
-echo "${sj_path}" | xargs -t dw_signal_sqlite 'call-events'
+dw_push 'call-events' "${sqlite_file}" "${SJ_PREFIX:-sj://dw-inbox/call-events}"
 
 psql --echo-all "${DATABASE_URL}" <<< "
   SELECT CURRENT_TIMESTAMP;
