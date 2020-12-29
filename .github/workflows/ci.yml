@@ -6,6 +6,9 @@ on:
 
 jobs:
   assets:
+    # ATTN -- Using macos-latest will have different results than using
+    #         ubuntu-latest, so this choice is really only so that CI matches
+    #         what I _happen_ to use for development.
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
