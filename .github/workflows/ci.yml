@@ -72,10 +72,9 @@ jobs:
         key: ${{ runner.os }}-nimble-stable
     - uses: jiro4989/setup-nim-action@v1.1.4
       with:
-        # TODO: Maybe one day get this caught up with the others
-        nim-version: 1.2.0
+        nim-version: 1.4.2
 
-    - run: nimble build --accept web
+    - run: nimble --define:useStdlib build --accept web
 
   docs:
     # FIXME: Figure out what's actually wrong-- I have a feeling it's just a
