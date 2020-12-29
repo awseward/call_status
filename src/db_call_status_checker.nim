@@ -6,7 +6,6 @@ import ./db
 import ./logs
 import ./misc
 import ./models/person
-import ./models/status
 
 let db_open = open_sqlite
 
