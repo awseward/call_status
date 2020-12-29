@@ -77,10 +77,6 @@ jobs:
     - run: nimble --define:useStdlib build --accept web
 
   docs:
-    # FIXME: Figure out what's actually wrong-- I have a feeling it's just a
-    # nimble version thing or something; in the meantime, wasn't really doing
-    # anything with these anyway so we're fine to just skip for now.
-    if: false
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
