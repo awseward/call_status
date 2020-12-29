@@ -11,8 +11,8 @@ bin           = @["call_status_checker", "call_status_cli", "web"]
 # Dependencies
 
 requires "argparse >= 0.10.1 & <= 0.10.1"
-requires "jester >= 0.4.3"
-requires "nim >= 1.2.0"
+requires "jester >= 0.5.0"
+requires "nim >= 1.4.2"
 requires "nimassets >= 0.1.0"
 requires "ws >= 0.4.0"
 
@@ -37,7 +37,7 @@ task pretty, "Run nimpretty on all .nim files in the repo":
   exec "find . -type f -not -name 'assets_file.nim' -name '*.nim' | xargs -n1 nimpretty --indent:2 --maxLineLen:120"
 
 task watch_web, "Watch for changes and reload web accordingly":
-  exec "find . -type f -name '*.nim' -or -name '*.nimf' | entr -r nimble run web"
+  exec "find . -type f -name '*.nim' -or -name '*.nimf' | entr -r nimble -d:useStdLib run web"
 
 task watch_zoom, "Simulate a zoom watching daemon (launchd LaunchAgent on MacOS)":
   while true:

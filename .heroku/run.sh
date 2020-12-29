@@ -35,3 +35,5 @@ dw_bin_install 'dw_signal_sqlite'
 dw_bin_install 'dw_push'
 
 chmod -v 500 .bin/*
+
+ls -lah /tmp/codon/tmp/cache/
