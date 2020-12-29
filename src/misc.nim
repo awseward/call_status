@@ -12,8 +12,6 @@ proc dedent*(s: string): string =
   unindent(s, discoverIndent s)
 
 runnableExamples:
-  import strutils
-
   let query = dedent """
 
     CREATE TABLE things (
