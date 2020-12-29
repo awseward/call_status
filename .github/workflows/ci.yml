@@ -22,6 +22,8 @@ jobs:
         path: ~/.nimble
         key: ${{ runner.os }}-nimble-stable
     - uses: jiro4989/setup-nim-action@v1.1.4
+      with:
+        nim-version: 1.4.2
 
     - run: nimble install --accept nimassets
     - run: nimble assets
@@ -67,7 +69,8 @@ jobs:
         key: ${{ runner.os }}-nimble-stable
     - uses: jiro4989/setup-nim-action@v1.1.4
       with:
-        nim-version: 1.4.2
+        # TODO: Maybe one day get this caught up with the others
+        nim-version: 1.2.0
 
     - run: nimble build --accept web
 
@@ -92,6 +95,8 @@ jobs:
         path: ~/.nimble
         key: ${{ runner.os }}-nimble-stable
     - uses: jiro4989/setup-nim-action@v1.1.4
+      with:
+        nim-version: 1.4.2
 
     - run: nimble install --accept
     - run: nimble docs
