@@ -41,7 +41,7 @@ task watch_web, "Watch for changes and reload web accordingly":
 
 task watch_zoom, "Simulate a zoom watching daemon (launchd LaunchAgent on MacOS)":
   while true:
-    exec "nimble -d:ssl run call_status_checker; sleep 10"
+    exec "nimble -d:ssl run call_status_checker check; sleep 10"
 
 task heroku_build, "Steps to perform during the heroku build phase":
   exec "nimble install --accept nimassets"
