@@ -42,7 +42,7 @@ jobs:
         key: ${{ runner.os }}-nimble-stable
     - uses: jiro4989/setup-nim-action@v1.1.4
       with:
-        nim-version: 1.2.0
+        nim-version: 1.4.2
 
     - run: nimble --define:ssl --define:release --stacktrace:on --linetrace:on build --accept
 
