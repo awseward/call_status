@@ -24,7 +24,7 @@ jobs:
       with:
         path: ~/.nimble
         key: ${{ runner.os }}-nimble-stable
-    - uses: jiro4989/setup-nim-action@v1.1.4
+    - uses: jiro4989/setup-nim-action@v1.2.3
       with:
         nim-version: 1.4.2
 
@@ -48,7 +48,7 @@ jobs:
       with:
         path: ~/.nimble
         key: ${{ runner.os }}-nimble-stable
-    - uses: jiro4989/setup-nim-action@v1.1.4
+    - uses: jiro4989/setup-nim-action@v1.2.3
       with:
         nim-version: 1.4.2
 
@@ -70,7 +70,7 @@ jobs:
       with:
         path: ~/.nimble
         key: ${{ runner.os }}-nimble-stable
-    - uses: jiro4989/setup-nim-action@v1.1.4
+    - uses: jiro4989/setup-nim-action@v1.2.3
       with:
         nim-version: 1.4.2
 
@@ -92,7 +92,7 @@ jobs:
       with:
         path: ~/.nimble
         key: ${{ runner.os }}-nimble-stable
-    - uses: jiro4989/setup-nim-action@v1.1.4
+    - uses: jiro4989/setup-nim-action@v1.2.3
       with:
         nim-version: 1.4.2
 
