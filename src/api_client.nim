@@ -31,8 +31,11 @@ proc sendJson*(api: ApiClient, httpMethod: HttpMethod, relativeUrl: string, body
   if is4xx(result.code) or is5xx(result.code):
     raise newException(HttpRequestError, $result.status)
   debug result.status
-  if result.body != "": debug result.body
 
+  # This doesn't seem great, but it works (I'm not having the best of times
+  # debugging it at the moment...)
+  if result.status != "204 No Content" and result.body != "":
+    debug result.body
 
 proc getPeople*(api: ApiClient): seq[Person] =
   let response = api.sendJson(HttpGet, "/api/people")

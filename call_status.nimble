@@ -12,7 +12,7 @@ bin           = @["call_status_checker", "call_status_cli", "web"]
 
 requires "argparse >= 0.10.1 & <= 0.10.1"
 requires "jester >= 0.4.3"
-requires "nim >= 1.2.0"
+requires "nim >= 1.4.2"
 requires "nimassets >= 0.1.0"
 requires "ws >= 0.4.0"
 
