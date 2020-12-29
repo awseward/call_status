@@ -9,7 +9,6 @@ import ./checker_config
 import ./db_call_status_checker
 import ./detect_zoom
 import ./logs
-import ./misc
 import ./models/person
 import ./models/status
 import ./statics
