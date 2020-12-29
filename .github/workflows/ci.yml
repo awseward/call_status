@@ -6,21 +6,28 @@ on:
 
 jobs:
   assets:
-    # FIXME: Solve the entry ordering discrepancy between different runners and
-    # then turn this job back on
-    if: false
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Cache choosenim
+      id: cache-choosenim
+      uses: actions/cache@v1
+      with:
+        path: ~/.choosenim
+        key: ${{ runner.os }}-choosenim-stable
+    - name: Cache nimble
+      id: cache-nimble
+      uses: actions/cache@v1
+      with:
+        path: ~/.nimble
+        key: ${{ runner.os }}-nimble-stable
     - uses: jiro4989/setup-nim-action@v1.1.4
 
-    - run: nimble install -y nimassets
+    - run: nimble install --accept nimassets
     - run: nimble assets
     - run: git diff --exit-code --color
 
   build-call_status_checker:
-    # FIXME: Solve the flaky cache issue and then turn this job back on
-    if: false
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
@@ -40,19 +47,29 @@ jobs:
       with:
         nim-version: 1.4.2
 
-    # (for some reason even w/ a valid binary)
-    - run: echo nimble build -y call_status_checker
-    - run: nimble build -y
+    - run: nimble build --accept call_status_checker
 
   build-web:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Cache choosenim
+      id: cache-choosenim
+      uses: actions/cache@v1
+      with:
+        path: ~/.choosenim
+        key: ${{ runner.os }}-choosenim-stable
+    - name: Cache nimble
+      id: cache-nimble
+      uses: actions/cache@v1
+      with:
+        path: ~/.nimble
+        key: ${{ runner.os }}-nimble-stable
     - uses: jiro4989/setup-nim-action@v1.1.4
       with:
         nim-version: 1.4.2
 
-    - run: nimble build --accept
+    - run: nimble build --accept web
 
   docs:
     # FIXME: Figure out what's actually wrong-- I have a feeling it's just a
@@ -62,7 +79,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Cache choosenim
+      id: cache-choosenim
+      uses: actions/cache@v1
+      with:
+        path: ~/.choosenim
+        key: ${{ runner.os }}-choosenim-stable
+    - name: Cache nimble
+      id: cache-nimble
+      uses: actions/cache@v1
+      with:
+        path: ~/.nimble
+        key: ${{ runner.os }}-nimble-stable
     - uses: jiro4989/setup-nim-action@v1.1.4
 
-    - run: nimble install -y
+    - run: nimble install --accept
     - run: nimble docs
