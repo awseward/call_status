@@ -36,4 +36,4 @@ dw_bin_install 'dw_push'
 
 chmod -v 500 .bin/*
 
-ls -lah /tmp/codon/tmp/cache/
+rm -rf /tmp/codon/tmp/cache/Nim
