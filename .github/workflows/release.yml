@@ -44,7 +44,7 @@ jobs:
       with:
         nim-version: 1.2.0
 
-    - run: nimble --define:ssl --define:release --stacktrace=on --linetrace=on build --accept
+    - run: nimble --define:ssl --define:release --stacktrace:on --linetrace:on build --accept
 
     - run: tar -czf "${TARBALL_FILENAME}" "${BINARY_FILENAME}"
 
