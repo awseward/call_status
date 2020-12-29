@@ -22,7 +22,7 @@ requires "https://github.com/awseward/nim-junk-drawer#9ff04c5c70b2fe5d24f951f0ff
 
 # See: https://web.archive.org/web/20200515050555/https://www.rockyourcode.com/how-to-serve-static-files-with-nim-and-jester-on-heroku/
 task assets, "Generate packaged assets":
-  exec "echo src/views/assets_file.nim | xargs -t -I{} nimassets --dir=public --output={}"
+  exec "nimassets --help && echo src/views/assets_file.nim | xargs -t -I{} nimassets --dir=public --output={}"
 
 task db_setup, "Set up the DB":
   exec "./misc/db_setup.sh"
