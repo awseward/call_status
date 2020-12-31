@@ -1,100 +1,111 @@
-name: CI
-
-on:
-  pull_request:
-    branches: [ master ]
+# Warning: this is a generated file; please avoid editing it manually unless
+# doing so temporarily.
 
 jobs:
-  assets:
-    # ATTN -- Using macos-latest will have different results than using
-    #         ubuntu-latest, so this choice is really only so that CI matches
-    #         what I _happen_ to use for development.
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Cache choosenim
-      id: cache-choosenim
-      uses: actions/cache@v1
-      with:
-        path: ~/.choosenim
-        key: ${{ runner.os }}-choosenim-stable
-    - name: Cache nimble
-      id: cache-nimble
-      uses: actions/cache@v1
-      with:
-        path: ~/.nimble
-        key: ${{ runner.os }}-nimble-stable
-    - uses: jiro4989/setup-nim-action@v1.2.3
-      with:
-        nim-version: 1.4.2
-
-    - run: nimble install --accept nimassets
-    - run: nimble assets
-    - run: git diff --exit-code --color
-
   build-call_status_checker:
-    runs-on: macos-latest
+    runs-on:
+      - macos-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Cache choosenim
-      id: cache-choosenim
-      uses: actions/cache@v1
-      with:
-        path: ~/.choosenim
-        key: ${{ runner.os }}-choosenim-stable
-    - name: Cache nimble
-      id: cache-nimble
-      uses: actions/cache@v1
-      with:
-        path: ~/.nimble
-        key: ${{ runner.os }}-nimble-stable
-    - uses: jiro4989/setup-nim-action@v1.2.3
-      with:
-        nim-version: 1.4.2
-
-    - run: nimble build --accept call_status_checker
-
+      - uses: "actions/checkout@v2"
+      - id: cache-choosenim
+        name: Cache choosenim
+        uses: "actions/cache@v1"
+        with:
+          key: "${{ runner.os }}-choosenim"
+          path: "~/.choosenim"
+      - id: cache-nimble
+        name: Cache nimble
+        uses: "actions/cache@v1"
+        with:
+          key: "${{ runner.os }}-nimble"
+          path: "~/.nimble"
+      - uses: "jiro4989/setup-nim-action@v1.2.3"
+        with:
+          nim-version: '1.4.2'
+      - run: nimble --stacktrace:on --linetrace:on --define:release --define:ssl build --accept call_status_checker
   build-web:
-    runs-on: ubuntu-latest
+    runs-on:
+      - ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Cache choosenim
-      id: cache-choosenim
-      uses: actions/cache@v1
-      with:
-        path: ~/.choosenim
-        key: ${{ runner.os }}-choosenim-stable
-    - name: Cache nimble
-      id: cache-nimble
-      uses: actions/cache@v1
-      with:
-        path: ~/.nimble
-        key: ${{ runner.os }}-nimble-stable
-    - uses: jiro4989/setup-nim-action@v1.2.3
-      with:
-        nim-version: 1.4.2
-
-    - run: nimble --define:useStdlib build --accept web
-
+      - uses: "actions/checkout@v2"
+      - id: cache-choosenim
+        name: Cache choosenim
+        uses: "actions/cache@v1"
+        with:
+          key: "${{ runner.os }}-choosenim"
+          path: "~/.choosenim"
+      - id: cache-nimble
+        name: Cache nimble
+        uses: "actions/cache@v1"
+        with:
+          key: "${{ runner.os }}-nimble"
+          path: "~/.nimble"
+      - uses: "jiro4989/setup-nim-action@v1.2.3"
+        with:
+          nim-version: '1.4.2'
+      - run: nimble --stacktrace:on --linetrace:on --define:release --define:useStdLib build --accept web
+  check-assets:
+    runs-on:
+      - macos-latest
+    steps:
+      - uses: "actions/checkout@v2"
+      - id: cache-choosenim
+        name: Cache choosenim
+        uses: "actions/cache@v1"
+        with:
+          key: "${{ runner.os }}-choosenim"
+          path: "~/.choosenim"
+      - id: cache-nimble
+        name: Cache nimble
+        uses: "actions/cache@v1"
+        with:
+          key: "${{ runner.os }}-nimble"
+          path: "~/.nimble"
+      - uses: "jiro4989/setup-nim-action@v1.2.3"
+        with:
+          nim-version: '1.4.2'
+      - run: nimble install --accept nimassets
+      - run: nimble  assets
+      - run: git diff --exit-code --color
+  check-dhall:
+    runs-on:
+      - ubuntu-latest
+    steps:
+      - uses: "actions/checkout@v2"
+      - uses: "awseward/gh-actions-dhall@0.2.4"
+        with:
+          dhallVersion: '1.37.1'
+  check-shell:
+    runs-on:
+      - ubuntu-latest
+    steps:
+      - uses: "actions/checkout@v2"
+      - uses: "awseward/gh-actions-shell@0.1.2"
   docs:
-    runs-on: ubuntu-latest
+    runs-on:
+      - ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Cache choosenim
-      id: cache-choosenim
-      uses: actions/cache@v1
-      with:
-        path: ~/.choosenim
-        key: ${{ runner.os }}-choosenim-stable
-    - name: Cache nimble
-      id: cache-nimble
-      uses: actions/cache@v1
-      with:
-        path: ~/.nimble
-        key: ${{ runner.os }}-nimble-stable
-    - uses: jiro4989/setup-nim-action@v1.2.3
-      with:
-        nim-version: 1.4.2
-
-    - run: nimble install --accept
-    - run: nimble docs
+      - uses: "actions/checkout@v2"
+      - id: cache-choosenim
+        name: Cache choosenim
+        uses: "actions/cache@v1"
+        with:
+          key: "${{ runner.os }}-choosenim"
+          path: "~/.choosenim"
+      - id: cache-nimble
+        name: Cache nimble
+        uses: "actions/cache@v1"
+        with:
+          key: "${{ runner.os }}-nimble"
+          path: "~/.nimble"
+      - uses: "jiro4989/setup-nim-action@v1.2.3"
+        with:
+          nim-version: '1.4.2'
+      - run: nimble  install --accept
+      - run: nimble docs
+name: CI
+on:
+  pull_request:
+    branches:
+      - main
+      - master
