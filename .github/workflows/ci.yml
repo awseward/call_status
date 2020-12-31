@@ -1,5 +1,8 @@
-# Warning: this is a generated file; please avoid editing it manually unless
-# doing so temporarily.
+# Warning: this is an automatically generated file.
+#
+# It was generated using '.github/.workflow_templates/ci.dhall'.
+#
+# Please avoid editing it manually unless doing so temporarily.
 
 jobs:
   build-call_status_checker:
