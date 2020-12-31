@@ -5,7 +5,7 @@
 # Please avoid editing it manually unless doing so temporarily.
 
 jobs:
-  release-client:
+  release-call_status_checker:
     runs-on:
       - macos-latest
     steps:
