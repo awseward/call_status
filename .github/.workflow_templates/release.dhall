@@ -11,7 +11,7 @@ let release = action_templates.release
 in  { name = "Release"
     , on.push.tags = [ "*" ]
     , jobs = toMap
-        { release-client =
+        { release-call_status_checker =
           { runs-on = [ "macos-latest" ]
           , steps =
               imports.concat
