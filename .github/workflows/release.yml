@@ -90,7 +90,7 @@ jobs:
             
             Sourced from ${{ steps.create_release.outputs.html_url }}.
           download-url: "${{ steps.upload_tarball.outputs.browser_download_url }}"
-          formula-name: call_status
+          formula-name: call_status_checker
           homebrew-tap: awseward/homebrew-tap
 name: Release
 on:

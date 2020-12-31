@@ -19,7 +19,7 @@ in  { name = "Release"
                 [ NimSetup.mkSteps NimSetup.Opts::{ nimVersion = "1.4.2" }
                 , release.mkSteps
                     release.Opts::{
-                    , formula-name = "call_status"
+                    , formula-name = "call_status_checker"
                     , homebrew-tap = "awseward/homebrew-tap"
                     }
                 ]
