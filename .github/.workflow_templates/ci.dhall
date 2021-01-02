@@ -14,26 +14,6 @@ let nim/Build = action_templates.nim/Build
 
 let nim/Docs = action_templates.nim/Docs
 
-let checkDhall =
-      let Inputs = imports.gh-actions-dhall.Inputs
-
-      in  GHA.Job::{
-          , runs-on = [ "ubuntu-latest" ]
-          , steps =
-              Checkout.plainDo
-                [ [ GHA.Step.mkUses
-                      GHA.Step.Common::{=}
-                      GHA.Step.Uses::{
-                      , uses = "awseward/gh-actions-dhall@0.2.4"
-                      , `with` =
-                          let inputs = Inputs::{ dhallVersion = "1.37.1" }
-
-                          in  toMap inputs
-                      }
-                  ]
-                ]
-          }
-
 let checkShell =
       GHA.Job::{
       , runs-on = [ "ubuntu-latest" ]
@@ -74,6 +54,20 @@ in  GHA.Workflow::{
             , nim/Docs.mkJobEntry
                 nim/Docs.Opts::{ platforms = [ "ubuntu-latest" ] }
             ]
-          , toMap { check-shell = checkShell, check-dhall = checkDhall }
+          , toMap
+              { check-shell = checkShell
+              , check-dhall = GHA.Job::{
+                , runs-on = [ "ubuntu-latest" ]
+                , steps =
+                    Checkout.plainDo
+                      [ [ let action = imports.gh-actions-dhall
+
+                          in  action.mkStep
+                                action.Common::{=}
+                                action.Inputs::{ dhallVersion = "1.37.1" }
+                        ]
+                      ]
+                }
+              }
           ]
     }
