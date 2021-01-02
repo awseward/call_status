@@ -1,24 +1,28 @@
 let imports = ../imports.dhall
 
+let GHA = imports.GHA
+
+let On = GHA.On
+
 let action_templates = imports.action_templates
 
-let NimSetup = action_templates.NimSetup
+let Checkout = action_templates.actions/Checkout
 
-let GHA = action_templates.gha/jobs
+let nim/Setup = action_templates.nim/Setup
 
-let release = action_templates.release
+let Release = action_templates.release
 
-in  { name = "Release"
-    , on.push.tags = [ "*" ]
+in  GHA.Workflow::{
+    , name = "Release"
+    , on = On.map [ On.push On.PushPull::{ tags = On.include [ "*" ] } ]
     , jobs = toMap
-        { release-call_status_checker =
-          { runs-on = [ "macos-latest" ]
+        { release-call_status_checker = GHA.Job::{
+          , runs-on = [ "macos-latest" ]
           , steps =
-              imports.concat
-                GHA.Step
-                [ NimSetup.mkSteps NimSetup.Opts::{ nimVersion = "1.4.2" }
-                , release.mkSteps
-                    release.Opts::{
+              Checkout.plainDo
+                [ nim/Setup.mkSteps nim/Setup.Opts::{ nimVersion = "1.4.2" }
+                , Release.mkSteps
+                    Release.Opts::{
                     , formula-name = "call_status_checker"
                     , homebrew-tap = "awseward/homebrew-tap"
                     }
