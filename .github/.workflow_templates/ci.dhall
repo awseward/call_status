@@ -1,50 +1,79 @@
 let imports = ../imports.dhall
 
-let Assets = imports.action_templates.NimAssets
+let GHA = imports.GHA
 
-let Build = imports.action_templates.NimBuild
+let On = GHA.On
 
-let Docs = imports.action_templates.NimDocs
+let action_templates = imports.action_templates
 
-let check-dhall = imports.gh-actions-dhall
+let Checkout = action_templates.actions/Checkout
 
-let check-shell = imports.gh-actions-shell
+let nim/Assets = action_templates.nim/Assets
 
-let checkedOut = imports.checkedOut
+let nim/Build = action_templates.nim/Build
 
-in  { name = "CI"
-    , on.pull_request.branches = [ "main", "master" ]
+let nim/Docs = action_templates.nim/Docs
+
+let checkDhall =
+      let Inputs = imports.gh-actions-dhall.Inputs
+
+      in  GHA.Job::{
+          , runs-on = [ "ubuntu-latest" ]
+          , steps =
+              Checkout.plainDo
+                [ [ GHA.Step.mkUses
+                      GHA.Step.Common::{=}
+                      GHA.Step.Uses::{
+                      , uses = "awseward/gh-actions-dhall@0.2.4"
+                      , `with` =
+                          let inputs = Inputs::{ dhallVersion = "1.37.1" }
+
+                          in  toMap inputs
+                      }
+                  ]
+                ]
+          }
+
+let checkShell =
+      GHA.Job::{
+      , runs-on = [ "ubuntu-latest" ]
+      , steps =
+          Checkout.plainDo
+            [ [ GHA.Step.mkUses
+                  GHA.Step.Common::{=}
+                  GHA.Step.Uses::{ uses = "awseward/gh-actions-shell@0.1.2" }
+              ]
+            ]
+      }
+
+let collectJobs = imports.concat { mapKey : Text, mapValue : GHA.Job.Type }
+
+in  GHA.Workflow::{
+    , name = "CI"
+    , on =
+        On.map
+          [ On.pullRequest
+              On.PushPull::{ branches = On.include [ "main", "master" ] }
+          ]
     , jobs =
-        imports.collectJobs
-          [ [ Assets.mkJob Assets.Opts::{ platforms = [ "macos-latest" ] }
-            , Build.mkJob
-                Build.Opts::{
+        collectJobs
+          [ [ nim/Assets.mkJobEntry
+                nim/Assets.Opts::{ platforms = [ "macos-latest" ] }
+            , nim/Build.mkJobEntry
+                nim/Build.Opts::{
                 , platforms = [ "ubuntu-latest" ]
                 , bin = "web"
                 , nimbleFlags = "--define:release --define:useStdLib"
                 }
-            , Build.mkJob
-                Build.Opts::{
+            , nim/Build.mkJobEntry
+                nim/Build.Opts::{
                 , platforms = [ "macos-latest" ]
                 , bin = "call_status_checker"
                 , nimbleFlags = "--define:release --define:ssl"
                 }
-            , Docs.mkJob Docs.Opts::{ platforms = [ "ubuntu-latest" ] }
+            , nim/Docs.mkJobEntry
+                nim/Docs.Opts::{ platforms = [ "ubuntu-latest" ] }
             ]
-          , toMap
-              { check-shell =
-                { runs-on = [ "ubuntu-latest" ]
-                , steps =
-                    checkedOut [ check-shell.mkJob check-shell.Inputs::{=} ]
-                }
-              , check-dhall =
-                { runs-on = [ "ubuntu-latest" ]
-                , steps =
-                    checkedOut
-                      [ check-dhall.mkJob
-                          check-dhall.Inputs::{ dhallVersion = "1.37.1" }
-                      ]
-                }
-              }
+          , toMap { check-shell = checkShell, check-dhall = checkDhall }
           ]
     }

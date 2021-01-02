@@ -84,7 +84,7 @@ jobs:
     steps:
       - uses: "actions/checkout@v2"
       - uses: "awseward/gh-actions-shell@0.1.2"
-  docs:
+  generate-docs:
     runs-on:
       - ubuntu-latest
     steps:
