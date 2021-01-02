@@ -14,18 +14,6 @@ let nim/Build = action_templates.nim/Build
 
 let nim/Docs = action_templates.nim/Docs
 
-let checkShell =
-      GHA.Job::{
-      , runs-on = [ "ubuntu-latest" ]
-      , steps =
-          Checkout.plainDo
-            [ [ GHA.Step.mkUses
-                  GHA.Step.Common::{=}
-                  GHA.Step.Uses::{ uses = "awseward/gh-actions-shell@0.1.2" }
-              ]
-            ]
-      }
-
 let collectJobs = imports.concat { mapKey : Text, mapValue : GHA.Job.Type }
 
 in  GHA.Workflow::{
@@ -55,7 +43,18 @@ in  GHA.Workflow::{
                 nim/Docs.Opts::{ platforms = [ "ubuntu-latest" ] }
             ]
           , toMap
-              { check-shell = checkShell
+              { check-shell = GHA.Job::{
+                , runs-on = [ "ubuntu-latest" ]
+                , steps =
+                    Checkout.plainDo
+                      [ [ let action = imports.gh-actions-shell
+
+                          in  action.mkStep
+                                action.Common::{=}
+                                action.Inputs::{=}
+                        ]
+                      ]
+                }
               , check-dhall = GHA.Job::{
                 , runs-on = [ "ubuntu-latest" ]
                 , steps =
