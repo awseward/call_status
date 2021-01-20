@@ -6,15 +6,15 @@ let On = GHA.On
 
 let OS = GHA.OS.Type
 
-let action_templates = imports.action_templates
+let actions = imports.actions-catalog
 
-let Checkout = action_templates.actions/Checkout
+let Checkout = actions.actions/checkout
 
-let nim/Assets = action_templates.nim/Assets
+let nim/Assets = imports.action_templates.nim/Assets
 
-let nim/Build = action_templates.nim/Build
+let nim/Build = imports.action_templates.nim/Build
 
-let nim/Docs = action_templates.nim/Docs
+let nim/Docs = imports.action_templates.nim/Docs
 
 in  GHA.Workflow::{
     , name = "CI"
@@ -46,20 +46,20 @@ in  GHA.Workflow::{
               , runs-on = [ OS.ubuntu-latest ]
               , steps =
                   Checkout.plainDo
-                    [ let action = imports.gh-actions-shell
+                    [ let A = actions.awseward/gh-actions-shell
 
-                      in  action.mkStep action.Common::{=} action.Inputs::{=}
+                      in  A.mkStep A.Common::{=} A.Inputs::{=}
                     ]
               }
             , check-dhall = GHA.Job::{
               , runs-on = [ OS.ubuntu-latest ]
               , steps =
                   Checkout.plainDo
-                    [ let action = imports.gh-actions-dhall
+                    [ let A = actions.awseward/gh-actions-dhall
 
-                      in  action.mkStep
-                            action.Common::{=}
-                            action.Inputs::{ dhallVersion = "1.37.1" }
+                      in  A.mkStep
+                            A.Common::{=}
+                            A.Inputs::{ dhallVersion = "1.37.1" }
                     ]
               }
             }
