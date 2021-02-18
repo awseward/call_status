@@ -4,14 +4,12 @@
 #include "HTTPClient.h"
 #include "PubSubClient.h"
 #include "WiFi.h"
+#include "./wifiCredentials.h"
 
 const int LED_BUILTIN = 2;
 const int LED_WIFI_CONNECTED = 16;
 const int LED_P1 = 17;
 const int LED_P2 = 18;
-
-const char* ssid     = "[REDACTED]";
-const char* password = "[REDACTED]";
 
 const char* mqttHost;
 int mqttPort;
