@@ -1,0 +1,2 @@
+export WIFI_SSID=__WIFI_SSID__
+export WIFI_PASSWORD=__WIFI_PASSWORD__
