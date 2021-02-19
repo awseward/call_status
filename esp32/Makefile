@@ -1,21 +1,22 @@
-header_template = main/wifiCredentials.template.h
-header_file     = main/wifiCredentials.h
-
 arduino_fqbn = espressif:esp32:esp32
 arduino_port = /dev/cu.usbserial-0001
+env_header   = main/env.h
+env_template = main/env.template.h
 
-build: ${header_file}
+# ---
+
+build: ${env_header}
 	arduino-cli compile -v --fqbn "${arduino_fqbn}" main
-	rm -rf "${header_file}"
+	rm -rf "${env_header}"
 
-flash: ${header_file}
+flash: ${env_header}
 	arduino-cli upload --fqbn "${arduino_fqbn}" --port "${arduino_port}" main
-	rm -rf "${header_file}"
+	rm -rf "${env_header}"
 
-${header_file}:
-	envsubst < "${header_template}" > "${header_file}"
+${env_header}:
+	envsubst < "${env_template}" > "${env_header}"
 
-wifi_cred_up: ${header_file}
+wifi_cred_up: ${env_header}
 
 nuke:
 	git clean -xdf -e .envrc

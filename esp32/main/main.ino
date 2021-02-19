@@ -4,7 +4,8 @@
 #include "HTTPClient.h"
 #include "PubSubClient.h"
 #include "WiFi.h"
-#include "./wifiCredentials.h"
+
+#include "./env.h"
 
 const int LED_BUILTIN = 2;
 const int LED_WIFI_CONNECTED = 16;
@@ -252,11 +253,13 @@ void setup() {
   Serial.begin(115200);
 
   // Join the wifi
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
+  WiFi.begin(env__WIFI_SSID, env__WIFI_PASSWORD);
+
+  while (WiFi.status() == WL_IDLE_STATUS) {
     delay(500);
     Serial.println("Connecting to WiFi...");
   }
+
   Serial.println("Connected to the WiFi network");
   captureWifiStatus();
   indicateWifiStatus();
