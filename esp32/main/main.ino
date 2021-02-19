@@ -4,10 +4,11 @@
 #include "HTTPClient.h"
 #include "PubSubClient.h"
 #include "WiFi.h"
-#include "./wifiCredentials.h"
+
+#include "./env.h"
 
 const int LED_BUILTIN = 2;
-const int LED_WIFI_CONNECTED = 16;
+const int LED_WIFI = 16;
 const int LED_P1 = 17;
 const int LED_P2 = 18;
 
@@ -16,7 +17,8 @@ int mqttPort;
 const char* mqttClientId;
 const char* mqttTopic;
 
-boolean wifiConnected = false;
+int wifiStatus = WL_IDLE_STATUS;
+
 boolean isOnCallP1 = false;
 boolean isOnCallP2 = false;
 
@@ -56,7 +58,7 @@ StaticJsonDocument<500> apiUp() {
 void startupFlash() {
   std::array<int,4> allLEDs = {
     LED_BUILTIN,
-    LED_WIFI_CONNECTED,
+    LED_WIFI,
     LED_P1,
     LED_P2
   };
@@ -154,7 +156,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 void connectMqtt() {
   Serial.println("Connecting to MQTT...");
   pubsubClient.connect(mqttClientId);
-  while (!pubsubClient.connected()) {
+  while(!pubsubClient.connected()) {
     delay(500);
     Serial.println("Connecting to MQTT...");
     pubsubClient.connect(mqttClientId);
@@ -206,34 +208,55 @@ void loopIndicatePeopleStatuses(void* parameter) {
   }
 }
 
-void captureWifiStatus() {
-  wifiConnected = WiFi.status() == WL_CONNECTED;
-}
-
-void indicateWifiStatus() {
-  int pin = LED_WIFI_CONNECTED;
-  boolean ledIsOn = digitalRead(pin) == HIGH;
-  boolean shouldBeOn = wifiConnected;
-  if (ledIsOn == shouldBeOn) { return; }
-
-  int writeVal = shouldBeOn ? HIGH : LOW;
-  logDigitalWrite(pin, writeVal);
-  digitalWrite(pin, writeVal);
+int captureWifiStatus() {
+  wifiStatus = WiFi.status();
+  return wifiStatus;
 }
 
 void loopCheckWifiStatus(void* parameter) {
   logTaskFnStart("loopCheckWifiStatus");
   while(true) {
     captureWifiStatus();
-    delay(10000);
+    delay(1000);
   }
 }
 
 void loopInidcatorWifi(void* parameter) {
   logTaskFnStart("loopInidcatorWifi");
+  int pin = LED_WIFI;
+  int on  = HIGH;
+  int off = LOW;
 
   while(true) {
-    indicateWifiStatus();
+    switch(wifiStatus) {
+      Serial.print("wifiStatus: "); Serial.println(wifiStatus);
+      case WL_CONNECTED:
+        logDigitalWrite(pin, on);
+        digitalWrite(pin, on);
+        break;
+
+      case WL_IDLE_STATUS:
+        // Fast blink
+        for (int i = 0; i < 6; i++) {
+          digitalWrite(pin, i % 2 == 0 ? on : off);
+          delay(100);
+        }
+        digitalWrite(pin, off);
+        break;
+
+      case WL_NO_SHIELD:
+      case WL_NO_SSID_AVAIL:
+      case WL_SCAN_COMPLETED:
+      case WL_CONNECT_FAILED:
+      case WL_CONNECTION_LOST:
+      case WL_DISCONNECTED:
+        // Slow blink
+        digitalWrite(pin, on);
+        delay(1000);
+        digitalWrite(pin, off);
+        break;
+
+    }
     delay(1000);
   }
 }
@@ -241,7 +264,7 @@ void loopInidcatorWifi(void* parameter) {
 void setup() {
   // Set up  LED pins
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(LED_WIFI_CONNECTED, OUTPUT);
+  pinMode(LED_WIFI, OUTPUT);
   pinMode(LED_P1, OUTPUT);
   pinMode(LED_P2, OUTPUT);
 
@@ -251,15 +274,17 @@ void setup() {
   // Set up serial console
   Serial.begin(115200);
 
+  // Start task which manages wifi status indication
+  xTaskCreatePinnedToCore(loopInidcatorWifi, "T_loopIndicatorWifi", 10000, NULL, 1, &T_loopIndicatorWifi, 1);
+
   // Join the wifi
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
+  WiFi.begin(env__WIFI_SSID, env__WIFI_PASSWORD);
+
+  while(captureWifiStatus() != WL_CONNECTED) {
     delay(500);
     Serial.println("Connecting to WiFi...");
   }
   Serial.println("Connected to the WiFi network");
-  captureWifiStatus();
-  indicateWifiStatus();
 
   // Register for callback hooks
   auto upJson = apiUp();
@@ -276,8 +301,6 @@ void setup() {
   pubsubClient.setCallback(mqttCallback);
   connectMqtt();
 
-  // Start task which manages wifi status indication
-  xTaskCreatePinnedToCore(loopInidcatorWifi, "T_loopIndicatorWifi", 10000, NULL, 1, &T_loopIndicatorWifi, 1);
 
   // Start task which manages people statuses indication
   xTaskCreatePinnedToCore(loopIndicatePeopleStatuses, "T_loopInidicatorPeople", 10000, NULL, 2, &T_loopInidicatorPeople, 1);
