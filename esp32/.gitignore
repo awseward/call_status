@@ -1,2 +1,2 @@
 .envrc
-main/wifiCredentials.h
+main/env.h
