@@ -24,8 +24,8 @@ boolean isOnCallP2 = false;
 
 TaskHandle_t T_loopMqtt;
 TaskHandle_t T_loopInidicatorPeople;
-TaskHandle_t T_loopIndicatorWifi;
-TaskHandle_t T_loopWifi;
+TaskHandle_t T_loopWifiIndicate;
+TaskHandle_t T_loopWifiCapture;
 
 WiFiClient espClient;
 PubSubClient pubsubClient(espClient);
@@ -275,7 +275,10 @@ void setup() {
   Serial.begin(115200);
 
   // Start task which manages wifi status indication
-  xTaskCreatePinnedToCore(loopInidcatorWifi, "T_loopIndicatorWifi", 10000, NULL, 1, &T_loopIndicatorWifi, 1);
+  xTaskCreatePinnedToCore(loopInidcatorWifi, "T_loopWifiIndicate", 10000, NULL, 1, &T_loopWifiIndicate, 1);
+
+  // Set up task that periodically checks wifi status
+  xTaskCreatePinnedToCore(loopCheckWifiStatus, "T_loopWifiCapture", 10000, NULL, 1, &T_loopWifiCapture, 0);
 
   // Join the wifi
   WiFi.begin(env__WIFI_SSID, env__WIFI_PASSWORD);
@@ -307,9 +310,6 @@ void setup() {
 
   // Start task which subscribes to MQTT
   xTaskCreatePinnedToCore(loopMqtt, "T_loopMqtt", 10000, NULL, 2, &T_loopMqtt, 0);
-
-  // Set up task that periodically checks wifi status
-  xTaskCreatePinnedToCore(loopCheckWifiStatus, "T_loopWifi", 10000, NULL, 1, &T_loopWifi, 0);
 }
 
 void loop() { }
