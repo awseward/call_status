@@ -18,6 +18,7 @@ const char* mqttClientId;
 const char* mqttTopic;
 
 int wifiStatus = WL_IDLE_STATUS;
+int consecutiveWifiNonconnects = 0;
 
 boolean isOnCallP1 = false;
 boolean isOnCallP2 = false;
@@ -210,6 +211,15 @@ void loopIndicatePeopleStatuses(void* parameter) {
 
 int captureWifiStatus() {
   wifiStatus = WiFi.status();
+  switch(wifiStatus) {
+    case WL_CONNECTED:
+      consecutiveWifiNonconnects = 0;
+      break;
+    default:
+      consecutiveWifiNonconnects += 1;
+      if (consecutiveWifiNonconnects > 10) { ESP.restart(); }
+      break;
+  }
   return wifiStatus;
 }
 
@@ -228,8 +238,8 @@ void loopInidcatorWifi(void* parameter) {
   int off = LOW;
 
   while(true) {
+    Serial.print("wifiStatus: "); Serial.println(wifiStatus);
     switch(wifiStatus) {
-      Serial.print("wifiStatus: "); Serial.println(wifiStatus);
       case WL_CONNECTED:
         reconcileLED(pin, true);
         break;
