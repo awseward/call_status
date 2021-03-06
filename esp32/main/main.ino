@@ -188,7 +188,7 @@ void logDigitalWrite(int pin, int value) {
   Serial.print("Setting pin "); Serial.print(pin); Serial.print(" to: "); Serial.println(value);
 }
 
-void reconcileLED(int pin, boolean shouldBeOn, boolean doFlash = false) {
+void reconcileLED(int pin, boolean shouldBeOn, boolean doFlash = true) {
   boolean ledIsOn = digitalRead(pin) == HIGH;
   if (ledIsOn == shouldBeOn) { return; }
 
@@ -241,7 +241,7 @@ void loopInidcatorWifi(void* parameter) {
     Serial.print("wifiStatus: "); Serial.println(wifiStatus);
     switch(wifiStatus) {
       case WL_CONNECTED:
-        reconcileLED(pin, true);
+        reconcileLED(pin, true, false);
         break;
 
       case WL_IDLE_STATUS:
