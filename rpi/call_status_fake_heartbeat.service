@@ -1,0 +1,11 @@
+[Unit]
+Description=Does a fake heartbeat. Only intended for use until the actual hardware consumers can send their own.
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /usr/bin/call_status_fake_heartbeat.sh
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=default.target
