@@ -175,17 +175,17 @@ void loopMqtt(void* parameter) {
       Serial.println("Reconnecting to MQTT");
       connectMqtt();
     } else {
-      char* payload;
-      strcat(payload, "{ \"id\": \"");
-      strcat(payload, WiFi.macAddress().c_str());
-      strcat(payload, "\" }");
+      // I'm not good enough at C++ to make something like this work… ¯\_(ツ)_/¯
+      // char* payload;
+      // strcat(payload, "{ \"id\": \"");
+      // strcat(payload, WiFi.macAddress().c_str());
+      // strcat(payload, "\" }");
+      // Serial.println(payload);
 
-      Serial.println(payload);
-
-      pubsubClient.publish("call-status/heartbeat", payload);
+      pubsubClient.publish("call-status/heartbeat", "{}");
     }
     pubsubClient.loop();
-    vTaskDelay(10);
+    vTaskDelay(500);
   }
 }
 
