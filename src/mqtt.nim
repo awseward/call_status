@@ -3,19 +3,18 @@ import json
 import oids
 import os
 import strutils
+import tables
 import uri
 
 import ./logs
 
-type MqttInfo* = object
-  host*: string
-  port*: int
-  topic*: string
+let server = parseUri getEnv("MQTT_SERVER")
 
-let configured* = block:
-  let uri = parseUri getEnv("MQTT_SERVER")
-  MqttInfo(
-    host: uri.hostname,
-    port: parseInt uri.port,
-    topic: getEnv "MQTT_TOPIC"
-  )
+let host* = server.hostname
+
+let port* = parseInt server.port
+
+let topics* = {
+  "people": getEnv "MQTT_TOPIC_PEOPLE",
+  "heartbeat": getEnv "MQTT_TOPIC_HEARTBEAT"
+}.toTable

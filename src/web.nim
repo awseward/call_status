@@ -52,15 +52,18 @@ router api:
     resp Http204
 
   post "/client/@client_id/up":
-    let mqttJson = %*mqtt.configured
-    mqttJson["client_id"] = %(@"client_id")
-    mqttJson["topics"] = %*{
-      "people": mqtt.configured.topic,
-      "heartbeat": "call-status/heartbeat"
+    resp %*{
+      "mqtt": {
+        "host": mqtt.host,
+        "port": mqtt.port,
+        "client_id": @"client_id",
+        "heartbeat_payload": {"client_id": @"client_id"},
+        "topics": mqtt.topics,
+        # TODO: Remove 'topic' from response once hardware clients all reflashed
+        #       to work with 'topics' instead
+        "topic": mqtt.topics["people"]
+      }
     }
-    mqttJson["heartbeat_payload"] = %*{ "client_id": @"client_id" }
-
-    resp %*{ "mqtt": mqttJson }
 
 router web:
   get "/":
