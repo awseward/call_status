@@ -59,9 +59,6 @@ router api:
         "client_id": @"client_id",
         "heartbeat_payload": {"client_id": @"client_id"},
         "topics": mqtt.topics,
-        # TODO: Remove 'topic' from response once hardware clients all reflashed
-        #       to work with 'topics' instead
-        "topic": mqtt.topics["people"]
       }
     }
 
