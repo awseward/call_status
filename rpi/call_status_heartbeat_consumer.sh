@@ -11,7 +11,7 @@ set -euo pipefail
 #
 
 readonly topic_heartbeat='call-status/heartbeat'
-readonly topic_heartbeat_latest='call-status/heartbeat/latest'
+readonly topic_heartbeat_latest="${topic_heartbeat}/latest"
 
 _info() { systemd-cat -t call_status_heartbeat_consumer -p info ; }
 
