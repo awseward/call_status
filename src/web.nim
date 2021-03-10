@@ -52,14 +52,15 @@ router api:
     resp Http204
 
   post "/client/@client_id/up":
-    let path = "/api/people"
     let mqttJson = %*mqtt.configured
     mqttJson["client_id"] = %(@"client_id")
-
-    resp %*{
-      "app_url": request.makeUri path,
-      "mqtt": mqttJson
+    mqttJson["topics"] = %*{
+      "people": mqtt.configured.topic,
+      "heartbeat": "call-status/heartbeat"
     }
+    mqttJson["heartbeat_payload"] = %*{ "client_id": @"client_id" }
+
+    resp %*{ "mqtt": mqttJson }
 
 router web:
   get "/":
