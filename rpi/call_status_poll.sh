@@ -12,7 +12,7 @@ set -euo pipefail
 
 readonly api_url='https://call-status.herokuapp.com/api/people'
 readonly topic_people='call-status/people'
-readonly topic_heartbeat='call-status/heartbeat'
+readonly topic_heartbeat='call-status/heartbeat/latest'
 
 echo "Started at $(date --iso-8601=s)" | systemd-cat -t call_status_poll -p info
 
