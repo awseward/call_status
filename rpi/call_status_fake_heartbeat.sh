@@ -10,15 +10,11 @@ set -euo pipefail
 #   - https://web.archive.org/web/20200628142802/https://ma.ttias.be/auto-restart-crashed-service-systemd/
 #
 
-api_url='https://call-status.herokuapp.com/api/people'
-mqtt_topic='call-status/people'
+readonly mqtt_topic='call-status/heartbeat'
 
-echo "Started at $(date --iso-8601=s)" | systemd-cat -t poll_call_status -p info
+echo "Started at $(date --iso-8601=s)" | systemd-cat -t call_status_fake_heartbeat -p info
 
 while true; do
-  echo "${api_url}" \
-    | xargs -t curl -s \
-    | mosquitto_pub -h localhost -t "${mqtt_topic}" -r -s
-
+  mosquitto_pub -h localhost -t "${mqtt_topic}" -r -m "$(date --iso-8601=s)"
   sleep 5
 done
