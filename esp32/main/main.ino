@@ -15,7 +15,9 @@ const int LED_P2 = 18;
 const char* mqttHost;
 int mqttPort;
 const char* mqttClientId;
-const char* mqttTopic;
+const char* mqttTopicPeople;
+const char* mqttTopicHeartbeat;
+const char* mqttHeartbeatPayload;
 
 int wifiStatus = WL_IDLE_STATUS;
 int consecutiveWifiNonconnects = 0;
@@ -164,28 +166,27 @@ void connectMqtt() {
   }
   Serial.println("Connected to MQTT");
 
-  Serial.print("Subscribing on MQTT topic "); Serial.println(mqttTopic);
-  pubsubClient.subscribe(mqttTopic, 1);
+  Serial.print("Subscribing on MQTT topic "); Serial.println(mqttTopicPeople);
+  pubsubClient.subscribe(mqttTopicPeople, 1);
 }
 
 void loopMqtt(void* parameter) {
   logTaskFnStart("loopMqtt");
+  int counter = 0;
   while(true) {
     if (!pubsubClient.connected()) {
       Serial.println("Reconnecting to MQTT");
       connectMqtt();
     } else {
-      // I'm not good enough at C++ to make something like this work… ¯\_(ツ)_/¯
-      // char* payload;
-      // strcat(payload, "{ \"id\": \"");
-      // strcat(payload, WiFi.macAddress().c_str());
-      // strcat(payload, "\" }");
-      // Serial.println(payload);
-
-      pubsubClient.publish("call-status/heartbeat", "{}");
+      if (counter >= 10) {
+        pubsubClient.publish(mqttTopicHeartbeat, mqttHeartbeatPayload);
+        counter = 0;
+      } else {
+        ++counter;
+      }
     }
     pubsubClient.loop();
-    vTaskDelay(500);
+    vTaskDelay(100);
   }
 }
 
@@ -311,8 +312,16 @@ void setup() {
   auto upJson = apiUp();
   mqttHost = upJson["mqtt"]["host"].as<const char*>();
   mqttPort = upJson["mqtt"]["port"].as<int>();
-  mqttTopic = upJson["mqtt"]["topic"].as<const char*>();
   mqttClientId = upJson["mqtt"]["client_id"].as<const char*>();
+  mqttTopicPeople = upJson["mqtt"]["topics"]["people"].as<const char*>();
+  mqttTopicHeartbeat = upJson["mqtt"]["topics"]["heartbeat"].as<const char*>();
+
+  char hbPayload[128];
+  serializeJson(
+    upJson["mqtt"]["heartbeat_payload"],
+    hbPayload
+  );
+  mqttHeartbeatPayload = hbPayload;
 
   Serial.print("MQTT host:     "); Serial.println(mqttHost);
   Serial.print("MQTT port:     "); Serial.println(mqttPort);
