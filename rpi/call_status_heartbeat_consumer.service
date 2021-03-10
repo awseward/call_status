@@ -4,8 +4,8 @@ Description="Consumes" heartbeat from the ESP32 devices.
 [Service]
 Type=simple
 ExecStart=/bin/bash /usr/bin/call_status_heartbeat_consumer.sh
-Restart=on-failure
-RestartSec=5s
+Restart=always
+RestartSec=2s
 
 [Install]
 WantedBy=default.target

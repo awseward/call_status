@@ -11,8 +11,16 @@ set -euo pipefail
 #
 
 readonly topic_heartbeat='call-status/heartbeat'
-readonly topic_heartbeat_latest='call-status/heartbeat/latest'
+readonly topic_heartbeat_latest="${topic_heartbeat}/latest"
 
-mosquitto_sub -t "${topic_heartbeat}" \
-  | xargs -L1 -I{} date --iso-8601=s \
-  | xargs -L1 -I{} mosquitto_pub -t "${topic_heartbeat_latest}" -r -m "{}"
+_info() { systemd-cat -t call_status_heartbeat_consumer -p info ; }
+
+_info <<< "Started at $(date --iso-8601=s)"
+
+while true; do
+  mosquitto_sub -t "${topic_heartbeat}" | while read -r line; do
+    msg="$(echo "${line}" | jq -c --arg timestamp "$(date --iso-8601=s)" '. + { $timestamp }')"
+    mosquitto_pub -t "${topic_heartbeat_latest}" -r -m "${msg}"
+  done
+  _info <<< "subscription dropped for some reason; resubscribing…"
+done
