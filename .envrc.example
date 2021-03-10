@@ -15,4 +15,5 @@ export DATABASE_FILEPATH=call_status_checker.db
 export REDIS_URL=redis://localhost:6379
 
 export MQTT_SERVER=mqtt://broker.mqttdashboard.com:1883
-export MQTT_TOPIC=call-status/d3768f07ab1d
+export MQTT_TOPIC_PEOPLE=d3768f07ab1d/call-status/people
+export MQTT_TOPIC_HEARTBEAT=d3768f07ab1d/call-status/heartbeat

@@ -1,21 +1,16 @@
 import asyncdispatch
-import json
-import oids
 import os
 import strutils
+import tables
 import uri
 
-import ./logs
+let server = parseUri getEnv("MQTT_SERVER")
 
-type MqttInfo* = object
-  host*: string
-  port*: int
-  topic*: string
+let host* = server.hostname
 
-let configured* = block:
-  let uri = parseUri getEnv("MQTT_SERVER")
-  MqttInfo(
-    host: uri.hostname,
-    port: parseInt uri.port,
-    topic: getEnv "MQTT_TOPIC"
-  )
+let port* = parseInt server.port
+
+let topics* = {
+  "people": getEnv "MQTT_TOPIC_PEOPLE",
+  "heartbeat": getEnv "MQTT_TOPIC_HEARTBEAT"
+}.toTable
