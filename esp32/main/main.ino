@@ -172,15 +172,21 @@ void connectMqtt() {
 
 void loopMqtt(void* parameter) {
   logTaskFnStart("loopMqtt");
+  int counter = 0;
   while(true) {
     if (!pubsubClient.connected()) {
       Serial.println("Reconnecting to MQTT");
       connectMqtt();
     } else {
-      pubsubClient.publish(mqttTopicHeartbeat, mqttHeartbeatPayload);
+      if (counter >= 10) {
+        pubsubClient.publish(mqttTopicHeartbeat, mqttHeartbeatPayload);
+        counter = 0;
+      } else {
+        ++counter;
+      }
     }
     pubsubClient.loop();
-    vTaskDelay(500);
+    vTaskDelay(100);
   }
 }
 
@@ -306,9 +312,16 @@ void setup() {
   auto upJson = apiUp();
   mqttHost = upJson["mqtt"]["host"].as<const char*>();
   mqttPort = upJson["mqtt"]["port"].as<int>();
-  mqttTopicPeople = upJson["mqtt"]["topic"]["people"].as<const char*>();
-  mqttTopicHeartbeat = upJson["mqtt"]["topic"]["heartbeat"].as<const char*>();
   mqttClientId = upJson["mqtt"]["client_id"].as<const char*>();
+  mqttTopicPeople = upJson["mqtt"]["topics"]["people"].as<const char*>();
+  mqttTopicHeartbeat = upJson["mqtt"]["topics"]["heartbeat"].as<const char*>();
+
+  char hbPayload[128];
+  serializeJson(
+    upJson["mqtt"]["heartbeat_payload"],
+    hbPayload
+  );
+  mqttHeartbeatPayload = hbPayload;
 
   Serial.print("MQTT host:     "); Serial.println(mqttHost);
   Serial.print("MQTT port:     "); Serial.println(mqttPort);
