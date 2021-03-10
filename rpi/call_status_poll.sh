@@ -14,27 +14,29 @@ readonly api_url='https://call-status.herokuapp.com/api/people'
 readonly topic_people='call-status/people'
 readonly topic_heartbeat='call-status/heartbeat/latest'
 
-echo "Started at $(date --iso-8601=s)" | systemd-cat -t call_status_poll -p info
+_info() { systemd-cat -t call_status_poll -p info ; }
+
+echo "Started at $(date --iso-8601=s)" | _info
 
 while true; do
   now_s="$(date +%s)"
-  heartbeat="$(mosquitto_sub -t "${topic_heartbeat}" -C 1 -W 1)"
+  heartbeat="$(mosquitto_sub -t "${topic_heartbeat}" -C 1 -W 1 | jq -r .timestamp)"
 
-  systemd-cat -t call_status_poll -p info <<< "heartbeat: ${heartbeat}"
+  _info <<< "heartbeat: ${heartbeat}"
 
   if [ "${heartbeat}" == '' ]; then
-    systemd-cat -t call_status_poll -p info <<< 'no heartbeat; doing nothing…'
+    _info <<< 'no heartbeat; doing nothing…'
   else
-    systemd-cat -t call_status_poll -p info <<< "now_s: ${now_s}"
+    _info <<< "now_s: ${now_s}"
     heartbeat_s="$(date -d "${heartbeat}" +%s)"
-    systemd-cat -t call_status_poll -p info <<< "heartbeat_s: ${heartbeat_s}"
+    _info <<< "heartbeat_s: ${heartbeat_s}"
     diff_s="$(( now_s - heartbeat_s ))"
-    systemd-cat -t call_status_poll -p info <<< "diff_s: ${diff_s}"
+    _info <<< "diff_s: ${diff_s}"
 
     if [ $diff_s -gt 10 ]; then
-      systemd-cat -t call_status_poll -p info <<< 'more than 10s since last heartbeat; doing nothing…'
+      _info <<< 'more than 10s since last heartbeat; doing nothing…'
     else
-      systemd-cat -t call_status_poll -p info <<< "polling: ${api_url} >> ${topic_people}"
+      _info <<< "polling: ${api_url} >> ${topic_people}"
       echo "${api_url}" \
         | xargs -t curl -s \
         | mosquitto_pub -h localhost -t "${topic_people}" -r -s
