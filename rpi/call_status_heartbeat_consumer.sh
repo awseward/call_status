@@ -10,11 +10,9 @@ set -euo pipefail
 #   - https://web.archive.org/web/20200628142802/https://ma.ttias.be/auto-restart-crashed-service-systemd/
 #
 
-readonly mqtt_topic='call-status/heartbeat'
+readonly topic_heartbeat='call-status/heartbeat'
+readonly topic_heartbeat_latest='call-status/heartbeat/latest'
 
-echo "Started at $(date --iso-8601=s)" | systemd-cat -t call_status_fake_heartbeat -p info
-
-while true; do
-  mosquitto_pub -h localhost -t "${mqtt_topic}" -r -m "$(date --iso-8601=s)"
-  sleep 5
-done
+mosquitto_sub -t "${topic_heartbeat}" \
+  | xargs -L1 -I{} date --iso-8601=s \
+  | xargs -L1 -I{} mosquitto_pub -t "${topic_heartbeat_latest}" -r -m "{}"
