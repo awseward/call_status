@@ -1,12 +1,8 @@
 import asyncdispatch
-import json
-import oids
 import os
 import strutils
 import tables
 import uri
-
-import ./logs
 
 let server = parseUri getEnv("MQTT_SERVER")
 
