@@ -174,6 +174,15 @@ void loopMqtt(void* parameter) {
     if (!pubsubClient.connected()) {
       Serial.println("Reconnecting to MQTT");
       connectMqtt();
+    } else {
+      char* payload;
+      strcat(payload, "{ \"id\": \"");
+      strcat(payload, WiFi.macAddress().c_str());
+      strcat(payload, "\" }");
+
+      Serial.println(payload);
+
+      pubsubClient.publish("call-status/heartbeat", payload);
     }
     pubsubClient.loop();
     vTaskDelay(10);
@@ -312,7 +321,6 @@ void setup() {
   pubsubClient.setServer(mqttHost, mqttPort);
   pubsubClient.setCallback(mqttCallback);
   connectMqtt();
-
 
   // Start task which manages people statuses indication
   xTaskCreatePinnedToCore(loopIndicatePeopleStatuses, "T_loopInidicatorPeople", 10000, NULL, 2, &T_loopInidicatorPeople, 1);
