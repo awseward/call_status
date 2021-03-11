@@ -15,7 +15,7 @@ const int LED_P2 = 18;
 const char* mqttHost;
 int mqttPort;
 const char* mqttClientId;
-const char* mqttTopicControl = "call-status/control";
+const char* mqttTopicControl;
 const char* mqttTopicPeople;
 const char* mqttTopicHeartbeat;
 const char* mqttHeartbeatPayload;
@@ -327,8 +327,9 @@ void setup() {
   mqttHost = upJson["mqtt"]["host"].as<const char*>();
   mqttPort = upJson["mqtt"]["port"].as<int>();
   mqttClientId = upJson["mqtt"]["client_id"].as<const char*>();
-  mqttTopicPeople = upJson["mqtt"]["topics"]["people"].as<const char*>();
+  mqttTopicControl = upJson["mqtt"]["topics"]["control"].as<const char*>();
   mqttTopicHeartbeat = upJson["mqtt"]["topics"]["heartbeat"].as<const char*>();
+  mqttTopicPeople = upJson["mqtt"]["topics"]["people"].as<const char*>();
 
   char hbPayload[128];
   serializeJson(
