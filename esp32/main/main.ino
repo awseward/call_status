@@ -15,6 +15,7 @@ const int LED_P2 = 18;
 const char* mqttHost;
 int mqttPort;
 const char* mqttClientId;
+const char* mqttTopicControl = "call-status/control";
 const char* mqttTopicPeople;
 const char* mqttTopicHeartbeat;
 const char* mqttHeartbeatPayload;
@@ -147,33 +148,46 @@ void apiGet(String url) {
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived ["); Serial.print(topic); Serial.println("] ");
-
-  String json = "";
+  String payloadStr = "";
   for (int i=0;i<length;i++) {
-    json += (char)payload[i];
+    payloadStr += (char)payload[i];
   }
 
-  handleResponse(json);
+  if (strcmp(topic, mqttTopicControl) == 0) {
+    String reboot = "reboot";
+    StaticJsonDocument<32> jsonDoc;
+    deserializeJson(jsonDoc, payloadStr);
+    if (strcmp(reboot.c_str(), jsonDoc["type"]) == 0) {
+      Serial.println("Rebooting…");
+      ESP.restart();
+    }
+  } else if (strcmp(topic, mqttTopicPeople) == 0) {
+    handleResponse(payloadStr);
+  } else {
+    Serial.print("Unrecognized topic ["); Serial.print(topic); Serial.print("] ");
+    Serial.println(payloadStr);
+  }
 }
 
 void connectMqtt() {
-  Serial.println("Connecting to MQTT...");
+  Serial.println("Connecting to MQTT…");
   pubsubClient.connect(mqttClientId);
-  while(!pubsubClient.connected()) {
+  while (!pubsubClient.connected()) {
     delay(500);
-    Serial.println("Connecting to MQTT...");
+    Serial.println("Connecting to MQTT…");
     pubsubClient.connect(mqttClientId);
   }
   Serial.println("Connected to MQTT");
 
   Serial.print("Subscribing on MQTT topic "); Serial.println(mqttTopicPeople);
   pubsubClient.subscribe(mqttTopicPeople, 1);
+  pubsubClient.subscribe(mqttTopicControl, 1);
 }
 
 void loopMqtt(void* parameter) {
   logTaskFnStart("loopMqtt");
   int counter = 0;
-  while(true) {
+  while (true) {
     if (!pubsubClient.connected()) {
       Serial.println("Reconnecting to MQTT");
       connectMqtt();
@@ -211,7 +225,7 @@ void reconcileLED(int pin, boolean shouldBeOn, boolean doFlash = true) {
 void loopIndicatePeopleStatuses(void* parameter) {
   logTaskFnStart("loopIndicatePeopleStatuses");
 
-  while(true) {
+  while (true) {
     reconcileLED(LED_P1, isOnCallP1);
     reconcileLED(LED_P2, isOnCallP2);
 
@@ -221,7 +235,7 @@ void loopIndicatePeopleStatuses(void* parameter) {
 
 int captureWifiStatus() {
   wifiStatus = WiFi.status();
-  switch(wifiStatus) {
+  switch (wifiStatus) {
     case WL_CONNECTED:
       consecutiveWifiNonconnects = 0;
       break;
@@ -235,7 +249,7 @@ int captureWifiStatus() {
 
 void loopCheckWifiStatus(void* parameter) {
   logTaskFnStart("loopCheckWifiStatus");
-  while(true) {
+  while (true) {
     captureWifiStatus();
     delay(1000);
   }
@@ -247,9 +261,9 @@ void loopInidcatorWifi(void* parameter) {
   int on  = HIGH;
   int off = LOW;
 
-  while(true) {
+  while (true) {
     Serial.print("wifiStatus: "); Serial.println(wifiStatus);
-    switch(wifiStatus) {
+    switch (wifiStatus) {
       case WL_CONNECTED:
         reconcileLED(pin, true, false);
         break;
@@ -302,9 +316,9 @@ void setup() {
   // Join the wifi
   WiFi.begin(env__WIFI_SSID, env__WIFI_PASSWORD);
 
-  while(captureWifiStatus() != WL_CONNECTED) {
+  while (captureWifiStatus() != WL_CONNECTED) {
     delay(500);
-    Serial.println("Connecting to WiFi...");
+    Serial.println("Connecting to WiFi…");
   }
   Serial.println("Connected to the WiFi network");
 
