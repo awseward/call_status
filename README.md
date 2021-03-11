@@ -19,3 +19,7 @@ mkdir -p           /usr/local/var/log/call_status_checker
 touch              /usr/local/var/log/call_status_checker/watch.log
 chown -R "${USER}" /usr/local/var/log/call_status_checker
 ```
+
+### High-level overview
+
+![High-level overview](/docs/high_level.svg?raw=true "High-level overview")
