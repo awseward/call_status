@@ -67,6 +67,13 @@ void startupFlash() {
     LED_P2
   };
 
+  // Zero them all out first
+  for (int j = 0; j < allLEDs.size(); j++) {
+    int pin = allLEDs[j];
+    digitalWrite(pin, LOW);
+  }
+  delay(500);
+
   for (int j = 0; j < allLEDs.size(); j++) {
     int pin = allLEDs[j];
     digitalWrite(pin, HIGH);
