@@ -22,10 +22,9 @@ let p = newParser("call-status"):
   option("-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER")
   option("-s", "--status", choices = @["on", "off"])
 
-  option("--api-base-url",
-    default = "https://call-status.herokuapp.com",
+  option "--api-base-url",
+    default = some "https://call-status.herokuapp.com",
     env = "CALL_STATUS_API_BASE_URL"
-  )
 
   run:
     if (opts.version):
@@ -38,7 +37,6 @@ let p = newParser("call-status"):
 
     if (opts.user == "" or opts.status == ""):
       echo "ERROR: Both user and status are required.", "\n"
-      echo p.help
       quit 1
 
     if opts.dryRun:

@@ -101,7 +101,6 @@ let p = newParser(AppName):
       let user = opts.user
       if user == "":
         echo "ERROR: User is required, but was not provided"
-        echo p.help
         quit 1
 
       runConfig user
@@ -113,7 +112,7 @@ let p = newParser(AppName):
     flag "-f", "--force"
 
     option "--api-base-url",
-      default = "https://call-status.herokuapp.com",
+      default = some "https://call-status.herokuapp.com",
       env = "CALL_STATUS_API_BASE_URL"
 
     run:
@@ -127,7 +126,6 @@ let p = newParser(AppName):
 
       if user == "":
         echo "ERROR: User is required, but was not provided"
-        echo p.help
         quit 1
 
       runCheck user, opts.apiBaseUrl, determineOverride(opts.dryRun, opts.force)
@@ -140,7 +138,8 @@ let p = newParser(AppName):
     elif opts.info:
       echo "version:  ", pkgVersion
       echo "revision: ", pkgRevision
-    elif commandLineParams().len == 0:
-      echo p.help
+    # TODO: Evaluate whether this is still necessary
+    # elif commandLineParams().len == 0:
+    #   # Used to print help here
 
 p.run()
