@@ -3,38 +3,15 @@ import logs
 import options
 import os
 
+import ./config_file
+
 const UserName = "user_name"
 
-type ConfigFilepath = distinct string
-
-const DefaultConfigFilepath =
-  when hostOS == "macosx":
-    # Basis of this filepath is homebrew installation directory choices.
-    #
-    # See:
-    # https://github.com/awseward/homebrew-tap/Formula/call_status_checker.rb
-    #
-    ConfigFilepath "/usr/local/etc/call_status_checker/config.json"
-  elif hostOS == "linux":
-    # This application doesn't actually target linux currently, but am just
-    # doing this so that CI can pass since this is evaluated at compile time.
-    #
-    # Maybe a better thing would be to just change the CI to run on a macosx
-    # container, but this is simpler and the alternative can always be
-    # revisited.
-    #
-    # For why this differs from the macosx path, see:
-    # https://www.tldp.org/HOWTO/HighQuality-Apps-HOWTO/fhs.html
-    #
-    ConfigFilepath "/etc/call_status_checker/config.json"
-  else:
-    raise Exception.newException "Unsupported host OS: " & hostOS
-
-proc fromString(str: string): ConfigFilepath =
+proc fromString(str: string): Filepath =
   if str == "":
-    DefaultConfigFilepath
+    config_file.defaultPath
   else:
-    ConfigFilepath str
+    Filepath str
 
 # ---
 
@@ -50,7 +27,7 @@ proc `%`(config: CheckerConfig): JsonNode =
     UserName: %config.user_name
   }
 
-proc tryRead(filepath: ConfigFilepath): Option[CheckerConfig] =
+proc tryRead(filepath: Filepath): Option[CheckerConfig] =
   try:
     let fileContents = readFile filepath.string
     some fromJson(fileContents)
@@ -58,7 +35,7 @@ proc tryRead(filepath: ConfigFilepath): Option[CheckerConfig] =
     warn "Handled exception in tryRead: ", getCurrentExceptionMsg()
     none CheckerConfig
 
-proc write(config: CheckerConfig, filepath: ConfigFilepath) =
+proc write(config: CheckerConfig, filepath: Filepath) =
   block:
     let (dir, _, _) = splitFile filepath.string
     createDir dir
