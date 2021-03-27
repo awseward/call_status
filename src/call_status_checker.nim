@@ -21,6 +21,8 @@ block tempBackwardsCompat:
   if not(existsEnv "DATABASE_FILEPATH") and existsEnv "DB_FILEPATH":
     putEnv("DATABASE_FILEPATH", getEnv("DB_FILEPATH"))
 
+type Username* = distinct string
+
 type Change = enum
   unchanged,
   changed,
@@ -53,9 +55,9 @@ proc getPreviousStatus(name: string): Option[Status] =
 proc getCurrentStatus(): Status =
   fromIsOnCall isZoomCallActive()
 
-proc runCheck(name: string, apiBaseUrl: string, override: Override) =
+proc runCheck(name: Username, apiBaseUrl: string, override: Override) =
   dbSetup()
-  let previous = getPreviousStatus name
+  let previous = getPreviousStatus name.string
   let current = getCurrentStatus()
 
   case determineChange(previous, current):
@@ -77,14 +79,15 @@ proc runCheck(name: string, apiBaseUrl: string, override: Override) =
           return
 
   let person = Person(
-    name: name,
+    name: name.string,
     status: current
   )
   newApiClient(apiBaseUrl).updatePerson person
   updatePerson person
 
-proc runConfig(name: string) =
-  CheckerConfig(userName: name).writeConfigFile getEnv("CONFIG_FILEPATH")
+
+proc runConfig(name: Username) =
+  CheckerConfig(userName: name.string).writeConfigFile getEnv("CONFIG_FILEPATH")
 
 const AppName = "call_status_checker"
 
@@ -96,14 +99,13 @@ let p = newParser(AppName):
   flag("--info", help = "Print version and revision")
 
   command "config":
-    option "-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER"
+    option "-u", "--user", required = true, choices = @["D", "N"], env = "CALL_STATUS_USER"
     run:
-      let user = opts.user
-      if user == "":
-        echo "ERROR: User is required, but was not provided"
+      if isEmptyOrWhitespace opts.user:
+        echo "ERROR: User is required, but no valid value was provided"
         quit 1
 
-      runConfig user
+      runConfig Username(opts.user)
 
   command "check":
     option "-u", "--user", choices = @["D", "N"], env = "CALL_STATUS_USER"
@@ -117,18 +119,18 @@ let p = newParser(AppName):
 
     run:
       let user = block:
-        if opts.user != "":
-          opts.user
-        else:
+        if isEmptyOrWhitespace opts.user:
           tryReadConfigFile(getEnv "CONFIG_FILEPATH")
             .map(conf => conf.userName)
             .get ""
+        else:
+          opts.user
 
-      if user == "":
-        echo "ERROR: User is required, but was not provided"
+      if isEmptyOrWhitespace user:
+        echo "ERROR: User is required, but no valid value was provided"
         quit 1
 
-      runCheck user, opts.apiBaseUrl, determineOverride(opts.dryRun, opts.force)
+      runCheck Username(user), opts.apiBaseUrl, determineOverride(opts.dryRun, opts.force)
 
   run:
     if opts.version:
