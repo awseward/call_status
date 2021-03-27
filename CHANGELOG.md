@@ -29,3 +29,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - RPi script which consumes ESP heartbeats now adds timestamps (https://github.com/awseward/call_status/pull/108)
+
+## [0.4.12] - 2021-03-10
+#### TODO: Backfill details
+
+## [0.4.11] - 2021-01-18
+#### TODO: Backfill details
+
+## [0.4.10] - 2021-01-05
+#### TODO: Backfill details
+
+## [0.4.9] - 2020-12-31
+#### TODO: Backfill details
+
+## [0.4.8] - 2020-12-31
+#### TODO: Backfill details
+
+## [0.4.7] - ????-??-??
+#### Mysteriously, nowhere to be found
+
+## [0.4.6] - 2020-12-28
+#### TODO: Backfill details
+
+## [0.4.5] - 2020-12-28
+#### TODO: Backfill details
+
+## [0.4.4] - 2020-12-28
+#### TODO: Backfill details
+
+## [0.4.3] - 2020-12-15
+#### TODO: Backfill details
+
+## [0.4.2] - 2020-12-13
+#### TODO: Backfill details
+
+## [0.4.1] - 2020-12-12
+#### TODO: Backfill details
+
+## [0.4.0] - 2020-07-28
+#### TODO: Backfill details
