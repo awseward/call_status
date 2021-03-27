@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.2] - 2021-03-27
+### Fixed
+- Corrected project `nimble` file; forgot to increment its version before tagging `0.6.1`.
+
 ## [0.6.1] - 2021-03-27
 ### Changed
 - DB file for `call_status_checker` now defaults to `$XDG_DATA_HOME/call_status/checker.db` (https://github.com/awseward/call_status/pull/118)
