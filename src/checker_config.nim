@@ -3,13 +3,13 @@ import logs
 import options
 import os
 
-import ./config_file
+import ./app_files
 
 const UserName = "user_name"
 
 proc fromString(str: string): Filepath =
   if str == "":
-    config_file.defaultPath
+    app_files.configPath
   else:
     Filepath str
 
