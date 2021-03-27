@@ -21,3 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed a minor bug with the ESP startup LED sequence (https://github.com/awseward/call_status/pull/114)
 - Updated docs to reflect that a previously-planned features is now implemented (https://github.com/awseward/call_status/pull/113)
 - Upgraded `argparse` dependency `0.10.1 → 2.0.0` (https://github.com/awseward/call_status/pull/115)
+
+## [0.5.1] - 2021-03-10
+### Added
+- Diagram in README giving a high-level overview of how everything works (https://github.com/awseward/call_status/pull/109, https://github.com/awseward/call_status/pull/110)
+- Support for a "control" MQTT topic; currently allows broadcasting a "reboot" signal over MQTT to all ESP devices (https://github.com/awseward/call_status/pull/111, https://github.com/awseward/call_status/pull/112)
+
+### Changed
+- RPi script which consumes ESP heartbeats now adds timestamps (https://github.com/awseward/call_status/pull/108)
