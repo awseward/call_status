@@ -1,4 +1,4 @@
-# call-status ![CI](https://github.com/awseward/call_status/workflows/CI/badge.svg)
+# call_status ![CI](https://github.com/awseward/call_status/workflows/CI/badge.svg)
 
 ## Installation & Usage
 
