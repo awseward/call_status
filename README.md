@@ -1,6 +1,6 @@
 # call-status ![CI](https://github.com/awseward/call_status/workflows/CI/badge.svg)
 
-### Installation & Usage
+## Installation & Usage
 
 ```sh
 brew install awseward/homebrew-tap/call_status_checker
@@ -20,6 +20,9 @@ touch              /usr/local/var/log/call_status_checker/watch.log
 chown -R "${USER}" /usr/local/var/log/call_status_checker
 ```
 
-### High-level overview
+## [Changelog](/CHANGELOG.md)
+
+
+## High-level overview
 
 ![High-level overview](/docs/high_level.svg?raw=true "High-level overview")
