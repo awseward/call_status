@@ -15,7 +15,10 @@ nimcache/
 # direnv
 .envrc
 
-# nimble binaries
+# nimble (when -l)
+nimbledeps/
+
+# project binaries
 call_status_checker
 call_status_cli
 web
