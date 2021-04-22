@@ -80,10 +80,94 @@ router web:
         headerVal.removePrefix("Basic ")
         if getEnv("SCANTAKE_BASIC_AUTH") != base64.decode(headerVal):
           raise Exception.newException "Nope!"
-      resp Http200, "<h1>TODO: Put the form here…</h1><p>Also, move this to its own site…</p>"
+      resp Http200, """
+        <style>
+          .visually-hidden {
+            position: absolute !important;
+            height: 1px;
+            width: 1px;
+            overflow: hidden;
+            clip: rect(1px, 1px, 1px, 1px);
+          }
+
+          /* Separate rule for compatibility, :focus-within is required on modern Firefox and Chrome */
+          input.visually-hidden:focus + label {
+            outline: thin dotted;
+          }
+          input.visually-hidden:focus-within + label {
+            outline: thin dotted;
+          }
+          .fake-link:hover {
+            cursor: pointer;
+          }
+        </style>
+
+        <script>
+          document.addEventListener("DOMContentLoaded", function() {
+            document.
+              getElementById("fileElem").
+              addEventListener("change", handleFiles, false);
+          });
+
+          function handleFiles() {
+            const fileList = this.files;
+            document.getElementById("fileSubmit").disabled = fileList.length === 0;
+            const ul = document.getElementById("selectedFiles");
+            ul.innerHTML = "";
+
+            for (let i = 0; i < fileList.length; i++) {
+              const file = fileList[i];
+              const li = document.createElement("li");
+              li.appendChild(document.createTextNode(file.name));
+
+              const ul_ = document.createElement("ul");
+
+              let li_ = document.createElement("li");
+              li_.appendChild(document.createTextNode(file.type));
+              ul_.appendChild(li_);
+
+              li_ = document.createElement("li");
+              li_.appendChild(document.createTextNode(file.size + " bytes"));
+              ul_.appendChild(li_);
+
+              li.appendChild(ul_);
+              ul.appendChild(li);
+            }
+          }
+        </script>
+
+        <form action="$1" method="post" enctype="multipart/form-data">
+          <input type="file" id="fileElem" name="file" accept="image/*,application/pdf" class="visually-hidden">
+          <h1>
+            <a href="#">
+              <label class="fake-link" for="fileElem">Select a file</label>
+            </a>
+          </h1>
+          <ul id="selectedFiles">
+          </ul>
+          <input id="fileSubmit" type="submit" value="Submit file(s)" disabled />
+        </form>
+      """ % [uri("/submit_file", absolute = false)]
     except Exception:
       request.send Http401, @({"WWW-Authenticate": "Basic"}), ""
       return
+
+  post "/submit_file":
+    let file = request.formData["file"]
+    let newName = "__TMP__" & file.fields["filename"]
+    writeFile(newName, file.body)
+    redirect "/file_submitted"
+
+  get "/file_submitted":
+    resp Http200, """
+      <style>
+        a, a:visited {
+          color: blue;
+        }
+      </style>
+      <h1>Okeydokey, got it!</h1>
+      <a href="/scantake">Do another…?</a>
+    """
 
   get "/ws":
     const supportedProtocol = "REFRESH"
