@@ -1,9 +1,11 @@
 import asyncdispatch
+import base64
 import jester
 import json
 import os
 import sequtils
 import strutils
+import sugar
 import times
 import uri
 
@@ -66,6 +68,22 @@ router web:
   get "/":
     let forms = getPeople().map(renderPerson)
     resp renderIndex(forms[0], forms[1])
+
+  get "/scantake":
+    try:
+      if not existsEnv("SCANTAKE_BASIC_AUTH"):
+        let msg = "Missing auth. Must configure SCANTAKE_BASIC_AUTH"
+        error msg
+        raise Exception.newException msg
+      block:
+        var headerVal : string = request.headers.getOrDefault("authorization")
+        headerVal.removePrefix("Basic ")
+        if getEnv("SCANTAKE_BASIC_AUTH") != base64.decode(headerVal):
+          raise Exception.newException "Nope!"
+      resp Http200, "<h1>TODO: Put the form here…</h1><p>Also, move this to its own site…</p>"
+    except Exception:
+      request.send Http401, @({"WWW-Authenticate": "Basic"}), ""
+      return
 
   get "/ws":
     const supportedProtocol = "REFRESH"
