@@ -1,6 +1,6 @@
 window.onload = function() {
-  const wsProtocol = location.protocol === "https:" ? "wss" : "ws";
-  const wsUrl = `${wsProtocol}://${window.location.host}/ws`;
+  const wsScheme = location.protocol === "https:" ? "wss" : "ws";
+  const wsUrl = `${wsScheme}://${window.location.host}/ws`;
   let wsInstance = createWs();
   let resetInterval = setInterval(() =>
   {

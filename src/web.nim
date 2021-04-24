@@ -7,7 +7,7 @@ import strutils
 import times
 import uri
 
-import ws, ws/jester_extra
+import ws
 
 import ./api_client
 import ./db_web
@@ -69,7 +69,7 @@ router web:
 
   get "/ws":
     const supportedProtocol = "REFRESH"
-    let ws = await newWebSocket(request)
+    let ws = await newWebSocket(request.getNativeReq(), protocol = supportedProtocol)
     if ws.protocol != supportedProtocol:
       await ws.send("Bad protocol")
       ws.close()
