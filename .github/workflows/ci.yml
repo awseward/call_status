@@ -106,9 +106,8 @@ jobs:
       - uses: "jiro4989/setup-nim-action@v1.2.3"
         with:
           nim-version: '1.4.2'
-      # TODO: Fix this upstream
-      - run: nimble  install --depsOnly --accept
-      - run: nimble docs
+      - run: nimble  install --accept --depsOnly
+      - run: nimble  docs
 name: CI
 on:
   pull_request:
