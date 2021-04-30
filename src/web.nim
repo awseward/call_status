@@ -3,13 +3,11 @@ import jester
 import json
 import os
 import sequtils
+import strtabs
 import strutils
-import times
-import uri
 
-import ws, ws/jester_extra
+import ws
 
-import ./api_client
 import ./db_web
 import ./logs
 import ./models/person
@@ -33,6 +31,9 @@ proc publishUpdates() =
 
 if defined(release):
   publishUpdates()
+
+proc mkWebSocket(request: Request, protocol: string = "") : Future[ws.WebSocket] =
+  newWebSocket(request.getNativeReq(), protocol = protocol)
 
 router api:
   get "/people": resp %*getPeople()
@@ -69,7 +70,7 @@ router web:
 
   get "/ws":
     const supportedProtocol = "REFRESH"
-    let ws = await newWebSocket(request)
+    let ws = await mkWebSocket(request, protocol = supportedProtocol)
     if ws.protocol != supportedProtocol:
       await ws.send("Bad protocol")
       ws.close()
