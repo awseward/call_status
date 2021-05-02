@@ -1,6 +1,6 @@
 let imports = ../imports.dhall
 
-let versions = ../versions.dhall
+let config = ../config.dhall
 
 let GHA = imports.GHA
 
@@ -18,11 +18,6 @@ let nim/Build = imports.action_templates.nim/Build
 
 let nim/Docs = imports.action_templates.nim/Docs
 
-let nimSetup =
-      let nim/Setup = imports.action_templates.nim/Setup
-
-      in  nim/Setup.Opts::{ nimVersion = versions.nim }
-
 in  GHA.Workflow::{
     , name = "CI"
     , on =
@@ -32,23 +27,29 @@ in  GHA.Workflow::{
           ]
     , jobs =
           [ nim/Assets.mkJobEntry
-              nim/Assets.Opts::{ platforms = [ OS.macos-latest ], nimSetup }
+              nim/Assets.Opts::{
+              , platforms = [ OS.macos-latest ]
+              , nimSetup = config.nim.setup.opts
+              }
           , nim/Build.mkJobEntry
               nim/Build.Opts::{
               , platforms = [ OS.ubuntu-latest ]
               , bin = "web"
               , nimbleFlags = "--define:release --define:useStdLib"
-              , nimSetup
+              , nimSetup = config.nim.setup.opts
               }
           , nim/Build.mkJobEntry
               nim/Build.Opts::{
               , platforms = [ OS.macos-latest ]
               , bin = "call_status_checker"
               , nimbleFlags = "--define:release --define:ssl"
-              , nimSetup
+              , nimSetup = config.nim.setup.opts
               }
           , nim/Docs.mkJobEntry
-              nim/Docs.Opts::{ platforms = [ OS.ubuntu-latest ], nimSetup }
+              nim/Docs.Opts::{
+              , platforms = [ OS.ubuntu-latest ]
+              , nimSetup = config.nim.setup.opts
+              }
           ]
         # toMap
             { check-shell = GHA.Job::{
@@ -68,7 +69,7 @@ in  GHA.Workflow::{
 
                       in  A.mkStep
                             A.Common::{=}
-                            A.Inputs::{ dhallVersion = versions.dhall }
+                            A.Inputs::{ dhallVersion = config.dhall.version }
                     ]
               }
             }

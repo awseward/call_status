@@ -1,6 +1,6 @@
 let imports = ../imports.dhall
 
-let versions = ../versions.dhall
+let config = ../config.dhall
 
 let GHA = imports.GHA
 
@@ -12,10 +12,6 @@ let actions = imports.actions-catalog
 
 let Checkout = actions.actions/checkout
 
-let nim/Setup = imports.action_templates.nim/Setup
-
-let Release = imports.action_templates.release
-
 in  GHA.Workflow::{
     , name = "Release"
     , on = On.map [ On.push On.PushPull::{ tags = On.include [ "*" ] } ]
@@ -24,14 +20,7 @@ in  GHA.Workflow::{
           , runs-on = [ OS.macos-latest ]
           , steps =
               Checkout.plainDo
-                (   nim/Setup.mkSteps
-                      nim/Setup.Opts::{ nimVersion = versions.nim }
-                  # Release.mkSteps
-                      Release.Opts::{
-                      , formula-name = "call_status_checker"
-                      , homebrew-tap = "awseward/homebrew-tap"
-                      }
-                )
+                (config.nim.setup.steps # config._release.homebrew.steps)
           }
         }
     }
