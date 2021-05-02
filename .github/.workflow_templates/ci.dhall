@@ -1,5 +1,7 @@
 let imports = ../imports.dhall
 
+let versions = ../versions.dhall
+
 let GHA = imports.GHA
 
 let On = GHA.On
@@ -16,6 +18,11 @@ let nim/Build = imports.action_templates.nim/Build
 
 let nim/Docs = imports.action_templates.nim/Docs
 
+let nimSetup =
+      let nim/Setup = imports.action_templates.nim/Setup
+
+      in  nim/Setup.Opts::{ nimVersion = versions.nim }
+
 in  GHA.Workflow::{
     , name = "CI"
     , on =
@@ -25,21 +32,23 @@ in  GHA.Workflow::{
           ]
     , jobs =
           [ nim/Assets.mkJobEntry
-              nim/Assets.Opts::{ platforms = [ OS.macos-latest ] }
+              nim/Assets.Opts::{ platforms = [ OS.macos-latest ], nimSetup }
           , nim/Build.mkJobEntry
               nim/Build.Opts::{
               , platforms = [ OS.ubuntu-latest ]
               , bin = "web"
               , nimbleFlags = "--define:release --define:useStdLib"
+              , nimSetup
               }
           , nim/Build.mkJobEntry
               nim/Build.Opts::{
               , platforms = [ OS.macos-latest ]
               , bin = "call_status_checker"
               , nimbleFlags = "--define:release --define:ssl"
+              , nimSetup
               }
           , nim/Docs.mkJobEntry
-              nim/Docs.Opts::{ platforms = [ OS.ubuntu-latest ] }
+              nim/Docs.Opts::{ platforms = [ OS.ubuntu-latest ], nimSetup }
           ]
         # toMap
             { check-shell = GHA.Job::{
@@ -59,7 +68,7 @@ in  GHA.Workflow::{
 
                       in  A.mkStep
                             A.Common::{=}
-                            A.Inputs::{ dhallVersion = "1.37.1" }
+                            A.Inputs::{ dhallVersion = versions.dhall }
                     ]
               }
             }
