@@ -77,7 +77,7 @@ jobs:
       - uses: "actions/checkout@v2"
       - uses: "awseward/gh-actions-dhall@0.2.9"
         with:
-          dhallVersion: '1.37.1'
+          dhallVersion: '1.38.1'
           typecheck_no_cache: false
           typecheck_package_files_only: false
   check-shell:
