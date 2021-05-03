@@ -32,7 +32,7 @@ proc publishUpdates() =
 if defined(release):
   publishUpdates()
 
-proc mkWebSocket(request: Request, protocol: string = "") : Future[ws.WebSocket] =
+proc mkWebSocket(request: Request, protocol: string = ""): Future[ws.WebSocket] =
   newWebSocket(request.getNativeReq(), protocol = protocol)
 
 router api:
