@@ -8,16 +8,21 @@ git remote show heroku \
 
 heroku create
 
-heroku buildpacks:add https://github.com/niteoweb/heroku-buildpack-shell
 heroku buildpacks:add https://github.com/awseward/heroku-buildpack-nim
 heroku buildpacks:add https://github.com/heroku/heroku-buildpack-apt
 
 heroku addons:create heroku-postgresql:hobby-dev
 
+heroku config:set DW_INGEST_URL=__FIXME__
 heroku config:set IS_HEROKU=true
-heroku config:set NIM_REV=3fb5157ab1b666a5a5c34efde0f357a82d433d04 # → v1.4.2
-heroku config:set NIMBLE_FLAGS='--define:release --define:ssl --define:useStdLib --stacktrace:on --linetrace:on'
+heroku config:set LOCAL_HISTORY_RETENTION='3 days'
 heroku config:set MQTT_SERVER=mqtt://192.168.86.20:1883
 heroku config:set MQTT_TOPIC=call-status/people
+heroku config:set MQTT_TOPIC_CONTROL=call-status/control
+heroku config:set MQTT_TOPIC_HEARTBEAT=call-status/heartbeat
+heroku config:set MQTT_TOPIC_PEOPLE=call-status/people
+heroku config:set NIM_REV=2b6b08032348939e5d355a6cb4faa0169306c17f # → v1.4.6
+heroku config:set NIMBLE_FLAGS='--define:release --define:ssl --define:useStdLib --stacktrace:on --linetrace:on --verbose'
+heroku config:set SJ_ACCESS=__FIXME__
 
 git push heroku master
