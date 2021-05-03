@@ -62,7 +62,7 @@ jobs:
         name: Cache nimble
         uses: "actions/cache@v1"
         with:
-          key: "${{ runner.os }}-nimble"
+          key: "${{ runner.os }}-nimble-${{ hashFiles('**/*.nimble') }}" # FIXME: Add this in upstream job-templates…
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.2.3"
         with:
