@@ -22,7 +22,7 @@ requires "https://github.com/awseward/nimassets#0.2.0"
 
 # See: https://web.archive.org/web/20200515050555/https://www.rockyourcode.com/how-to-serve-static-files-with-nim-and-jester-on-heroku/
 task assets, "Generate packaged assets":
-  exec "nimassets --help && echo src/views/assets_file.nim | xargs -t -I{} nimassets --dir=public --output={}"
+  exec "(type nimassets || nimble install --accept --depsOnly) && nimassets --help && echo src/views/assets_file.nim | xargs -t -I{} nimassets --dir=public --output={}"
 
 task db_setup, "Set up the DB":
   exec "./misc/db_setup.sh"
