@@ -5,8 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- A favicon for web (https://github.com/awseward/call_status/pull/124)
+
 ### Changed
 - Give XDG dirs their own module (https://github.com/awseward/call_status/pull/123)
+- Use latest nim (1.4.6) (https://github.com/awseward/call_status/pull/127)
+- Use latest dhall (1.38.1) (https://github.com/awseward/call_status/pull/128)
+- Misc changes to dhall-generated GH Actions (https://github.com/awseward/call_status/pull/126/files, https://github.com/awseward/call_status/pull/129, https://github.com/awseward/call_status/pull/130, https://github.com/awseward/call_status/pull/134)
+
+### Fixed
+- Fix (kinda) the broken websocket-driven auto-refresh (https://github.com/awseward/call_status/pull/125)
+- Address some compiler warnings coming from nimassets (https://github.com/awseward/call_status/pull/131, https://github.com/awseward/call_status/pull/133)
+- Get heroku deploys working again (https://github.com/awseward/call_status/pull/135)
 
 ## [0.6.3] - 2021-03-27
 ### Added
