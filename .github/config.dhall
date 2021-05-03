@@ -25,28 +25,28 @@ let _workflows =
         }
       }
 
-in  { dhall = let version = _config.versions.dhall in { setup = <>, version }
+in  { dhall.version = _config.versions.dhall
     , nim =
         let version = _config.versions.nim
 
         in  { setup =
-                let Setup = imports.action_templates.nim/Setup
+                let J_ = imports.job-templates.nim/Setup
 
-                let opts = Setup.Opts::{ nimVersion = version }
+                let opts = J_.Opts::{ nimVersion = version }
 
-                in  { steps = Setup.mkSteps opts, opts }
+                in  { steps = J_.mkSteps opts, opts }
             , version
             }
     , homebrew =
-        let Release = imports.action_templates.release
+        let J_ = imports.job-templates.release
 
         let opts =
-              Release.Opts::{
+              J_.Opts::{
               , formula-name = _config.homebrew.formula
               , homebrew-tap = _config.homebrew.tap
               }
 
-        in  { steps = Release.mkSteps opts, opts }
+        in  { steps = J_.mkSteps opts, opts }
     , _config
     , _workflows
     }
