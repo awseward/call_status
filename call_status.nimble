@@ -7,7 +7,6 @@ license       = "MIT"
 srcDir        = "src"
 bin           = @["call_status_checker", "call_status_cli", "web"]
 
-
 # Dependencies
 
 requires "argparse >= 2.0.0 & <= 2.0.0"
@@ -23,10 +22,14 @@ requires "https://github.com/awseward/nimassets#0.2.0"
 
 # See: https://web.archive.org/web/20200515050555/https://www.rockyourcode.com/how-to-serve-static-files-with-nim-and-jester-on-heroku/
 task assets, "Generate packaged assets":
-  exec "(set +e; type nimassets || nimble install --accept --depsOnly) && nimassets --help && echo src/views/assets_file.nim | xargs -t -I{} nimassets --dir=public --output={}"
+  exec "type nimassets || nimble deps"
+  exec "nimassets --help && echo src/views/assets_file.nim | xargs -t -I{} nimassets --dir=public --output={}"
 
 task db_setup, "Set up the DB":
   exec "./misc/db_setup.sh"
+
+task deps, "Install dependencies":
+  exec "echo '--depsOnly' | xargs -t nimble install --accept"
 
 task docs, "Generate documentation":
   exec "nimble doc --project src/call_status_checker.nim"
@@ -35,7 +38,8 @@ task docs, "Generate documentation":
   # exec "nim doc --project src/web.nim"
 
 task pretty, "Run nimpretty on all .nim files in the repo":
-  exec "find . -type f -not -name 'assets_file.nim' -name '*.nim' | xargs -n1 nimpretty --indent:2 --maxLineLen:120"
+  exec "type nimpretty"
+  exec "find . -type f -not -name 'assets_file.nim' -name '*.nim' | xargs -t nimpretty --indent:2 --maxLineLen:120"
 
 task watch_web, "Watch for changes and reload web accordingly":
   exec "find . -type f -name '*.nim' -or -name '*.nimf' | entr -r nimble -d:useStdLib run web"
@@ -47,13 +51,13 @@ task watch_zoom, "Simulate a zoom watching daemon (launchd LaunchAgent on MacOS)
 task heroku_build, "Steps to perform during the heroku build phase":
   exec "echo '--version' | xargs -t nim"
   exec "echo '--version' | xargs -t nimble"
-  exec "echo '--depsOnly' | xargs -t nimble install --accept"
+  exec "nimble deps"
   exec "nimble assets"
   exec "mkdir -vp .bin/"
   exec "echo .bin/ | xargs -t cp \"$(which heroku_database_url_splitter)\""
   exec """
-temp_dir="$(mktemp -d)"
-mkdir -vp "${temp_dir}"
-echo "${temp_dir}" | xargs -t git clone git://github.com/mbucc/shmig.git
-echo .bin/ | xargs -t cp "${temp_dir}/shmig"
-"""
+    temp_dir="$(mktemp -d)"
+    mkdir -vp "${temp_dir}"
+    echo "${temp_dir}" | xargs -t git clone git://github.com/mbucc/shmig.git
+    echo .bin/ | xargs -t cp "${temp_dir}/shmig"
+  """
