@@ -67,7 +67,6 @@ jobs:
       - uses: "jiro4989/setup-nim-action@v1.2.3"
         with:
           nim-version: '1.4.6'
-      - run: nimble install --accept --depsOnly # FIXME: Address this in job-templates
       - run: nimble  assets
       - run: git diff --exit-code --color
   check-dhall:
