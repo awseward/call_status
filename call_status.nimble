@@ -53,11 +53,4 @@ task heroku_build, "Steps to perform during the heroku build phase":
   exec "echo '--version' | xargs -t nimble"
   exec "nimble deps"
   exec "nimble assets"
-  exec "mkdir -vp .bin/"
-  exec "echo .bin/ | xargs -t cp \"$(which heroku_database_url_splitter)\""
-  exec """
-    temp_dir="$(mktemp -d)"
-    mkdir -vp "${temp_dir}"
-    echo "${temp_dir}" | xargs -t git clone git://github.com/mbucc/shmig.git
-    echo .bin/ | xargs -t cp "${temp_dir}/shmig"
-  """
+  exec "make heroku-local-bins"
