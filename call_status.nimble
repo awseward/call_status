@@ -45,8 +45,9 @@ task watch_zoom, "Simulate a zoom watching daemon (launchd LaunchAgent on MacOS)
     exec "nimble -d:ssl run call_status_checker check; sleep 10"
 
 task heroku_build, "Steps to perform during the heroku build phase":
-  exec "echo '--version' | xargs nim"
-  exec "nimble install --accept --depsOnly"
+  exec "echo '--version' | xargs -t nim"
+  exec "echo '--version' | xargs -t nimble"
+  exec "echo '--depsOnly' | xargs -t nimble install --accept"
   exec "nimble assets"
   exec "mkdir -vp .bin/"
   exec "echo .bin/ | xargs -t cp \"$(which heroku_database_url_splitter)\""
