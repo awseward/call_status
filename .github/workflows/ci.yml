@@ -24,7 +24,7 @@ jobs:
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.2.3"
         with:
-          nim-version: '1.4.2'
+          nim-version: '1.4.6'
       - run: nimble --stacktrace:on --linetrace:on --define:release --define:ssl build --accept call_status_checker
   build-web:
     runs-on:
@@ -45,7 +45,7 @@ jobs:
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.2.3"
         with:
-          nim-version: '1.4.2'
+          nim-version: '1.4.6'
       - run: nimble --stacktrace:on --linetrace:on --define:release --define:useStdLib build --accept web
   check-assets:
     runs-on:
@@ -66,8 +66,7 @@ jobs:
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.2.3"
         with:
-          nim-version: '1.4.2'
-      - run: nimble install --accept nimassets
+          nim-version: '1.4.6'
       - run: nimble  assets
       - run: git diff --exit-code --color
   check-dhall:
@@ -77,7 +76,7 @@ jobs:
       - uses: "actions/checkout@v2"
       - uses: "awseward/gh-actions-dhall@0.2.9"
         with:
-          dhallVersion: '1.37.1'
+          dhallVersion: '1.38.1'
           typecheck_no_cache: false
           typecheck_package_files_only: false
   check-shell:
@@ -105,9 +104,9 @@ jobs:
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.2.3"
         with:
-          nim-version: '1.4.2'
-      - run: nimble  install --accept
-      - run: nimble docs
+          nim-version: '1.4.6'
+      - run: nimble  install --accept --depsOnly
+      - run: nimble  docs
 name: CI
 on:
   pull_request:

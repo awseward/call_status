@@ -13,16 +13,16 @@ bin           = @["call_status_checker", "call_status_cli", "web"]
 requires "argparse >= 2.0.0 & <= 2.0.0"
 requires "jester >= 0.5.0"
 requires "nim >= 1.4.2"
-requires "nimassets >= 0.1.0"
-requires "ws >= 0.4.0"
+requires "ws >= 0.4.3"
 
 requires "https://github.com/awseward/nim-junk-drawer#9ff04c5c70b2fe5d24f951f0ff8f408a108ee059"
+requires "https://github.com/awseward/nimassets#0.2.0"
 
 # Tasks
 
 # See: https://web.archive.org/web/20200515050555/https://www.rockyourcode.com/how-to-serve-static-files-with-nim-and-jester-on-heroku/
 task assets, "Generate packaged assets":
-  exec "nimassets --help && echo src/views/assets_file.nim | xargs -t -I{} nimassets --dir=public --output={}"
+  exec "(type nimassets || nimble install --accept --depsOnly) && nimassets --help && echo src/views/assets_file.nim | xargs -t -I{} nimassets --dir=public --output={}"
 
 task db_setup, "Set up the DB":
   exec "./misc/db_setup.sh"

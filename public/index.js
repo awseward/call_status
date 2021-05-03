@@ -1,7 +1,8 @@
 window.onload = function() {
-  const wsProtocol = location.protocol === "https:" ? "wss" : "ws";
-  const wsUrl = `${wsProtocol}://${window.location.host}/ws`;
+  const wsScheme = location.protocol === "https:" ? "wss" : "ws";
+  const wsUrl = `${wsScheme}://${window.location.host}/ws`;
   let wsInstance = createWs();
+  document.wsInstance = wsInstance;
   let resetInterval = setInterval(() =>
   {
     if (wsInstance && wsInstance.readyState > 1) {
@@ -33,7 +34,10 @@ window.onload = function() {
       }, 2000);
     }
 
-    ws.onclose = event => console.warn(`WebSocket closed on ${wsUrl}`, event);
+    ws.onclose = event => {
+      console.warn(`WebSocket closed on ${wsUrl}`, event);
+      setTimeout(() => window.location.reload(), 1000);
+    }
 
     ws.onmessage = msg => {
       const data = msg.data;

@@ -24,7 +24,7 @@ jobs:
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.2.3"
         with:
-          nim-version: '1.4.2'
+          nim-version: '1.4.6'
       - id: plan
         name: Plan release
         run: |
