@@ -1,0 +1,30 @@
+name: Cache
+on:
+  push:
+    branches:
+      - main
+      - master
+jobs:
+  update-cache:
+    runs-on: ${{ matrix.os }}
+      - macos-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: "actions/checkout@v2"
+      - id: cache-choosenim
+        name: Cache choosenim
+        uses: "actions/cache@v2"
+        with:
+          key: "${{ runner.os }}-choosenim"
+          path: "~/.choosenim"
+      - id: cache-nimble
+        name: Cache nimble
+        uses: "actions/cache@v2"
+        with:
+          key: "${{ runner.os }}-nimble-${{ hashFiles('**/*.nimble') }}"
+          path: "~/.nimble"
+      - uses: "jiro4989/setup-nim-action@v1.2.3"
+        with:
+          nim-version: '1.4.6'
