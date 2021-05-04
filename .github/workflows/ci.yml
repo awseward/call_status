@@ -12,13 +12,13 @@ jobs:
       - uses: "actions/checkout@v2"
       - id: cache-choosenim
         name: Cache choosenim
-        uses: "actions/cache@v2"
+        uses: "actions/cache@v1"
         with:
           key: "${{ runner.os }}-choosenim"
           path: "~/.choosenim"
       - id: cache-nimble
         name: Cache nimble
-        uses: "actions/cache@v2"
+        uses: "actions/cache@v1"
         with:
           key: "${{ runner.os }}-nimble-${{ hashFiles('**/*.nimble') }}"
           path: "~/.nimble"
@@ -33,13 +33,13 @@ jobs:
       - uses: "actions/checkout@v2"
       - id: cache-choosenim
         name: Cache choosenim
-        uses: "actions/cache@v2"
+        uses: "actions/cache@v1"
         with:
           key: "${{ runner.os }}-choosenim"
           path: "~/.choosenim"
       - id: cache-nimble
         name: Cache nimble
-        uses: "actions/cache@v2"
+        uses: "actions/cache@v1"
         with:
           key: "${{ runner.os }}-nimble-${{ hashFiles('**/*.nimble') }}"
           path: "~/.nimble"
@@ -54,13 +54,13 @@ jobs:
       - uses: "actions/checkout@v2"
       - id: cache-choosenim
         name: Cache choosenim
-        uses: "actions/cache@v2"
+        uses: "actions/cache@v1"
         with:
           key: "${{ runner.os }}-choosenim"
           path: "~/.choosenim"
       - id: cache-nimble
         name: Cache nimble
-        uses: "actions/cache@v2"
+        uses: "actions/cache@v1"
         with:
           key: "${{ runner.os }}-nimble-${{ hashFiles('**/*.nimble') }}"
           path: "~/.nimble"
@@ -92,13 +92,13 @@ jobs:
       - uses: "actions/checkout@v2"
       - id: cache-choosenim
         name: Cache choosenim
-        uses: "actions/cache@v2"
+        uses: "actions/cache@v1"
         with:
           key: "${{ runner.os }}-choosenim"
           path: "~/.choosenim"
       - id: cache-nimble
         name: Cache nimble
-        uses: "actions/cache@v2"
+        uses: "actions/cache@v1"
         with:
           key: "${{ runner.os }}-nimble-${{ hashFiles('**/*.nimble') }}"
           path: "~/.nimble"
