@@ -1,29 +1,38 @@
-name: Cache
-on:
-  push:
-    branches:
-      - main
-      - master
+# Warning: this is an automatically generated file.
+#
+# It was generated using '.github/.workflow_templates/cache.dhall'.
+#
+# Please avoid editing it manually unless doing so temporarily.
+
 jobs:
   update-cache:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
+    runs-on:
+      - "${{ matrix.os }}"
     steps:
       - uses: "actions/checkout@v2"
       - id: cache-choosenim
         name: Cache choosenim
-        uses: "actions/cache@v2"
+        uses: "actions/cache@v1"
         with:
           key: "${{ runner.os }}-choosenim"
           path: "~/.choosenim"
       - id: cache-nimble
         name: Cache nimble
-        uses: "actions/cache@v2"
+        uses: "actions/cache@v1"
         with:
           key: "${{ runner.os }}-nimble-${{ hashFiles('**/*.nimble') }}"
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.2.3"
         with:
           nim-version: '1.4.6'
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+name: Cache
+on:
+  push:
+    branches:
+      - master
+      - main
