@@ -23,7 +23,6 @@ jobs:
           key: "${{ runner.os }}-nimble-${{ hashFiles('**/*.nimble') }}"
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.2.3"
-        if: steps.cache-choosenim.outputs.cache-hit != 'true'
         with:
           nim-version: '1.4.6'
       - run: nimble --stacktrace:on --linetrace:on --define:release --define:ssl build --accept call_status_checker
@@ -45,7 +44,6 @@ jobs:
           key: "${{ runner.os }}-nimble-${{ hashFiles('**/*.nimble') }}"
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.2.3"
-        if: steps.cache-choosenim.outputs.cache-hit != 'true'
         with:
           nim-version: '1.4.6'
       - run: nimble --stacktrace:on --linetrace:on --define:release --define:useStdLib build --accept web
@@ -67,7 +65,6 @@ jobs:
           key: "${{ runner.os }}-nimble-${{ hashFiles('**/*.nimble') }}"
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.2.3"
-        if: steps.cache-choosenim.outputs.cache-hit != 'true'
         with:
           nim-version: '1.4.6'
       - run: nimble  assets
@@ -106,7 +103,6 @@ jobs:
           key: "${{ runner.os }}-nimble-${{ hashFiles('**/*.nimble') }}"
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.2.3"
-        if: steps.cache-choosenim.outputs.cache-hit != 'true'
         with:
           nim-version: '1.4.6'
       - run: nimble  install --accept --depsOnly
