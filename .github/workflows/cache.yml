@@ -7,7 +7,6 @@ on:
 jobs:
   update-cache:
     runs-on: ${{ matrix.os }}
-      - macos-latest
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
