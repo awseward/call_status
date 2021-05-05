@@ -4,32 +4,35 @@ let config = ../config.dhall
 
 let GHA = imports.GHA
 
-let On = GHA.On
-
-let OS = GHA.OS.Type
-
 let actions = imports.actions-catalog
 
 let checkoutDo = actions.actions/checkout.plainDo
 
-in  GHA.Workflow::{
-    , name = "Cache"
-    , on =
-        On.map
-          [ On.push On.PushPull::{ branches = On.include [ "master", "main" ] }
-          ]
-    , jobs = toMap
-        { update-cache = GHA.Job::{
-          , strategy = Some GHA.Strategy::{
-            , matrix =
-                GHA.Strategy.Matrix.mk
-                  GHA.Strategy.Matrix.Common::{
-                  , os = [ OS.macos-latest, OS.ubuntu-latest ]
-                  }
-                  GHA.Strategy.Matrix.otherEmpty
+let OS = GHA.OS.Type
+
+let multiOS =
+      λ(os : List OS) →
+        let Strategy = GHA.Strategy
+
+        in  { strategy = Some Strategy::{
+              , matrix =
+                  Strategy.Matrix.mk
+                    Strategy.Matrix.Common::{ os }
+                    Strategy.Matrix.otherEmpty
+              }
+            , runs-on = [ OS.other (GHA.subst "matrix.os") ]
             }
-          , runs-on = [ OS.other (GHA.subst "matrix.os") ]
-          , steps = checkoutDo config.nim.setup.steps
-          }
+
+let opts =
+        config._workflows.cache
+      ⫽ { jobs = toMap
+            { update-cache =
+                let opts =
+                        multiOS [ OS.macos-latest, OS.ubuntu-latest ]
+                      ⫽ { steps = checkoutDo config.nim.setup.steps }
+
+                in  GHA.Job::opts
+            }
         }
-    }
+
+in  GHA.Workflow::opts

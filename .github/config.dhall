@@ -11,7 +11,15 @@ let _config =
       }
 
 let _workflows =
-      { ci =
+      { cache =
+        { name = "Cache"
+        , on =
+            On.map
+              [ On.push
+                  On.PushPull::{ branches = On.include [ "main", "master" ] }
+              ]
+        }
+      , ci =
         { name = "CI"
         , on =
             On.map
