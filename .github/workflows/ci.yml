@@ -67,7 +67,7 @@ jobs:
       - uses: "jiro4989/setup-nim-action@v1.2.3"
         with:
           nim-version: '1.4.6'
-      - run: nimble  assets
+      - run: nimble assets
       - run: git diff --exit-code --color
   check-dhall:
     runs-on:
@@ -105,8 +105,8 @@ jobs:
       - uses: "jiro4989/setup-nim-action@v1.2.3"
         with:
           nim-version: '1.4.6'
-      - run: nimble  install --accept --depsOnly
-      - run: nimble  docs
+      - run: nimble install --accept --depsOnly
+      - run: nimble docs
 name: CI
 on:
   pull_request:
