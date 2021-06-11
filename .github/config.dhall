@@ -5,7 +5,7 @@ let GHA = imports.GHA
 let On = GHA.On
 
 let _config =
-      { versions = { dhall = "1.38.1", nim = "1.4.6" }
+      { versions = { dhall = "1.39.0", nim = "1.4.6" }
       , homebrew =
         { formula = "call_status_checker", tap = "awseward/homebrew-tap" }
       }
@@ -50,6 +50,10 @@ in  { dhall.version = _config.versions.dhall
 
         let opts =
               J_.Opts::{
+              , base-branch =
+                  -- going for 'main' momentarily, but this intermediate step
+                  -- is necessary
+                  "master"
               , formula-name = _config.homebrew.formula
               , homebrew-tap = _config.homebrew.tap
               }
