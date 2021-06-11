@@ -74,9 +74,9 @@ jobs:
       - ubuntu-latest
     steps:
       - uses: "actions/checkout@v2"
-      - uses: "awseward/gh-actions-dhall@0.2.9"
+      - uses: "awseward/gh-actions-dhall@0.3.1"
         with:
-          dhallVersion: '1.38.1'
+          dhallVersion: '1.39.0'
           typecheck_no_cache: false
           typecheck_package_files_only: false
   check-shell:
