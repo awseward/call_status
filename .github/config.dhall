@@ -14,17 +14,13 @@ let _workflows =
       { cache =
         { name = "Cache"
         , on =
-            On.map
-              [ On.push
-                  On.PushPull::{ branches = On.include [ "main", "master" ] }
-              ]
+            On.map [ On.push On.PushPull::{ branches = On.include [ "main" ] } ]
         }
       , ci =
         { name = "CI"
         , on =
             On.map
-              [ On.pullRequest
-                  On.PushPull::{ branches = On.include [ "main", "master" ] }
+              [ On.pullRequest On.PushPull::{ branches = On.include [ "main" ] }
               ]
         }
       , release =
@@ -50,10 +46,6 @@ in  { dhall.version = _config.versions.dhall
 
         let opts =
               J_.Opts::{
-              , base-branch =
-                  -- going for 'main' momentarily, but this intermediate step
-                  -- is necessary
-                  "master"
               , formula-name = _config.homebrew.formula
               , homebrew-tap = _config.homebrew.tap
               }

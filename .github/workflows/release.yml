@@ -85,7 +85,7 @@ jobs:
           COMMITTER_TOKEN: "${{ secrets.COMMITTER_TOKEN }}"
         uses: "mislav/bump-homebrew-formula-action@v1"
         with:
-          base-branch: master
+          base-branch: main
           commit-message: |
             {{formulaName}} {{version}}
             
