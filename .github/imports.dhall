@@ -3,10 +3,10 @@ let dhall-misc =
         sha256:61348f29f9ed05d780d7650e9aeba711b4fc71aba263d5de4ac1a9905fbd8be8
 
 let Plural =
-    -- TODO: Pull this up to dhall-utils if it seems to be useful…
+    -- TODO: Pull this up to dhall-utils if it seems to be useful
     -- Like `NonEmpty`, but instead of representing `> 0`, it represents `> 1`
       let NonEmpty =
-          -- TODO: Take from Prelud instead maybe
+          -- TODO: Take from Prelude instead when possible
             dhall-misc.GHA.NonEmpty
 
       let Plural = λ(a : Type) → { head : a, neck : a, tail : List a }
