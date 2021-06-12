@@ -20,8 +20,8 @@ let Plural =
 
       let _testMake =
               assert
-            :   make Text "foo" "bar" [ "baz" ]
-              ≡ { head = "foo", neck = "bar", tail = [ "baz" ] }
+            :   make Text "foo" "bar" [ "baz", "moop" ]
+              ≡ { head = "foo", neck = "bar", tail = [ "baz", "moop" ] }
 
       let pair =
             λ(a : Type) →
@@ -40,8 +40,8 @@ let Plural =
 
       let _testToList =
               assert
-            :   toList Text (make Text "foo" "bar" [ "baz" ])
-              ≡ [ "foo", "bar", "baz" ]
+            :   toList Text (make Text "foo" "bar" [ "baz", "moop" ])
+              ≡ [ "foo", "bar", "baz", "moop" ]
 
       let toNonEmpty
           : ∀(a : Type) → Plural a → NonEmpty.Type a
