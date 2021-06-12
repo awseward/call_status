@@ -37,7 +37,11 @@ let _workflows =
         }
       }
 
-let mkCacheWorkflowOpts -- TODO: Maybe consider upstreaming this…
+let mkCacheWorkflowOpts -- TODO: Consider upstreaming in some form or another.
+                        --
+                        -- FIXME:
+                        --   I'm not sure if requiring `Plural OS` is what we
+                        --   actually want; for now I'm just trying things out.
                         =
       λ(defaultBranch : Text) →
       λ(os : Plural.Type OS.Type) →
