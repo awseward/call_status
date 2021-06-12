@@ -4,23 +4,23 @@ let GHA = imports.GHA
 
 let On = GHA.On
 
+let OS = GHA.OS
+
 let _config =
       { versions = { dhall = "1.39.0", nim = "1.4.6" }
       , homebrew =
         { formula = "call_status_checker", tap = "awseward/homebrew-tap" }
       }
 
+let defaultBranch = "main"
+
 let _workflows =
-      { cache =
-        { name = "Cache"
-        , on =
-            On.map [ On.push On.PushPull::{ branches = On.include [ "main" ] } ]
-        }
-      , ci =
+      { ci =
         { name = "CI"
         , on =
             On.map
-              [ On.pullRequest On.PushPull::{ branches = On.include [ "main" ] }
+              [ On.pullRequest
+                  On.PushPull::{ branches = On.include [ defaultBranch ] }
               ]
         }
       , release =
@@ -29,7 +29,23 @@ let _workflows =
         }
       }
 
-in  { dhall.version = _config.versions.dhall
+let mkCacheWorkflowOpts -- TODO: Maybe consider upstreaming this…
+                        =
+      λ(defaultBranch : Text) →
+      λ(osHead : OS.Type) →
+      λ(osTail : List OS.Type) →
+      λ(steps : List GHA.Step.Type) →
+        { name = "Cache"
+        , on =
+            On.map
+              [ On.push On.PushPull::{ branches = On.include [ defaultBranch ] }
+              ]
+        , jobs = toMap
+            { update-cache = GHA.Job::(GHA.multiOS osHead osTail ⫽ { steps }) }
+        }
+
+in  { defaultBranch
+    , dhall.version = _config.versions.dhall
     , nim =
         let version = _config.versions.nim
 
@@ -53,4 +69,5 @@ in  { dhall.version = _config.versions.dhall
         in  { steps = J_.mkSteps opts, opts }
     , _config
     , _workflows
+    , mkCacheWorkflowOpts
     }
