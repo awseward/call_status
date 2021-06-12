@@ -7,7 +7,7 @@
 jobs:
   release-call_status_checker:
     runs-on:
-      - macos-latest
+      head: macos-latest # FIXME: needs to render as a list, not like this
     steps:
       - uses: "actions/checkout@v2"
       - id: cache-choosenim

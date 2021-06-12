@@ -7,7 +7,7 @@
 jobs:
   build-call_status_checker:
     runs-on:
-      - macos-latest
+      head: macos-latest # FIXME: needs to render as a list, not like this
     steps:
       - uses: "actions/checkout@v2"
       - id: cache-choosenim
@@ -28,7 +28,7 @@ jobs:
       - run: nimble --stacktrace:on --linetrace:on --define:release --define:ssl build --accept call_status_checker
   build-web:
     runs-on:
-      - ubuntu-latest
+      head: ubuntu-latest # FIXME: needs to render as a list, not like this
     steps:
       - uses: "actions/checkout@v2"
       - id: cache-choosenim
@@ -49,7 +49,7 @@ jobs:
       - run: nimble --stacktrace:on --linetrace:on --define:release --define:useStdLib build --accept web
   check-assets:
     runs-on:
-      - macos-latest
+      head: macos-latest # FIXME: needs to render as a list, not like this
     steps:
       - uses: "actions/checkout@v2"
       - id: cache-choosenim
@@ -71,7 +71,7 @@ jobs:
       - run: git diff --exit-code --color
   check-dhall:
     runs-on:
-      - ubuntu-latest
+      head: ubuntu-latest # FIXME: needs to render as a list, not like this
     steps:
       - uses: "actions/checkout@v2"
       - uses: "awseward/gh-actions-dhall@0.3.2"
@@ -81,13 +81,13 @@ jobs:
           typecheck_package_files_only: false
   check-shell:
     runs-on:
-      - ubuntu-latest
+      head: ubuntu-latest # FIXME: needs to render as a list, not like this
     steps:
       - uses: "actions/checkout@v2"
       - uses: "awseward/gh-actions-shell@0.1.5"
   generate-docs:
     runs-on:
-      - ubuntu-latest
+      head: ubuntu-latest # FIXME: needs to render as a list, not like this
     steps:
       - uses: "actions/checkout@v2"
       - id: cache-choosenim

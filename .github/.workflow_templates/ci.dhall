@@ -4,6 +4,10 @@ let config = ../config.dhall
 
 let GHA = imports.GHA
 
+let NonEmpty =
+    -- TODO: Should consider eventually pulling this from Prelude instead
+      GHA.NonEmpty
+
 let OS = GHA.OS.Type
 
 let job-templates = imports.job-templates
@@ -19,7 +23,7 @@ let opts =
 
                 in  J_.mkJobEntry
                       J_.Opts::{
-                      , platforms = [ OS.ubuntu-latest ]
+                      , platforms = NonEmpty.singleton OS OS.ubuntu-latest
                       , bin = "web"
                       , nimbleFlags = "--define:release --define:useStdLib"
                       , nimSetup = config.nim.setup.opts
@@ -28,7 +32,7 @@ let opts =
 
                 in  J_.mkJobEntry
                       J_.Opts::{
-                      , platforms = [ OS.macos-latest ]
+                      , platforms = NonEmpty.singleton OS OS.macos-latest
                       , bin = "call_status_checker"
                       , nimbleFlags = "--define:release --define:ssl"
                       , nimSetup = config.nim.setup.opts
@@ -37,20 +41,20 @@ let opts =
 
                 in  J_.mkJobEntry
                       J_.Opts::{
-                      , platforms = [ OS.macos-latest ]
+                      , platforms = NonEmpty.singleton OS OS.macos-latest
                       , nimSetup = config.nim.setup.opts
                       }
               , let J_ = job-templates.nim/Docs
 
                 in  J_.mkJobEntry
                       J_.Opts::{
-                      , platforms = [ OS.ubuntu-latest ]
+                      , platforms = NonEmpty.singleton OS OS.ubuntu-latest
                       , nimSetup = config.nim.setup.opts
                       }
               ]
             # toMap
                 { check-shell = GHA.Job::{
-                  , runs-on = [ OS.ubuntu-latest ]
+                  , runs-on = NonEmpty.singleton OS OS.ubuntu-latest
                   , steps =
                       checkoutDo
                         [ let J_ = actions.awseward/gh-actions-shell
@@ -59,7 +63,7 @@ let opts =
                         ]
                   }
                 , check-dhall = GHA.Job::{
-                  , runs-on = [ OS.ubuntu-latest ]
+                  , runs-on = NonEmpty.singleton OS OS.ubuntu-latest
                   , steps =
                       checkoutDo
                         [ let J_ = actions.awseward/gh-actions-dhall
