@@ -6,6 +6,14 @@ let On = GHA.On
 
 let OS = GHA.OS
 
+let Plural = imports.Plural
+
+let multiOS =
+      λ(oses : Plural.Type OS.Type) →
+        let nonempty = Plural.toNonEmpty OS.Type oses
+
+        in  GHA.multiOS nonempty.head nonempty.tail
+
 let _config =
       { versions = { dhall = "1.39.0", nim = "1.4.6" }
       , homebrew =
@@ -29,19 +37,21 @@ let _workflows =
         }
       }
 
-let mkCacheWorkflowOpts -- TODO: Maybe consider upstreaming this…
+let mkCacheWorkflowOpts -- TODO: Consider upstreaming in some form or another.
+                        --
+                        -- FIXME:
+                        --   I'm not sure if requiring `Plural OS` is what we
+                        --   actually want; for now I'm just trying things out.
                         =
       λ(defaultBranch : Text) →
-      λ(osHead : OS.Type) →
-      λ(osTail : List OS.Type) →
+      λ(os : Plural.Type OS.Type) →
       λ(steps : List GHA.Step.Type) →
         { name = "Cache"
         , on =
             On.map
               [ On.push On.PushPull::{ branches = On.include [ defaultBranch ] }
               ]
-        , jobs = toMap
-            { update-cache = GHA.Job::(GHA.multiOS osHead osTail ⫽ { steps }) }
+        , jobs = toMap { update-cache = GHA.Job::(multiOS os ⫽ { steps }) }
         }
 
 in  { defaultBranch
