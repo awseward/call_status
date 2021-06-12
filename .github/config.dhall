@@ -8,12 +8,6 @@ let OS = GHA.OS
 
 let Plural = imports.Plural
 
-let multiOS =
-      λ(oses : Plural.Type OS.Type) →
-        let nonempty = Plural.toNonEmpty OS.Type oses
-
-        in  GHA.multiOS nonempty.head nonempty.tail
-
 let _config =
       { versions = { dhall = "1.39.0", nim = "1.4.6" }
       , homebrew =
@@ -51,7 +45,7 @@ let mkCacheWorkflowOpts -- TODO: Consider upstreaming in some form or another.
             On.map
               [ On.push On.PushPull::{ branches = On.include [ defaultBranch ] }
               ]
-        , jobs = toMap { update-cache = GHA.Job::(multiOS os ⫽ { steps }) }
+        , jobs = toMap { update-cache = GHA.Job::(GHA.multiOS os ⫽ { steps }) }
         }
 
 in  { defaultBranch
