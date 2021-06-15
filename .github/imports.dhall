@@ -1,6 +1,6 @@
 let dhall-misc =
-      https://raw.githubusercontent.com/awseward/dhall-misc/20210612224343/package.dhall
-        sha256:3b00491aee91e23d6df498ec32e285a8075d9d46f74b69deb33fb3b1ad13be03
+      https://raw.githubusercontent.com/awseward/dhall-misc/20210615160625/package.dhall
+        sha256:f2f63279600b19f733c04683286b9a955886d64b89589aee251bfb3643d18218
 
 let dhall-utils =
       https://raw.githubusercontent.com/awseward/dhall-utils/20210612223556/package.dhall
