@@ -31,19 +31,6 @@ let _workflows =
         }
       }
 
-let mkCacheWorkflowOpts -- TODO: Consider upstreaming in some form or another.
-                        =
-      λ(defaultBranch : Text) →
-      λ(os : NonEmpty.Type OS.Type) →
-      λ(steps : List GHA.Step.Type) →
-        { name = "Cache"
-        , on =
-            On.map
-              [ On.push On.PushPull::{ branches = On.include [ defaultBranch ] }
-              ]
-        , jobs = toMap { update-cache = GHA.Job::(GHA.handleOS os ⫽ { steps }) }
-        }
-
 in  { defaultBranch
     , dhall.version = _config.versions.dhall
     , nim =

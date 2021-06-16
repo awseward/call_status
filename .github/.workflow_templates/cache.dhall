@@ -16,5 +16,5 @@ in  GHA.Workflow::( let os =
 
                     let steps = checkoutDo config.nim.setup.steps
 
-                    in  config.mkCacheWorkflowOpts config.defaultBranch os steps
+                    in  GHA.mkCacheWorkflowOpts config.defaultBranch os steps
                   )
