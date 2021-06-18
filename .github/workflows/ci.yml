@@ -24,7 +24,7 @@ jobs:
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.3.4"
         with:
-          nim-version: '1.4.6'
+          nim-version: '1.4.8'
       - run: nimble --stacktrace:on --linetrace:on --define:release --define:ssl build --accept call_status_checker
   build-web:
     runs-on:
@@ -45,7 +45,7 @@ jobs:
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.3.4"
         with:
-          nim-version: '1.4.6'
+          nim-version: '1.4.8'
       - run: nimble --stacktrace:on --linetrace:on --define:release --define:useStdLib build --accept web
   check-assets:
     runs-on:
@@ -66,7 +66,7 @@ jobs:
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.3.4"
         with:
-          nim-version: '1.4.6'
+          nim-version: '1.4.8'
       - run: nimble assets
       - run: git diff --exit-code --color
   check-dhall:
@@ -104,7 +104,7 @@ jobs:
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.3.4"
         with:
-          nim-version: '1.4.6'
+          nim-version: '1.4.8'
       - run: nimble install --accept --depsOnly
       - run: nimble docs
 name: CI
