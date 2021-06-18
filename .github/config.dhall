@@ -4,10 +4,6 @@ let GHA = imports.GHA
 
 let On = GHA.On
 
-let OS = GHA.OS
-
-let NonEmpty = GHA.NonEmpty
-
 let _config =
       { versions = { dhall = "1.39.0", nim = "1.4.6" }
       , homebrew =
@@ -56,5 +52,4 @@ in  { defaultBranch
         in  { steps = J_.mkSteps opts, opts }
     , _config
     , _workflows
-    , mkCacheWorkflowOpts
     }

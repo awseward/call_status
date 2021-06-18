@@ -43,7 +43,9 @@ jobs:
           
           set -euo pipefail
           
-          TARBALL_FILENAME="$( ./_build_release_tarball.sh "${GIT_TAG}" "$( tr '[:upper:]' '[:lower:]' <<< "${PLATFORM_NAME}" )" )"
+          __build_release_tarball="${BUILD_RELEASE_TARBALL:-./_build_release_tarball.sh}"
+          
+          TARBALL_FILENAME="$( "${__build_release_tarball}" "${GIT_TAG}" "$( tr '[:upper:]' '[:lower:]' <<< "${PLATFORM_NAME}" )" )"
           ls -lah
           export TARBALL_FILENAME
           export TARBALL_FILEPATH="./${TARBALL_FILENAME}"
@@ -64,7 +66,7 @@ jobs:
           echo "::set-output name=tarball_checksum::${TARBALL_CHECKSUM}"
       - env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        id: create_release
+        id: create-release
         uses: "actions/create-release@v1"
         with:
           body: "Checksum: `${{ steps.checksum.outputs.tarball_checksum }}`"
@@ -74,13 +76,13 @@ jobs:
           tag_name: "${{ steps.plan.outputs.git_tag }}"
       - env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        id: upload_tarball
+        id: upload-tarball
         uses: "actions/upload-release-asset@v1"
         with:
           asset_content_type: application/gzip
           asset_name: "${{ steps.tarball.outputs.tarball_filename }}"
           asset_path: "${{ steps.tarball.outputs.tarball_filepath }}"
-          upload_url: "${{ steps.create_release.outputs.upload_url }}"
+          upload_url: "${{ steps.create-release.outputs.upload_url }}"
       - env:
           COMMITTER_TOKEN: "${{ secrets.COMMITTER_TOKEN }}"
         uses: "mislav/bump-homebrew-formula-action@v1"
@@ -89,8 +91,8 @@ jobs:
           commit-message: |
             {{formulaName}} {{version}}
             
-            Sourced from ${{ steps.create_release.outputs.html_url }}.
-          download-url: "${{ steps.upload_tarball.outputs.browser_download_url }}"
+            Sourced from ${{ steps.create-release.outputs.html_url }}.
+          download-url: "${{ steps.upload-tarball.outputs.browser_download_url }}"
           formula-name: call_status_checker
           homebrew-tap: awseward/homebrew-tap
 name: Release
