@@ -5,8 +5,6 @@
 # Please avoid editing it manually unless doing so temporarily.
 
 jobs:
-  # Shouldn't be here -- added intentionally to demonstrate CI failure in case
-  # of yml ↔ template drift
   release-call_status_checker:
     runs-on:
       - macos-latest
