@@ -5,6 +5,8 @@
 # Please avoid editing it manually unless doing so temporarily.
 
 jobs:
+  # Shouldn't be here -- added intentionally to demonstrate CI failure in case
+  # of yml ↔ template drift
   release-call_status_checker:
     runs-on:
       - macos-latest
@@ -43,9 +45,9 @@ jobs:
           
           set -euo pipefail
           
-          __build_release_tarball="${BUILD_RELEASE_TARBALL:-./_build_release_tarball.sh}"
+          _build="${BUILD_RELEASE_TARBALL:-./_build_release_tarball.sh}"
           
-          TARBALL_FILENAME="$( "${__build_release_tarball}" "${GIT_TAG}" "$( tr '[:upper:]' '[:lower:]' <<< "${PLATFORM_NAME}" )" )"
+          TARBALL_FILENAME="$( "${_build}" "${GIT_TAG}" "$( tr '[:upper:]' '[:lower:]' <<< "${PLATFORM_NAME}" )" )"
           ls -lah
           export TARBALL_FILENAME
           export TARBALL_FILEPATH="./${TARBALL_FILENAME}"
