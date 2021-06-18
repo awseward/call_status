@@ -43,9 +43,9 @@ jobs:
           
           set -euo pipefail
           
-          __build_release_tarball="${BUILD_RELEASE_TARBALL:-./_build_release_tarball.sh}"
+          _build="${BUILD_RELEASE_TARBALL:-./_build_release_tarball.sh}"
           
-          TARBALL_FILENAME="$( "${__build_release_tarball}" "${GIT_TAG}" "$( tr '[:upper:]' '[:lower:]' <<< "${PLATFORM_NAME}" )" )"
+          TARBALL_FILENAME="$( "${_build}" "${GIT_TAG}" "$( tr '[:upper:]' '[:lower:]' <<< "${PLATFORM_NAME}" )" )"
           ls -lah
           export TARBALL_FILENAME
           export TARBALL_FILEPATH="./${TARBALL_FILENAME}"
