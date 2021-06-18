@@ -1,7 +1,7 @@
 let dhall-misc =
         env:DHALL_MISC
-      ? https://raw.githubusercontent.com/awseward/dhall-misc/20210618054443/package.dhall
-          sha256:8069801dbbfc48b58b11e0a91a84d4a84df61a174d30202be8be68844a904e59
+      ? https://raw.githubusercontent.com/awseward/dhall-misc/20210618085503/package.dhall
+          sha256:62a426f128fc05bbed2184e5c91f9eb1848fbc064006835eed8dabcd02470ccc
 
 let dhall-utils =
         env:DHALL_UTILS

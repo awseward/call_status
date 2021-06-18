@@ -22,7 +22,7 @@ jobs:
         with:
           key: "${{ runner.os }}-nimble-${{ hashFiles('**/*.nimble') }}"
           path: "~/.nimble"
-      - uses: "jiro4989/setup-nim-action@v1.2.3"
+      - uses: "jiro4989/setup-nim-action@v1.3.4"
         with:
           nim-version: '1.4.6'
     strategy:
