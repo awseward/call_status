@@ -11,22 +11,23 @@ proc dedent*(s: string): string =
   ## first line is indented.
   unindent(s, discoverIndent s)
 
-runnableExamples:
-  let query = dedent """
+# FIXME
+# runnableExamples:
+#   let query = dedent """
 
-    CREATE TABLE things (
-      id        SERIAL PRIMARY KEY,
-      name      TEXT NOT NULL,
-      is_active BOOLEAN NOT NULL
-    );
-  """
-  doAssert query == """
-CREATE TABLE things (
-  id        SERIAL PRIMARY KEY,
-  name      TEXT NOT NULL,
-  is_active BOOLEAN NOT NULL
-);
-"""
+#     CREATE TABLE things (
+#       id        SERIAL PRIMARY KEY,
+#       name      TEXT NOT NULL,
+#       is_active BOOLEAN NOT NULL
+#     );
+#   """
+#   doAssert query == """
+# CREATE TABLE things (
+#   id        SERIAL PRIMARY KEY,
+#   name      TEXT NOT NULL,
+#   is_active BOOLEAN NOT NULL
+# );
+# """
 
 # TESTME
 when isMainModule:

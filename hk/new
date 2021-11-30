@@ -21,7 +21,7 @@ heroku config:set MQTT_TOPIC=call-status/people
 heroku config:set MQTT_TOPIC_CONTROL=call-status/control
 heroku config:set MQTT_TOPIC_HEARTBEAT=call-status/heartbeat
 heroku config:set MQTT_TOPIC_PEOPLE=call-status/people
-heroku config:set NIM_REV=2b6b08032348939e5d355a6cb4faa0169306c17f # → v1.4.6
+heroku config:set NIM_REV=727c6378d2464090564dbcd9bc8b9ac648467e38 # → v1.6.0
 heroku config:set NIMBLE_FLAGS='--define:release --define:ssl --define:useStdLib --stacktrace:on --linetrace:on --verbose'
 heroku config:set SJ_ACCESS=__FIXME__
 

@@ -16,8 +16,8 @@ jobs:
           #!/usr/bin/env bash
           set -euo pipefail
 
-          dhall_haskell_ver="1.39.0"
-          dhall_json_ver="1.7.7"
+          dhall_haskell_ver="1.40.2"
+          dhall_json_ver="1.7.9"
 
           bin_zip_name="dhall-${dhall_haskell_ver}-x86_64-linux.tar.bz2"
           wget "https://github.com/dhall-lang/dhall-haskell/releases/download/${dhall_haskell_ver}/${bin_zip_name}" \
