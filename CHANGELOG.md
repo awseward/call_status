@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - Moved the local binaries' setup for heroku into a Makefile (https://github.com/awseward/call_status/pull/137)
+- Use latest nim (1.6.0), dhall (1.40.2) (https://github.com/awseward/call_status/pull/154)
+- Various CI changes
 
 ## [0.6.4] - 2021-05-02
 ### Added
