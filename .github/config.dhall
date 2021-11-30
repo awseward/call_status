@@ -5,7 +5,7 @@ let GHA = imports.GHA
 let On = GHA.On
 
 let _config =
-      { versions = { dhall = "1.39.0", nim = "1.4.8" }
+      { versions = { dhall = "1.40.2", nim = "1.6.0" }
       , homebrew =
         { formula = "call_status_checker", tap = "awseward/homebrew-tap" }
       }
