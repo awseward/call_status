@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-export PATH="/app/.bin:${PATH}"
+export PATH="${HOME}/.local/bin:${PATH}"
 
 readonly sj_access_name="${SJ_ACCESS_NAME:-dw-write}"
 uplink import "${sj_access_name}" "${SJ_ACCESS}" || true
@@ -57,7 +57,7 @@ query_load "${csv_file}" | sqlite3 "${sqlite_file}"
 query_move               | sqlite3 "${sqlite_file}"
 chmod -v 400 "${sqlite_file}"
 
-dw_push 'call-events' "${sqlite_file}" "${SJ_PREFIX:-sj://dw-inbox/call-events}"
+dw push 'call-events' "${SJ_PREFIX:-sj://dw-inbox/call-events}" "${sqlite_file}"
 
 psql --echo-all "${DATABASE_URL}" <<< "
   SELECT CURRENT_TIMESTAMP;
