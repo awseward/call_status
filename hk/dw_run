@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-export PATH="/app/.bin:${PATH}"
+export PATH="${HOME}/.local/bin:${PATH}"
 
 readonly sj_access_name="${SJ_ACCESS_NAME:-dw-write}"
 uplink import "${sj_access_name}" "${SJ_ACCESS}" || true
