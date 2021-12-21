@@ -22,7 +22,7 @@ jobs:
         with:
           key: "${{ runner.os }}-nimble-${{ hashFiles('**/*.nimble') }}"
           path: "~/.nimble"
-      - uses: "jiro4989/setup-nim-action@v1.3.4"
+      - uses: "jiro4989/setup-nim-action@v1.3"
         with:
           nim-version: '1.6.0'
       - run: nimble --stacktrace:on --linetrace:on --define:release --define:ssl build --accept call_status_checker
@@ -43,7 +43,7 @@ jobs:
         with:
           key: "${{ runner.os }}-nimble-${{ hashFiles('**/*.nimble') }}"
           path: "~/.nimble"
-      - uses: "jiro4989/setup-nim-action@v1.3.4"
+      - uses: "jiro4989/setup-nim-action@v1.3"
         with:
           nim-version: '1.6.0'
       - run: nimble --stacktrace:on --linetrace:on --define:release --define:useStdLib build --accept web
@@ -64,7 +64,7 @@ jobs:
         with:
           key: "${{ runner.os }}-nimble-${{ hashFiles('**/*.nimble') }}"
           path: "~/.nimble"
-      - uses: "jiro4989/setup-nim-action@v1.3.4"
+      - uses: "jiro4989/setup-nim-action@v1.3"
         with:
           nim-version: '1.6.0'
       - run: nimble assets
@@ -102,7 +102,7 @@ jobs:
         with:
           key: "${{ runner.os }}-nimble-${{ hashFiles('**/*.nimble') }}"
           path: "~/.nimble"
-      - uses: "jiro4989/setup-nim-action@v1.3.4"
+      - uses: "jiro4989/setup-nim-action@v1.3"
         with:
           nim-version: '1.6.0'
       - run: nimble install --accept --depsOnly
