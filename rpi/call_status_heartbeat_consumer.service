@@ -1,9 +1,9 @@
 [Unit]
-Description="Consumes" heartbeat from the ESP32 devices.
+Description=Call Status ESP32 heartbeat polling service
 
 [Service]
 Type=simple
-ExecStart=/bin/bash /usr/bin/call_status_heartbeat_consumer.sh
+ExecStart=/usr/bin/call_status.sh poll_heartbeats
 Restart=always
 RestartSec=2s
 
