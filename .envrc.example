@@ -17,3 +17,5 @@ export REDIS_URL=redis://localhost:6379
 export MQTT_SERVER=mqtt://broker.mqttdashboard.com:1883
 export MQTT_TOPIC_PEOPLE=d3768f07ab1d/call-status/people
 export MQTT_TOPIC_HEARTBEAT=d3768f07ab1d/call-status/heartbeat
+
+export HURL_url='http://localhost:5000'
