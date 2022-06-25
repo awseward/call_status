@@ -19,3 +19,4 @@ export MQTT_TOPIC_PEOPLE=d3768f07ab1d/call-status/people
 export MQTT_TOPIC_HEARTBEAT=d3768f07ab1d/call-status/heartbeat
 
 export HURL_url='http://localhost:5000'
+export HURL_client_id=foobar
