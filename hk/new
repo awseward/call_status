@@ -25,4 +25,4 @@ heroku config:set NIM_REV=727c6378d2464090564dbcd9bc8b9ac648467e38 # → v1.6.0
 heroku config:set NIMBLE_FLAGS='--define:release --define:ssl --define:useStdLib --stacktrace:on --linetrace:on --verbose'
 heroku config:set SJ_ACCESS=__FIXME__
 
-git push heroku master
+git push heroku main
