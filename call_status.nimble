@@ -22,35 +22,25 @@ requires "https://github.com/awseward/nimassets#0.2.0"
 
 # See: https://web.archive.org/web/20200515050555/https://www.rockyourcode.com/how-to-serve-static-files-with-nim-and-jester-on-heroku/
 task assets, "Generate packaged assets":
-  exec "type nimassets || nimble deps"
-  exec "nimassets --help && echo src/views/assets_file.nim | xargs -t -I{} nimassets --dir=public --output={}"
-
-task db_setup, "Set up the DB":
-  exec "./misc/db_setup.sh"
+  exec "script/misc.sh _nimble_assets"
 
 task deps, "Install dependencies":
-  exec "echo '--depsOnly' | xargs -t nimble install --accept"
+  exec "script/misc.sh _nimble_deps"
 
 task docs, "Generate documentation":
-  exec "nimble doc --project src/call_status_checker.nim"
-  exec "nimble doc --project src/call_status_cli.nim"
-  # Web currently errors here, will have to figure out why
-  # exec "nim doc --project src/web.nim"
+  exec "script/misc.sh _nimble_docs"
 
 task pretty, "Run nimpretty on all .nim files in the repo":
-  exec "type nimpretty"
-  exec "find . -type f -not -name 'assets_file.nim' -name '*.nim' | xargs -t nimpretty --indent:2 --maxLineLen:120"
+  exec "script/misc.sh _nimble_pretty"
 
 task watch_web, "Watch for changes and reload web accordingly":
-  exec "find . -type f -name '*.nim' -or -name '*.nimf' | entr -r nimble -d:useStdLib run web"
+  exec "script/misc.sh _nimble_watch_web"
 
-task watch_zoom, "Simulate a zoom watching daemon (launchd LaunchAgent on MacOS)":
-  while true:
-    exec "nimble -d:ssl run call_status_checker check; sleep 10"
+task watch_zoom, "Simulate a Zoom-watching daemon (launchd LaunchAgent on MacOS)":
+  exec "script/misc.sh _nimble_watch_zoom"
+
+task simulate_call_zoom, "Simulate a zoom call":
+  exec "script/misc.sh _nimble_simulate_call_zoom"
 
 task heroku_build, "Steps to perform during the heroku build phase":
-  exec "echo '--version' | xargs -t nim"
-  exec "echo '--version' | xargs -t nimble"
-  exec "nimble deps"
-  exec "nimble assets"
-  exec "make heroku-local-bins"
+  exec "script/misc.sh _nimble_heroku_build"
