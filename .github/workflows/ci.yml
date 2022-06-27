@@ -68,16 +68,6 @@ jobs:
         with:
           nim-version: '1.6.0'
       - run: script/gh-actions-ci.sh check_assets
-  check-dhall:
-    runs-on:
-      - ubuntu-latest
-    steps:
-      - uses: "actions/checkout@v2"
-      - uses: "awseward/gh-actions-dhall@0.3.2"
-        with:
-          dhallVersion: '1.40.2'
-          typecheck_no_cache: false
-          typecheck_package_files_only: false
   check-shell:
     runs-on:
       - ubuntu-latest
