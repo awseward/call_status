@@ -27,43 +27,13 @@ jobs:
           nim-version: '1.6.0'
       - id: plan
         name: Plan release
-        run: |
-          #!/usr/bin/env bash
-          
-          set -euo pipefail
-          
-          export GIT_TAG="${GITHUB_REF/refs\/tags\//}"
-          echo "GITHUB_REF=${GITHUB_REF}"
-          echo "GIT_TAG=${GIT_TAG}" | tee -a "$GITHUB_ENV"
-          echo "::set-output name=git_tag::${GIT_TAG}"
+        run: script/gh-actions-release.sh plan
       - id: tarball
         name: Create tarball
-        run: |
-          #!/usr/bin/env bash
-          
-          set -euo pipefail
-          
-          _build="${BUILD_RELEASE_TARBALL:-./_build_release_tarball.sh}"
-          
-          TARBALL_FILENAME="$( "${_build}" "${GIT_TAG}" "$( tr '[:upper:]' '[:lower:]' <<< "${PLATFORM_NAME}" )" )"
-          ls -lah
-          export TARBALL_FILENAME
-          export TARBALL_FILEPATH="./${TARBALL_FILENAME}"
-          echo "TARBALL_FILENAME=${TARBALL_FILENAME}" | tee -a "$GITHUB_ENV"
-          echo "TARBALL_FILEPATH=${TARBALL_FILEPATH}" | tee -a "$GITHUB_ENV"
-          echo "::set-output name=tarball_filename::${TARBALL_FILENAME}"
-          echo "::set-output name=tarball_filepath::${TARBALL_FILEPATH}"
+        run: script/gh-actions-release.sh create_tarball
       - id: checksum
         name: Record checksum
-        run: |
-          #!/usr/bin/env bash
-          
-          set -euo pipefail
-          
-          TARBALL_CHECKSUM="$(shasum -a 256 "${TARBALL_FILENAME}" | cut -d ' ' -f1)"
-          export TARBALL_CHECKSUM
-          echo "TARBALL_CHECKSUM=${TARBALL_CHECKSUM}" | tee -a "GITHUB_ENV"
-          echo "::set-output name=tarball_checksum::${TARBALL_CHECKSUM}"
+        run: script/gh-actions-release.sh record_checksum
       - env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         id: create-release
@@ -90,7 +60,7 @@ jobs:
           base-branch: main
           commit-message: |
             {{formulaName}} {{version}}
-            
+
             Sourced from ${{ steps.create-release.outputs.html_url }}.
           download-url: "${{ steps.upload-tarball.outputs.browser_download_url }}"
           formula-name: call_status_checker
