@@ -61,29 +61,26 @@ _to_elapsed_s() {
     done
 }
 
-fetch_if_enabled() {
-  _name="${FUNCNAME[0]}"; info() { _info "$_name" ; }
-  local -r enabled="$1"
-
-  if [ "$enabled" = 'false' ]; then
-    info <<< 'doing nothing…'
-  else
-    info <<< "${API_URL_PEOPLE} >> ${TOPIC_PEOPLE}"
-    echo "${API_URL_PEOPLE}" \
-    | xargs -t curl -fsS -XGET \
-    | _pub --stdin-file --topic "${TOPIC_PEOPLE}"
-  fi
-}
-
 poll_statuses() {
-  _name="${FUNCNAME[0]}"; info() { _info "$_name" ; }
+  _name="${FUNCNAME[0]}"; info() { _info "$_name"; }
   _start_msg | info
 
   _sub --topic "${TOPIC_HEARTBEAT_LATEST}" \
   | _to_elapsed_s \
+  | while read -r elapsed; do
+      _debug "$_name" <<< "Elapsed since last heartbeat: $elapsed seconds"
+      echo "$elapsed"
+    done \
   | jq --unbuffered '. <= 10' \
   | while read -r enabled; do
-      xargs -t "$0" fetch_if_enabled <<< "$enabled"
+      if [ "$enabled" = 'false' ]; then
+        info <<< 'No recent enough heartbeat, doing nothing…'
+      else
+        info <<< "${API_URL_PEOPLE} >> ${TOPIC_PEOPLE}"
+        echo "${API_URL_PEOPLE}" \
+        | xargs curl -fsS -XGET \
+        | _pub --stdin-file --topic "${TOPIC_PEOPLE}"
+      fi
     done
 }
 
@@ -93,11 +90,12 @@ poll_heartbeats() {
 
   _sub --topic "${TOPIC_HEARTBEAT}" \
   | while read -r msg; do
-      jq \
-        --compact-output \
-        --arg timestamp "$(date --iso-8601=s)" \
-        '{ $timestamp } + .' <<< "${msg}" \
-      | tee >("$0" _debug "$_name")
+      echo "$msg" \
+      | tee >("$0" _debug "$_name") \
+      | jq \
+          --compact-output \
+          --arg timestamp "$(date --iso-8601=s)" \
+          '{ $timestamp } + .'
     done \
   | _pub --stdin-line --topic "${TOPIC_HEARTBEAT_LATEST}"
 }
