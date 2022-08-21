@@ -15,9 +15,15 @@ readonly topic_heartbeat='call-status/heartbeat'
 readonly topic_heartbeat_latest="${topic_heartbeat}/latest"
 readonly topic_people='call-status/people'
 
-_info() { systemd-cat -t "call_status<${1}>" -p info ; }
+set +e
+if (type -f systemd-cat >/dev/null 2>&1); then
+  _info() { systemd-cat -t "call_status<$1>" -p info ; }
+else
+  _info() { >&2 echo -n "$0<$1>: "; >&2 cat; }
+fi
+set -e
+
 # This can be used in place of the above for dev on a non-systemd env
-# _info() { >&2 echo -n 'info: '; >&2 cat; }
 _start_msg() { date --iso-8601=s | xargs echo 'Started at' ; }
 
 _pub() {
@@ -34,9 +40,14 @@ _sub() {
 }
 
 _to_elapsed_s() {
-  jq -r '.timestamp' \
+  jq -r --unbuffered '.timestamp' \
   | xargs -I{} date -d {} +%s \
-  | jq --argjson now_s "$(date +%s)" '$now_s - .'
+  | while read -r latest_s; do
+      jq -n \
+        --argjson latest_s "$latest_s" \
+        --argjson now_s    "$(date +%s)" \
+        '$now_s - $latest_s'
+    done
 }
 
 fetch_if_enabled() {
@@ -59,14 +70,14 @@ poll_statuses() {
   _name="${FUNCNAME[0]}"; info() { _info "$_name" ; }
   _start_msg | info
 
-  while true; do
-    _sub --topic "${topic_heartbeat_latest}" -C 1 -W 1 \
-    | _to_elapsed_s \
-    | jq '. <= 10' \
-    | xargs -t "$0" fetch_if_enabled
+  _sub --topic "${topic_heartbeat_latest}" \
+  | _to_elapsed_s \
+  | jq --unbuffered '. <= 10' \
+  | while read -r enabled; do
+      xargs -t "$0" fetch_if_enabled <<< "$enabled"
+      sleep 5
+    done
 
-    sleep 5
-  done
 }
 
 poll_heartbeats() {
