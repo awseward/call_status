@@ -12,7 +12,7 @@ set -euo pipefail
 
 export API_URL_PEOPLE="${API_URL_PEOPLE:-https://call-status.herokuapp.com/api/people}"
 export TOPIC_HEARTBEAT="${TOPIC_HEARTBEAT:-call-status/heartbeat}"
-export TOPIC_HEARTBEAT_LATEST="${TOPIC_HEARTBEAT_LATEST:-${topic_heartbeat}/latest}"
+export TOPIC_HEARTBEAT_LATEST="${TOPIC_HEARTBEAT_LATEST:-${TOPIC_HEARTBEAT}/latest}"
 export TOPIC_PEOPLE="${TOPIC_PEOPLE:-call-status/people}"
 
 set +e
@@ -59,6 +59,13 @@ _to_elapsed_s() {
         --argjson now_s    "$(date +%s)" \
         '$now_s - $latest_s'
     done
+}
+
+# This is really just to help with debugging convenience, I wouldn't probably
+# actually use this outside that context
+send_heartbeat() {
+  jq -c -n --arg client_id "$0<${FUNCNAME[0]}>" '{ $client_id }' \
+  | _pub --topic "${TOPIC_HEARTBEAT}" --stdin-line
 }
 
 poll_statuses() {
