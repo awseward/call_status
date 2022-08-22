@@ -37,18 +37,9 @@ _debug() { _log debug "$@"; }
 # This can be used in place of the above for dev on a non-systemd env
 _start_msg() { date --iso-8601=s | xargs echo 'Started at' ; }
 
-_pub() {
-  mosquitto_pub \
-    --host localhost \
-    --retain \
-    "$@"
-}
+_pub() { mosquitto_pub --host localhost "$@"; }
 
-_sub() {
-  mosquitto_sub \
-    --host localhost \
-    "$@"
-}
+_sub() { mosquitto_sub --host localhost "$@"; }
 
 _to_elapsed_s() {
   jq -r --unbuffered '.timestamp' \
@@ -66,6 +57,17 @@ _to_elapsed_s() {
 send_heartbeat() {
   jq -c -n --arg client_id "$0<${FUNCNAME[0]}>" '{ $client_id }' \
   | _pub --topic "${TOPIC_HEARTBEAT}" --stdin-line
+}
+
+# This is really just to help with debugging convenience, I wouldn't probably
+# actually use this outside that context
+sub_all() {
+  _sub \
+    --topic "${TOPIC_HEARTBEAT}" \
+    --topic "${TOPIC_HEARTBEAT_LATEST}" \
+    --topic "${TOPIC_PEOPLE}" \
+    --verbose \
+    "$@"
 }
 
 poll_statuses() {
@@ -86,7 +88,7 @@ poll_statuses() {
         info <<< "${API_URL_PEOPLE} >> ${TOPIC_PEOPLE}"
         echo "${API_URL_PEOPLE}" \
         | xargs curl -fsS -XGET \
-        | _pub --stdin-file --topic "${TOPIC_PEOPLE}"
+        | _pub --retain --stdin-file --topic "${TOPIC_PEOPLE}"
       fi
     done
 }
@@ -104,7 +106,7 @@ poll_heartbeats() {
           --arg timestamp "$(date --iso-8601=s)" \
           '{ $timestamp } + .'
     done \
-  | _pub --stdin-line --topic "${TOPIC_HEARTBEAT_LATEST}"
+  | _pub --retain --stdin-line --topic "${TOPIC_HEARTBEAT_LATEST}"
 }
 
 "$@"
