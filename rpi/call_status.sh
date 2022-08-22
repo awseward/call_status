@@ -10,17 +10,12 @@ set -euo pipefail
 #   - https://web.archive.org/web/20200628142802/https://ma.ttias.be/auto-restart-crashed-service-systemd/
 #
 
-export API_URL_PEOPLE="${API_URL_PEOPLE:-https://call-status.herokuapp.com/api/people}"
-export TOPIC_HEARTBEAT="${TOPIC_HEARTBEAT:-call-status/heartbeat}"
-export TOPIC_HEARTBEAT_LATEST="${TOPIC_HEARTBEAT_LATEST:-${TOPIC_HEARTBEAT}/latest}"
-export TOPIC_PEOPLE="${TOPIC_PEOPLE:-call-status/people}"
-
 set +e
 if (type -f systemd-cat >/dev/null 2>&1); then
   _log() {
     local -r level="$1"
     local -r label="$2"
-    systemd-cat -t "call_status<$label>" -p "$level" ;
+    systemd-cat -t "$0<$label>" -p "$level" ;
   }
 else
   _log() {
@@ -74,7 +69,7 @@ poll_statuses() {
   _name="${FUNCNAME[0]}"; info() { _info "$_name"; }
   _start_msg | info
 
-  _sub --topic "${TOPIC_HEARTBEAT_LATEST}" \
+  _sub --topic "${TOPIC_HEARTBEAT_LATEST}" -W 300 \
   | _to_elapsed_s \
   | while read -r elapsed; do
       _debug "$_name" <<< "Elapsed since last heartbeat: $elapsed seconds"
@@ -97,7 +92,7 @@ poll_heartbeats() {
   _name="${FUNCNAME[0]}"; info() { _info "$_name" ; }
   _start_msg | info
 
-  _sub --topic "${TOPIC_HEARTBEAT}" \
+  _sub --topic "${TOPIC_HEARTBEAT}" -W 300 \
   | while read -r msg; do
       echo "$msg" \
       | tee >("$0" _debug "$_name") \

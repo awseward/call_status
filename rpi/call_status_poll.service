@@ -1,11 +1,15 @@
 [Unit]
 Description=Call Status polling service
+Requires=mosquitto.service
 
 [Service]
 Type=simple
 ExecStart=/usr/bin/call_status.sh poll_statuses
 Restart=always
-RestartSec=2s
+Environment=API_URL_PEOPLE=https://call-status.herokuapp.com/api/people
+Environment=TOPIC_HEARTBEAT=call-status/heartbeat
+Environment=TOPIC_HEARTBEAT_LATEST=call-status/heartbeat/latest
+Environment=TOPIC_PEOPLE=call-status/people
 
 [Install]
 WantedBy=default.target
