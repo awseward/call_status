@@ -3,7 +3,7 @@ temp_dir := $(shell mktemp -d)
 dw-misc_rev := 0.0.4
 dw-misc_url_base := https://github.com/awseward/dw-misc/raw/${dw-misc_rev}/bin
 
-shmig_repo := git://github.com/mbucc/shmig.git
+shmig_repo := https://github.com/mbucc/shmig.git
 shmig_dir := ${temp_dir}/shmig
 
 uplink_zip_name := uplink_linux_amd64.zip
@@ -11,10 +11,8 @@ uplink_zip_url := https://github.com/storj/storj/releases/latest/download/${upli
 
 # ---
 
-heroku-local-bins: .local/bin/heroku_database_url_splitter .local/bin/shmig .local/bin/uplink dw-misc-bins
+heroku-local-bins: .local/bin/heroku_database_url_splitter .local/bin/shmig .local/bin/uplink .local/bin/dw
 	chmod -v 700 .local/bin/*
-
-dw-misc-bins: .local/bin/dw
 
 .local/bin:
 	mkdir -p .local/bin
