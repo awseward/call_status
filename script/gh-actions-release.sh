@@ -4,11 +4,14 @@ set -euo pipefail
 
 _set_env_and_output() {
   local -r name_cap="$1"
-  local -r value="$1"
+  local -r value="$2"
 
   echo "${name_cap}=${value}" | tee -a "$GITHUB_ENV"
   echo "::set-output name=${name_cap,,}::${value}"
 }
+
+_checksum() { shasum -a 256 "$1" | cut -d ' ' -f1; }
+_lower() { tr '[:upper:]' '[:lower:]' <<< "$1"; }
 
 plan() {
   local -r git_tag="${GITHUB_REF/refs\/tags\//}"
@@ -17,14 +20,12 @@ plan() {
 }
 
 create_tarball() {
-  local -r build="${BUILD_RELEASE_TARBALL:-./_build_release_tarball.sh}"
-
-  # shellcheck disable=SC2153
   local -r tarball_filename="$(
-    "${build}" "${GIT_TAG}" "$( tr '[:upper:]' '[:lower:]' <<< "${PLATFORM_NAME}" )"
+    # shellcheck disable=SC2153
+    ./script/release.sh build_tarball "${GIT_TAG}" "$(_lower "$PLATFORM_NAME")"
   )"
 
-  ls -lah
+  xargs -t ls -lah <<< "$tarball_filename"
 
   _set_env_and_output 'TARBALL_FILENAME' "${tarball_filename}"
   _set_env_and_output 'TARBALL_FILEPATH' "./${tarball_filename}"
@@ -32,9 +33,7 @@ create_tarball() {
 
 record_checksum() {
   # shellcheck disable=SC2153
-  _set_env_and_output 'TARBALL_CHECKSUM' "$(
-    shasum -a 256 "${TARBALL_FILENAME}" | cut -d ' ' -f1
-  )"
+  _set_env_and_output 'TARBALL_CHECKSUM' "$(_checksum "$TARBALL_FILENAME")"
 }
 
 "$@"
