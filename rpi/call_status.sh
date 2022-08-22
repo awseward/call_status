@@ -10,59 +10,98 @@ set -euo pipefail
 #   - https://web.archive.org/web/20200628142802/https://ma.ttias.be/auto-restart-crashed-service-systemd/
 #
 
-readonly api_url_people='https://call-status.herokuapp.com/api/people'
-readonly topic_heartbeat='call-status/heartbeat'
-readonly topic_heartbeat_latest="${topic_heartbeat}/latest"
-readonly topic_people='call-status/people'
+set +e
+if (type -f systemd-cat >/dev/null 2>&1); then
+  _log() {
+    local -r level="$1"
+    local -r label="$2"
+    systemd-cat -t "$0<$label>" -p "$level" ;
+  }
+else
+  _log() {
+    local -r level="$1"
+    local -r label="$2"
+    >&2 echo -n "[${level^^}] $0<$label>: "; >&2 cat;
+  }
+fi
+set -e
 
-_info() { systemd-cat -t "call_status<${1}>" -p info ; }
+_info()  { _log info "$@";  }
+_debug() { _log debug "$@"; }
+
+# This can be used in place of the above for dev on a non-systemd env
 _start_msg() { date --iso-8601=s | xargs echo 'Started at' ; }
 
+_pub() { mosquitto_pub --host localhost "$@"; }
+
+_sub() { mosquitto_sub --host localhost "$@"; }
+
+_to_elapsed_s() {
+  jq -r --unbuffered '.timestamp' \
+  | xargs -I{} date -d {} +%s \
+  | while read -r latest_s; do
+      jq -n \
+        --argjson latest_s "$latest_s" \
+        --argjson now_s    "$(date +%s)" \
+        '$now_s - $latest_s'
+    done
+}
+
+# This is really just to help with debugging convenience, I wouldn't probably
+# actually use this outside that context
+send_heartbeat() {
+  jq -c -n --arg client_id "$0<${FUNCNAME[0]}>" '{ $client_id }' \
+  | _pub --topic "${TOPIC_HEARTBEAT}" --stdin-line
+}
+
+# This is really just to help with debugging convenience, I wouldn't probably
+# actually use this outside that context
+sub_all() {
+  _sub \
+    --topic "${TOPIC_HEARTBEAT}" \
+    --topic "${TOPIC_HEARTBEAT_LATEST}" \
+    --topic "${TOPIC_PEOPLE}" \
+    --verbose \
+    "$@"
+}
+
 poll_statuses() {
-  _name="${FUNCNAME[0]}"; info() { _info "$_name" ; }
+  _name="${FUNCNAME[0]}"; info() { _info "$_name"; }
   _start_msg | info
 
-  while true; do
-    now_s="$(date +%s)"
-    latest="$(mosquitto_sub -t "${topic_heartbeat_latest}" -C 1 -W 1 | jq -r .timestamp)"
-
-    info <<< "latest heartbeat: ${latest}"
-
-    if [ "${latest}" == '' ]; then
-      info <<< 'no latest heartbeat; doing nothing…'
-    else
-      latest_s="$(date -d "${latest}" +%s)"
-      diff_s="$(( now_s - latest_s ))"
-
-      info <<< "now_s:    ${now_s}"
-      info <<< "latest_s: ${latest_s}"
-      info <<< "diff_s:   ${diff_s}"
-
-      if [ $diff_s -gt 10 ]; then
-        info <<< 'more than 10s since latest heartbeat; doing nothing…'
+  _sub --topic "${TOPIC_HEARTBEAT_LATEST}" -W 300 \
+  | _to_elapsed_s \
+  | while read -r elapsed; do
+      _debug "$_name" <<< "Elapsed since last heartbeat: $elapsed seconds"
+      echo "$elapsed"
+    done \
+  | jq --unbuffered '. <= 10' \
+  | while read -r enabled; do
+      if [ "$enabled" = 'false' ]; then
+        info <<< 'No recent enough heartbeat, doing nothing…'
       else
-        info <<< "polling: ${api_url_people} >> ${topic_people}"
-        echo "${api_url_people}" \
-          | xargs -t curl -s \
-          | mosquitto_pub -h localhost -t "${topic_people}" -r -s
+        info <<< "${API_URL_PEOPLE} >> ${TOPIC_PEOPLE}"
+        echo "${API_URL_PEOPLE}" \
+        | xargs curl -fsS -XGET \
+        | _pub --retain --stdin-file --topic "${TOPIC_PEOPLE}"
       fi
-    fi
-
-    sleep 5
-  done
+    done
 }
 
 poll_heartbeats() {
   _name="${FUNCNAME[0]}"; info() { _info "$_name" ; }
   _start_msg | info
 
-  while true; do
-    mosquitto_sub -t "${topic_heartbeat}" | while read -r line; do
-      msg="$(echo "${line}" | jq -c --arg timestamp "$(date --iso-8601=s)" '. + { $timestamp }')"
-      mosquitto_pub -t "${topic_heartbeat_latest}" -r -m "${msg}"
-    done
-    info <<< "subscription dropped for some reason; resubscribing…"
-  done
+  _sub --topic "${TOPIC_HEARTBEAT}" -W 300 \
+  | while read -r msg; do
+      echo "$msg" \
+      | tee >("$0" _debug "$_name") \
+      | jq \
+          --compact-output \
+          --arg timestamp "$(date --iso-8601=s)" \
+          '{ $timestamp } + .'
+    done \
+  | _pub --retain --stdin-line --topic "${TOPIC_HEARTBEAT_LATEST}"
 }
 
 "$@"
