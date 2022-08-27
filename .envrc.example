@@ -3,12 +3,15 @@ export CALL_STATUS_USER=__fixme__
 export CONFIG_FILEPATH=config.json
 
 export DATABASE_URL=postgres://localhost:5432/call_status_development
-# It's a little weird to have these in both spots, but these are here for
-# shmig, which can't just take a DATABASE_URL and figure it out. It needs the
-# parts broken out instead.
-export DATABASE_NAME=call_status_development
-export DATABASE_HOST=localhost
-export DATABASE_PORT=5432
+
+# This populates the following based on `$DATABASE_URL` (mainly for use with
+# `shmig`, which needs the url exploded for it):
+# - DATABASE_HOST
+# - DATABASE_PORT
+# - DATABASE_LOGIN
+# - DATABASE_PASSWORD
+# - DATABASE_NAME
+eval "$(heroku_database_url_splitter)"
 
 export DATABASE_FILEPATH=call_status_checker.db
 
