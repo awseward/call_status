@@ -6,8 +6,6 @@ import sequtils
 import strtabs
 import strutils
 
-import ws
-
 import ./db_web
 import ./logs
 import ./models/person
@@ -15,7 +13,6 @@ import ./models/status
 import ./mqtt
 import ./views/index
 import ./statics
-import ./websockets
 
 let settings = newSettings()
 if existsEnv("PORT"):
@@ -25,15 +22,6 @@ logs.setupWeb()
 
 info "version:  ", pkgVersion
 info "revision: ", pkgRevision
-
-proc publishUpdates() =
-  wsRefreshAll()
-
-if defined(release):
-  publishUpdates()
-
-proc mkWebSocket(request: Request, protocol: string = ""): Future[ws.WebSocket] =
-  newWebSocket(request.getNativeReq(), protocol = protocol)
 
 router api:
   get "/people": resp %*getPeople()
@@ -49,7 +37,6 @@ router api:
     if not(person.name == rawName.string): halt Http422
 
     updatePerson person
-    publishUpdates()
     resp Http204
 
   post "/client/@client_id/up":
@@ -68,23 +55,11 @@ router web:
     let forms = getPeople().map(renderPerson)
     resp renderIndex(forms[0], forms[1])
 
-  get "/ws":
-    const supportedProtocol = "REFRESH"
-    let ws = await mkWebSocket(request, protocol = supportedProtocol)
-    if ws.protocol != supportedProtocol:
-      await ws.send("Bad protocol")
-      ws.close()
-      resp Http400
-    else:
-      wsAdd ws
-      resp Http101
-
   # I'd like for this to be PUT, but browser forms are GET and POST only
   post "/person/@name":
     let status = status.fromIsOnCall parseBool(request.params["is_on_call"])
     let person = Person(name: @"name", status: status)
     updatePerson person
-    publishUpdates()
     redirect "/"
 
 routes:
