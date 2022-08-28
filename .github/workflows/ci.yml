@@ -1,9 +1,3 @@
-# Warning: this is an automatically generated file.
-#
-# It was generated using '.github/.workflow_templates/ci.dhall'.
-#
-# Please avoid editing it manually unless doing so temporarily.
-
 jobs:
   build-call_status_checker:
     runs-on:
@@ -24,7 +18,7 @@ jobs:
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.3.4"
         with:
-          nim-version: '1.6.0'
+          nim-version: '1.6.6'
       - run: script/gh-actions-ci.sh build_call_status_checker
   build-web:
     runs-on:
@@ -45,7 +39,7 @@ jobs:
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.3.4"
         with:
-          nim-version: '1.6.0'
+          nim-version: '1.6.6'
       - run: script/gh-actions-ci.sh build_web
   check-assets:
     runs-on:
@@ -66,7 +60,7 @@ jobs:
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.3.4"
         with:
-          nim-version: '1.6.0'
+          nim-version: '1.6.6'
       - run: script/gh-actions-ci.sh check_assets
   check-shell:
     runs-on:
@@ -93,7 +87,7 @@ jobs:
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.3.4"
         with:
-          nim-version: '1.6.0'
+          nim-version: '1.6.6'
       - run: script/gh-actions-ci.sh generate_docs
 name: CI
 on:

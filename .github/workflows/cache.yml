@@ -1,9 +1,3 @@
-# Warning: this is an automatically generated file.
-#
-# It was generated using '.github/.workflow_templates/cache.dhall'.
-#
-# Please avoid editing it manually unless doing so temporarily.
-
 jobs:
   update-cache:
     runs-on:

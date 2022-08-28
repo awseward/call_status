@@ -11,7 +11,7 @@ bin           = @["call_status_checker", "call_status_cli", "web"]
 
 requires "argparse >= 2.0.0 & <= 2.0.0"
 requires "jester >= 0.5.0"
-requires "nim >= 1.4.2"
+requires "nim >= 1.6.0"
 
 requires "https://github.com/awseward/heroku_database_url_splitter"
 requires "https://github.com/awseward/nim-junk-drawer#9ff04c5c70b2fe5d24f951f0ff8f408a108ee059"
