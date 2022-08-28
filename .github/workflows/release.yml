@@ -1,9 +1,3 @@
-# Warning: this is an automatically generated file.
-#
-# It was generated using '.github/.workflow_templates/release.dhall'.
-#
-# Please avoid editing it manually unless doing so temporarily.
-
 jobs:
   release-call_status_checker:
     runs-on:
@@ -24,7 +18,7 @@ jobs:
           path: "~/.nimble"
       - uses: "jiro4989/setup-nim-action@v1.3.4"
         with:
-          nim-version: '1.6.0'
+          nim-version: '1.6.6'
       - id: plan
         name: Plan release
         run: script/gh-actions-release.sh plan
