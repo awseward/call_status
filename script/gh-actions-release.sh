@@ -7,7 +7,7 @@ _set_env_and_output() {
   local -r value="$2"
 
   echo "${name_cap}=${value}" | tee -a "$GITHUB_ENV"
-  echo "::set-output name=${name_cap,,}::${value}"
+  echo "::set-output name=$(_lower "$name_cap")::${value}"
 }
 
 _checksum() { shasum -a 256 "$1" | cut -d ' ' -f1; }
