@@ -9,6 +9,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved the local binaries' setup for heroku into a Makefile (https://github.com/awseward/call_status/pull/137)
 - Use latest nim (1.6.0), dhall (1.40.2) (https://github.com/awseward/call_status/pull/154)
 - Various CI changes
+- Some improvements to the RPi MQTT stuff
+- Too many changes to go through, so for posterity I'm just dumping them all here:
+
+    >
+    > https://github.com/awseward/call_status/compare/0.6.4...aa8536efd8dccc5163e0df84503da6511123c518
+    >
+    > * Add Plural type                                    https://github.com/awseward/call_status/pull/149
+    > * Add a makefile                                     https://github.com/awseward/call_status/pull/137
+    > * Change `master` to `main`                          https://github.com/awseward/call_status/pull/160
+    > * Codify cache action in dhall                       https://github.com/awseward/call_status/pull/142
+    > * Consolidate RPi systemd stuff                      https://github.com/awseward/call_status/pull/159
+    > * Fix a typo                                         https://github.com/awseward/call_status/pull/140
+    > * Fix release script                                 https://github.com/awseward/call_status/pull/174
+    > * Freshen some things up                             https://github.com/awseward/call_status/pull/145
+    > * Get rid of some CI silliness                       https://github.com/awseward/call_status/pull/166
+    > * Make some more random tweaks                       https://github.com/awseward/call_status/pull/144
+    > * Make the `.envrc` a little less double-entry       https://github.com/awseward/call_status/pull/169
+    > * Misc updates                                       https://github.com/awseward/call_status/pull/155
+    > * More hurl                                          https://github.com/awseward/call_status/pull/163
+    > * More hurl                                          https://github.com/awseward/call_status/pull/164
+    > * Random touchups                                    https://github.com/awseward/call_status/pull/168
+    > * Remove now-unnecessary buildpack                   https://github.com/awseward/call_status/pull/138
+    > * Rip out all the auto-refresh websocket stuff       https://github.com/awseward/call_status/pull/170
+    > * Split up tests                                     https://github.com/awseward/call_status/pull/165
+    > * Start poking around with HURL                      https://github.com/awseward/call_status/pull/161
+    > * Start pulling the "cache" workflow out a bit more… https://github.com/awseward/call_status/pull/148
+    > * Touch up scripts                                   https://github.com/awseward/call_status/pull/167
+    > * Try this out                                       https://github.com/awseward/call_status/pull/153
+    > * Try upgrading cache action                         https://github.com/awseward/call_status/pull/139
+    > * Update templates                                   https://github.com/awseward/call_status/pull/162
+    > * Upgrade `dhall`, `nim`                             https://github.com/awseward/call_status/pull/154
+    > * Upgrade actions/cache to v2                        https://github.com/awseward/call_status/pull/143
+    > * Use `awseward/dhall-setup`                         https://github.com/awseward/call_status/pull/158
+    > * Use `jiro4989/setup-nim-action` `v1.3`             https://github.com/awseward/call_status/pull/157
+    > * Use handleOS                                       https://github.com/awseward/call_status/pull/151
+    > * Use nim >= 1.6.0                                   https://github.com/awseward/call_status/pull/172
+    > * Use release updates                                https://github.com/awseward/call_status/pull/152
+    > * Use upstream `Plural`, `multiOS`                   https://github.com/awseward/call_status/pull/150
+    > * Use upstreamed multiOS                             https://github.com/awseward/call_status/pull/146
+    >
 
 ## [0.6.4] - 2021-05-02
 ### Added
