@@ -1,8 +1,8 @@
 # Package
 
-version       = "0.6.4"
+version       = "0.6.5"
 author        = "Andrew Seward"
-description   = "An app to indicate who's on a call"
+description   = "Note who's on a call so you can avoid interrupting them."
 license       = "MIT"
 srcDir        = "src"
 bin           = @["call_status_checker", "call_status_cli", "web"]
