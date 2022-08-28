@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.6.5] - 2022-08-28
 ### Changed
 - Moved the local binaries' setup for heroku into a Makefile (https://github.com/awseward/call_status/pull/137)
 - Use latest nim (1.6.0), dhall (1.40.2) (https://github.com/awseward/call_status/pull/154)
