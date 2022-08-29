@@ -43,8 +43,21 @@ _nimble_heroku_build() {
   echo '--version' | xargs -t nim
   echo '--version' | xargs -t nimble
   nimble deps
-  nimble assets
-  make heroku-local-bins
+  # NOTE: Probably don't _really_ need this; it's failing when trying to deploy
+  # to fly.io so I'm commenting it out for now.
+  # nimble assets
+
+  # The following used to be `make heroku-local-bins` but I got tired of
+  # troubleshooting it so bash it is…
+  local -r temp_dir="$(mktemp -d)"
+  local -r shmig_repo='https://github.com/mbucc/shmig.git'
+  local -r shmig_dir="${temp_dir}/shmig"
+  mkdir -p .local/bin
+  cp "$(command -v heroku_database_url_splitter)" .local/bin/
+  mkdir -p "$shmig_dir"
+  git clone "$shmig_repo" "$shmig_dir"
+  cp "${shmig_dir}/shmig" .local/bin/
+  .local/bin/shmig -V
 }
 
 "$@"
