@@ -1,4 +1,26 @@
-# Notes `esp-idf`
+## Notes on `Lua-RTOS`
+
+Repo: https://github.com/whitecatboard/Lua-RTOS-ESP32
+
+I've played around with this and it's super nice to have an interactive
+console; feels pretty promising. It's very straightforward to get onto Wifi, it
+looks like it's got a native MQTT client, and native JSON functionality.
+
+The "getting started" is [right in the
+README](https://github.com/whitecatboard/Lua-RTOS-ESP32#method-1-get-a-precompiled-firmware).
+As a note to my future self, I used something like "Generic ESP32" **without**
+OTA (OTA didn't seem to work; it'd be nice, but oh well, hardly the end of the
+world).
+
+**However**, it looks like there's no simple or straightforward way to get an
+HTTP client running on-device. So far, searching has only turned up:
+https://twitter.com/loboris2/status/833012792139644928
+
+It _might_ be a good idea to remove the HTTP requirement anyway; instead, just
+have the devices go straight to MQTT. I'd first like to see just how much
+effort getting an HTTP client onboard ends up being, though.
+
+## Notes on `esp-idf`
 
 Notes here pertain to [the official esp-idf "getting started"
 guide](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/linux-macos-setup.html#get-started-prerequisites).
