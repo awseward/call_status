@@ -1,0 +1,35 @@
+FROM nimlang/nim:1.6.6-ubuntu-regular
+
+RUN apt-get update -y \
+      && apt-get install -y \
+            curl \
+            jq \
+            make \
+            postgresql-client
+
+RUN mkdir -p app
+WORKDIR app
+
+RUN mkdir -p hk/ script/
+
+COPY call_status.nimble .
+COPY hk/release         hk/
+COPY public/            public/
+COPY script/misc.sh     script/
+COPY migrations/        migrations/
+COPY src/               src/
+COPY shmig.conf         .
+
+RUN ls -lah
+RUN ls -lah public/
+
+RUN ./script/misc.sh _nimble_heroku_build \
+      && nimble build --accept --define:release --define:ssl --define:useStdLib --stacktrace:on --linetrace:on --verbose web
+
+COPY entrypoint.sh .
+
+EXPOSE 8080
+
+ENTRYPOINT ["./entrypoint.sh"]
+
+CMD ["web"]
