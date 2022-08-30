@@ -12,9 +12,14 @@ As a note to my future self, I used something like "Generic ESP32" **without**
 OTA (OTA didn't seem to work; it'd be nice, but oh well, hardly the end of the
 world).
 
-**However**, it looks like there's no simple or straightforward way to get an
+~**However**, it looks like there's no simple or straightforward way to get an
 HTTP client running on-device. So far, searching has only turned up:
-https://twitter.com/loboris2/status/833012792139644928
+https://twitter.com/loboris2/status/833012792139644928~
+
+This might actually work, if I can get `luasocket` to show up on the device
+filesystem. There's some potential leads here, maybe:
+
+https://github.com/whitecatboard/Lua-RTOS-ESP32/issues?q=is%3Aissue+luasocket+is%3Aclosed
 
 It _might_ be a good idea to remove the HTTP requirement anyway; instead, just
 have the devices go straight to MQTT. I'd first like to see just how much
